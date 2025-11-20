@@ -1,0 +1,432 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> ** PHP Sandbox**
+
+====== PHP Sandbox ======
+
+===== Simulating Database select result =====
+
+<code php>
+<?php
+$listings = [
+  [
+    'id' => 1,
+    'title' => 'Software Engineer',
+    'description' => 'We are seeking a skilled software engineer to develop high-quality software solutions.',
+    'salary' => 80000,
+    'location' => 'Frankfurt a. Main',
+    'tags' => ['Software Development', 'Java', 'Python']
+  ],
+  [   
+    'id' => 2,
+    'title' => 'Marketing Specialist',
+    'description' => 'We are looking for a marketing specialist to develop and implement effective marketing strategies.',
+    'salary' => 60000,
+    'location' => 'Hamburg',
+    'tags' => ['Digital Marketing', 'Social Media', 'SEO']
+  ],
+  [
+    'id' => 3,
+    'title' => 'Accountant',
+    'description' => 'We are hiring an experienced accountant to handle financial transactions and ensure compliance.',
+    'salary' => 55000,
+    'location' => 'Frankfurt a. Main',
+    'tags' => ['Accounting', 'Bookkeeping', 'Financial Reporting']
+  ],
+  [
+    'id' => 4,
+    'title' => 'UX Designer',
+    'description' => 'We are seeking a talented UX designer to create intuitive and visually appealing user interfaces.',
+    'salary' => 70000,
+    'location' => 'Chemnitz',
+    'tags' => ['Software Development', 'java', 'Python']
+  ],
+  [
+    'id' => 5,
+    'title' => 'Customer Service Representative',
+    'description' => 'We are looking for a friendly customer service representative to assist customers and resolve issues.',
+    'salary' => 40000,
+    'location' => 'Schwerin',
+    'tags' => ['Customer Support', 'Communication', 'Problem Solving']
+  ], 
+];
+?>
+</code>
+
+Use **<?= implode(', ', $job['tags']); ?>** as "to_string" in a html page
+
+===== Manipulating HTML with PHP =====
+
+<code php>
+<?php foreach ($listing as $index => $job) : ?>
+  <div class=md my-4">
+    <!-- div class="bg-blue-100 rounded-lg shadow-md" -->
+    <!-- Blue/White switch -->
+    <div class="<?php if($index % 2 === 0): ?> 
+        bg-blue-100
+      <?php else : ?>
+        bg-white
+      <? php endif; ?>
+      rounded-lg shadow-md">
+      <div class="p-4">
+         <h2 class="text-xl font-semibold"><?= $job['title'] ?></h2>
+         <p class="text-gray-700 text-lg mt-2"><?= $job[description'] ?></p>
+         <ul class="mt-4">
+           <li class="mb-2"><strong>Salary:</strong> <?= $job['salary'] ?></li>
+           <li class="mb-2"><strong>Location:</strong> <?= $job['location'] ?>
+           <?php if($job['location' === 'Hamburg'): ?>
+             <span class="text-xs text-white bg-blue-500 rounded-full px-2py-1 ml-2">Local</span>
+           <?php endif; ?>
+           </li>   
+           <?php if(!empty($job['tags'])) : ?>        
+             <li  class="mb-2"><strong>Tags:</strong> <?= implode(', ', $job['tags']) ?></li>
+           <?php endif; ?>  
+         </ul>
+      </div>
+    </div>
+  </div>    
+</code>
+  * **Background switches from blue to white** ternary makes things shorter but harder to read
+  * Add Local if job location is Hamburg
+  * Remove Tags if tags array is empty
+
+<code php>
+<div class="rounded-lg shadow-md <?php index % 2 === 0 ? 'bg-blue-100' : 'bg-white' ?>">
+</code>
+**Background switches from blue to white** ternary
+
+<code php>
+  <?php $job['location'] === 'Hamburg' ? <span class="text-xs text-white bg-blue-500 rounded-full px-2 py-1 ml-2">local</span> :'' ?>
+</code>
+**Add Local if job location is Hamburg**
+
+===== Build Helper Functions =====
+
+<code php>
+<?php
+/** ***********************************************************
+ *  Get the base path
+ *  @param string $path
+ *  @return string
+ *  **********************************************************/
+function basePath($path = '') {
+  return __DIR__ . '/' . $path;
+}
+</code>
+**Showing path to file using the DIR constant** should be in base folder of the project
+
+<code php>
+/** ***********************************************************
+ *  Inspact a value(s)
+ *  @param mixed $value
+ *  @return void
+ * ***********************************************************/ 
+function inspect($value = 'value not set') {
+  echo '<pre>';
+  var_dump($value);
+  echo '</pre>';
+}
+
+/** ***********************************************************
+ *  Inspact a value(s) and die
+ *  @param mixed $value
+ *  @return void
+ * ***********************************************************/ 
+function inspectAndDie($value = 'value not set') {
+  echo '<pre>';
+  var_dump($value);
+  echo '</pre>';
+  die();
+}
+</code>
+**Debug variables by displaying values**
+
+<code php>
+/** ***********************************************************
+ *  Redirect to a given URL
+ *  @param strring $url
+ *  @return void
+ * ***********************************************************/ 
+function redirect($url) {
+  header("Location: {$url}");
+  exit;
+}
+</code>
+**Redirect to a different page**
+
+<code php>
+/**
+ * Resolve the effective HTTP method, honoring _method override on POST.
+ *
+ * Returns the uppercased HTTP method (e.g. GET, POST, PUT, PATCH, DELETE).
+ * Useful when forms emulate PUT/PATCH/DELETE via a hidden _method field.
+ *
+ * @return string One of GET, POST, PUT, PATCH, DELETE.
+ */
+function detectMethod(): string {
+    $m = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+    if ($m === 'POST' && isset($_POST['_method'])) {
+        $ovr = strtoupper(trim((string)$_POST['_method']));
+        if (in_array($ovr, ['PUT','PATCH','DELETE'], true)) return $ovr;
+    }
+    return $m;
+}
+</code>
+**Detect HTTP Request Method**
+
+<code php>
+/**
+ * HTML-escape helper for safe output.
+ *
+ * Converts special characters to HTML entities to prevent XSS when rendering
+ * untrusted data inside HTML text or attributes.
+ *
+ * @param string|null $v Raw string (may be null).
+ * @return string Escaped string safe for HTML contexts.
+ */
+function e(?string $v): string {
+    return htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+</code>
+
+<code php>
+/**
+ * Get (or create) the CSRF token for the current session.
+ *
+ * The token stays stable for the session lifetime. Call this when
+ * rendering forms to embed the token as a hidden field.
+ *
+ * @return string 64-hex-character token.
+ * @throws \Exception If a secure random source is unavailable.
+ */
+public static function csrfToken(): string {
+  if (!isset($_SESSION['_csrf'])) {
+    $_SESSION['_csrf'] = bin2hex(random_bytes(32));
+  }
+  return $_SESSION['_csrf'];
+}
+  
+/**
+ * Constant-time validation of a submitted CSRF token.
+ *
+ * @param string $token Token value from the submitted form (usually $_POST['_token']).
+ * @return bool True if the token matches the session token; false otherwise.
+ */  
+public static function verifyCsrf(string $token): bool {
+  return isset($_SESSION['_csrf']) && hash_equals($_SESSION['_csrf'], $token);
+}
+  
+// partials/csrf.php
+<input type="hidden" name="_token" value="<?= e(\Framework\Session::csrfToken()) ?>">
+
+// POST Controller
+if (!\Framework\Session::verifyCsrf($_POST['_token'] ?? '')) {
+  http_response_code(419); // Page Expired
+  \Framework\Session::setFlashMessage('error_message', 'Security token mismatch.');
+  return redirect($_SERVER['HTTP_REFERER'] ?? '/');
+}  
+</code>
+**Work with security token**
+
+<code php>
+/** ***********************************************************
+ *  highlight a array element in HTML
+ *  @param array $tags
+ *  @param string $searchTerm
+ *  @return void
+ * ***********************************************************/ 
+function highlightTags($tags, $searchTerm) {
+  $tagsString = implode(', ', $tags);
+  return str_replace($searchTerm, "<span class='bg-yello-200'>{$searchTerm}</span>", $tagsString);
+}
+</code>
+
+Small functions make thing easy to read, here **add an $ in front of the salary entry**
+<code php>
+<?php
+/** ***********************************************************
+ *  Add a Currency value in front of salary
+ *  @param  string $salary
+ *  @return string $formatedSalary
+ * ***********************************************************/ 
+function formatSalary($salary) {
+  return '$' . number_format($salary);
+}
+
+<?= formatSalary($job['salary']); ?>
+</code>
+
+<code php>
+<?php $formatSalary = fn($salary) => '$' . number_format($salary); ?>
+
+<?= $formatSalary($job['salary']); ?>
+</code>
+or as short Lambda function, the **$** in front of $formatSalary makes the difference, by calling the function 
+
+<code php>
+<?php
+/** ***********************************************************
+ *  Display an error
+ *  @param string $message
+ *  @return void
+ * ***********************************************************/ 
+function showError($message = 'Unknown Error') {
+  echo '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">';
+  echo '  <strong class="font-bold">' . $message . '</strong>';
+  //echo '  <span class="block sm:inline">Bitte überprüfe deine Eingaben.</span>';
+  echo '</div>';
+}
+
+/** ***********************************************************
+ *  Display a warning
+ *  @param string $message
+ *  @return void
+ * ***********************************************************/ 
+function showWarning($message = "Unknown Error") {
+  echo '<div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative" role="alert">';
+  echo '  <strong class="font-bold">' . $message . '</strong>';
+  //echo '  <span class="block sm:inline">Bitte überprüfe deine Eingaben.</span>';
+  echo '</div>';
+}
+</code>
+
+===== Split Client UI into Partials =====
+
+
+<code php>
+/** ***********************************************************
+ *  Load a view
+ *  @param string $name
+ *  @return void
+ * ***********************************************************/ 
+function loadView($name=' -- unknown -- ', $data=[]) {
+  $viewPath = basePath("views/{$name}.view.php");
+  if(file_exists($viewPath)) {
+    extract($data);
+    require $viewPath;
+  } else {
+    showError ("View '{$viewPath} not found!'");
+  }
+}
+
+/** ***********************************************************
+ *  Load a partial view
+ *  @param string $name
+ *  @return void
+ * ***********************************************************/ 
+function loadPartial($name =' -- unknown -- ') {
+  $partialPath = basePath("views/partials/{$name}.php");
+  if(file_exists($partialPath)) {
+    require $partialPath;
+  } else {
+    showError ("Partial View '{$partialPath} not found!'");
+  }  
+}
+</code>
+**Load outsourced HTML Code**
+
+<code php>
+loadView('home'); // Load the welcome webpage (view) inside a controller
+loadView('profile',['user' => $user]); // Load User Profile
+</code>
+
+<code php>
+loadPartial('HTML-Header'); // Load a part of webpage (view)
+</code>
+===== Data Sanitation =====
+
+Prevent harmful user input
+  * String validation
+  * Email address validation
+  * Password confirmation
+
+**/Core/Validation.php**
+<code php>
+<?php
+namepasce Core;
+
+class Validation {
+
+  /**
+   * Validate a string
+   * @param string $value
+   * @param int $min
+   * @param int $max
+   * @return bool
+   * 
+   * TODO: $max = INF really not e.g. 255 or max HTML Textarea size?
+   */ 
+  public static function string($value ='', $min = 1, $max = INF) {
+    if(is_string($value)) {
+      $value = trim($value);
+      $length =strlen($value);
+      return $length >= $min && $length <= $max;
+    }
+    return false;
+  }
+  
+  /**
+   * Validate email address
+   * @paramstring $value
+   * @return mixed
+   */ 
+  public static function email($value = '') {
+    return filter_var(trim($value), FILTER_VALIDATE_EMAIL);
+  }
+  
+  /** 
+   * Match value against another
+   * @param string $value1
+   * @param string $value2
+   * @return bool
+   */ 
+  public static function match($value1, $value2) {
+     return trim($value1) === $trim(value2);
+  }
+  
+  /** Sanitize Data
+   * @return string $dirty
+   * @return string $clean
+   */
+  public function $sanitize($dirty) {
+    // return htmlspecialchars(trim($dirty));
+    return filter_var(trim($dirty), FILTER_SANITIZE_SPECIAL_CHARS);
+  } 
+}
+</code>
+
+===== Project Setup =====
+
+<code bash>
+php -S localhost:8000 -t public
+</code>
+
+==== MVC Project Version 0.00.00 ====
+<code>
+ .env
+ Database.php
+ helpers.php 
+ Router.php
+ routes.php
+ + config
+ |   database.php
+ + controllers
+ |   home.controller.php
+ + model
+ |   users.model.php
+ + public  -- DocumentRoot
+ +   css
+ +   images
+ |   index.php
+ + views 
+ |   home.view.php
+</code>
+
+==== git Setup ====
+
+<code bash>
+$ git init
+$ git add .
+$ git commit -m "Initial Commit"
+$ git remote add origin git@github.com:RobinGoerlach/come2us.git
+$ git branch -M main
+$ git push -u origin main
+</code>

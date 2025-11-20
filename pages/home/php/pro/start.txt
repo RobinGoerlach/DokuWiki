@@ -1,0 +1,624 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **Intermediate PHP**
+
+====== Intermediate PHP ======
+
+===== PHP CLI =====
+
+Run PHP interactively
+<code bash>
+$ php -a
+Interactive mode enabled
+
+php > echo "hello\n";
+hello
+php > ^D
+$
+</code>
+
+
+<code bash>
+$ php -f args.php apple cherry 7
+Total aruments: Array
+(
+   [0] => args.php
+   [1] => apple
+   [2] => cherry
+   [3] => 7
+)
+</code>
+
+==== PHP Built-In Web Server ====
+
+Not a production server only for development purpose. You can start it with this command
+<code bash>
+php -S localhost 8080
+</code>
+[[htttp://localhost:8080|localhost:8080]]
+
+  * php -S localhost 8080 **routing.php** answering requests with this file instead of index.php and rewrites to index.php
+  * **-t public** Specify document root <docroot> for built-in web server, this time public
+  * -c specify an config file
+
+<code php>
+<?php
+
+if (file_exists(__DIR__ . '/' .$_SERVER['REQUEST_URI'])) {
+  return false; // server the requested resource as-is.
+} else {
+  repuire 'index.php';
+}
+</code>
+**routing.php**
+
+<code bash>
+php -S dev.project.local:8080
+    -t /var/www/project/web
+    -c php-ini.development
+    routing.php
+</code>    
+==== PHP Message Queue Worker ====
+
+Attaching to Gilman or Beanstalk waiting for something to do happen and then process jobs and tasks.
+
+<code php>
+<?php
+
+$i=0;
+$time = rand(2,7); // 2 <= $time <= 7
+
+while($i < $time) {
+  echo ".";
+  sleep(1);
+  $i++;
+}
+
+echo " enough";
+</code>
+**supervise-me.php**
+
+
+**[[https://supervisord.org/|Supervisor]]** is a client/server system that allows its users to monitor and control a number of processes on UNIX-like operating systems.
+
+**/etc/supervisor/conf.d/php-cli.conf**
+<code>
+[program:php-cli]
+command=php /home/robin/scripts/cli/supervise-me.php
+autostart=false
+aautorestart=true
+</code>
+
+
+<code bash>
+sudo supervisorctl
+supervisor> start php-cli
+supervisor> status
+supervisor> tail -f php-cli
+</code>
+===== PHP New Features =====
+
+==== Anonymous Functions ====
+
+**[[home:php:basics:start#anonymous_functions|Anonymous Functions]]** Literally functions with no name, called closures or lamda function if they use variables from the outside scope, so function is not stored in root namespace. so they are use once or injecting functions.
+<code php>
+<?php
+$ping = function() {
+  echo "ping!";
+};
+
+$ping();  
+</code>
+
+**Closure Example**
+<code php>
+$message = "Hello";
+$greet = function ($name) use ($message) {
+  echo $message . ' ' . $name;
+};
+
+$greet('Daisy'); // Hello Daisy
+</code>
+
+==== Variadic Functions ====
+
+Functions with a variable numbers of parameters with func_get_args()
+
+**Old way:**
+<code php>
+function concatenate($transform) {
+  $string = '';
+  $pieces = fung_get_args();
+  $transform = array_shift($pieces);
+  foreach($pieces as $piece) {
+    $string .= $piece;
+  }
+  return ($transform($string));
+}
+
+echo concatenate("strtoupper", "I'd ", "like ", 4 + 2, " apples");
+</code>
+or using the **Splat or scatter operator ...**
+
+
+**Much cleaner with new syntax:**
+<code php>
+function concatenate($transform, ...$strings) {
+  $string = '';
+  
+  foreach($strings as $piece) {
+    $string .= $piece;
+  }
+  return($transform($string));
+}  
+
+echo concatenate("strtoupper", "I'd ", "like ", 4 + 2, " apples");
+</code>
+
+==== Argment Unpacking ====
+
+Let PHP unpack your args
+<code php>
+$email[] = "john.doe@gmail.com";
+$email[] = "jane.doe@gmail.com";
+$email[] = "jane.roe@gmail.com";
+
+mail($email[0], $email[1], $email[2]); // old syntax
+mail(...$email); // new syntax
+</code>
+
+==== Generators ====
+
+Generators look like a function, but will return another value each time they are called, and retain state in between.
+
+<code php>
+function getValues() {
+  yield "Apple";
+  yield "Ball";
+  yield "Cat";
+}
+
+$stuff = getValues();
+foreach($stuff as $thing) {
+  echo "$thing . "\n"; 
+}
+</code>
+
+Check co-routines in PHP
+
+==== Upgrading PHP Tips ====
+
+Check relative PHP Performance (benche.php) and Memory usage, [[http://php.net/ChangeLog-5.php|Check the changelog]]
+turn on E_DEPRECATED. Run unit tests with new php binary. Upgrade test platform (**pecl** extensions will need a reinstall.
+
+
+
+
+
+===== PHP Security Improvements =====
+
+Importend concepts for coder, to prevent Script injection
+  * **Filter Input** also into databases, check [[http://php.net/filter|PHP filters]] to Sanitise or validate
+  * **Escspe Output**
+
+<code php>
+$clean_data = filter_input_array(INPUT_POST, array(
+  // each field in turn, with desired definition
+  'name' => FILTER_SANITIZE_STRING,
+  'email' => FILTER_VALIDATE_EMAIL)
+);
+var_dump($clean_data);
+</code>
+
+<code bash>
+$ curl -X POST http://localhost:8080/filter.php -d name="fred" -d email="fred@excample.com"
+
+array(2) {
+  ["name"] => 
+  string(4) "fred"
+  ["email"] =>
+  bool(true)
+}  
+</code>
+
+==== PHP Passwords ====
+
+**Hash:**
+  * a one-way encryption
+  * take password, hash and store hashed password
+  * on login, accept incoming password, hash and compare with store value
+
+__**Password Hashing with md5() isn't good enough**__
+
+=== Salted Passwords ===
+
+Salt is a little something added to make a hash more effective.
+<code php>
+$hash = md5($password + $salt);
+</code>
+**Store the hash and the salt** in different tables and not in the users table, maybe you like to store the hash algorithem also. 
+
+=== Easy Password Hashing ===
+
+Use **password_hash** with the **PASSWORD_DEFAULT** constant to get PHP's current best option
+<code php>
+$password = "secretpassword";
+$hashed = password_hash($password, PASSWORD_DEFAULT);
+echo $hased;
+</code>
+
+PASSWORD_DEFAULT is the current best hashing algorithm. Older Versions of PHP see [[https://github.com/ircmaxell/password_compat|password compat]] at Github
+
+<code php>
+if(password_verify($password, $existing_hash))) 
+  echo "Good";
+else
+  echo "Noop";
+</code>
+  
+===== Object Oriented PHP =====
+
+[[home:php:oop:|PHP Object Oriented Programming]]
+
+  * One Class one file
+  * Class and file have the same name
+
+==== Auto Loading ====
+
+**index.php** selfmade autoloader with magic __autoload function
+<code php>
+<?php
+
+function __autoload($classname) {
+  require __DIR__ . "/lib/" . str_replace("\\", DIRECTORY_SEPERATOR, $classname) . ".php";
+}
+
+$myClass = new \MyApp\MyClass();
+</code>
+
+Autoloading with anonymous function
+<code php>
+<?php
+spl_autoload_register(function ($classname) {
+  require __DIR__ . "/lib/" . str_replace("\\", DIRECTORY_SEPERATOR, $classname) . ".php";
+});
+
+$myClass = new \MyApp\MyClass();
+</code>
+So don't care is class loaded or not autoloader will handle this.
+
+
+[[home:php:oop:start#autoloader|more]] ...
+==== Namespaces ====
+
+Combine libraries with the same class names, code can be more easily organised. [[https://blogs.sitepoint.com/php-53-namespaces-basics/|Some good examples]]
+
+
+Declare a namespace using the **namespace keyword** at the **top of the file**. All classes, functions and constants in this file are now in that namespace until end of the file
+<code php>
+<?php
+namespace SASD;
+
+function decorate($string) {
+  return "** " . $string . " **";
+}
+
+
+// elsewhere in the application
+$message = "Hello";
+$decorated = \SASD\decorate($message);
+echo $decorated; // ** Hello **
+</code>
+
+Declaring Classes and using the class from elsewhere (include inside another namespace) is just the same.
+<code php>
+<?php
+namespace MyApp;
+
+class User {
+
+  public function __construct($user_id) {
+    // some magic
+  }
+}
+</code>
+
+<code php>
+<?php
+$user1 = new \SASD\User(42);
+
+use \SASD\User;
+$user2 = new User(42);
+
+use \SASD\User as Human;  // Alias or nickname 
+$user3 = new Human(42);
+</code>
+
+==== Interfaces ====
+
+Interfaces define a contract
+  * Prototypes of class methods
+  * Classes "implement" an interface
+  * They must implement all these methods
+  * The object equivalent of a contract
+
+This interface is defined in the SPL, and it looks like this:
+<code php>
+<?php
+Interface Countable {
+  public function count();
+}
+</code>
+
+Implementing it by declaring the methods:
+<code php>
+<?php
+class Basket implements Countable {
+  public $items;
+  public function count() {
+    return count($this->items);
+  }
+}
+
+
+$basket = new Basket();
+$basket->items = array("apple", "pear", "cherry");
+echo count($basket); // 3
+</code>
+
+SPL Interfaces (her**bal**)
+  * **Drawable** -> draw()
+  * **Seriazable** 
+  * **Iterable**
+
+[[home:php:oop:start#interfaces|more]] ...
+
+=== Type Hinting ===
+
+<code php>
+<?php
+
+function output(Drawable $thing) { // We know $thing will implement Drawable 
+  echo $thing->draw() . "\n";
+}
+
+output(new Shape()); 
+output(new Rectangle()); 
+</code> 
+Using Polymorphism Shape and rectangle are different classes
+
+==== Abstract Classes ====
+
+Abstract Classes are
+  * incomplete
+  * at least partially incomplete
+  * we cannot instantiate then
+  * if a class has a abstract method, the class must be marked abstract too
+  * common in parent classes
+
+**An abstract class**
+<code php>
+<?php
+abstract class Shape {
+  abstarct function draw($x, $y);
+}
+</code>
+
+We can build on it, but must implement any abstract methods
+<code php>
+<?php
+class Circle extends Shape {
+  public function draw($x, $y) {
+    echo "circle draw at $x, $y\n";
+  }
+}
+</code>
+Any non-abstract methods are inherited as normal
+
+[[home:php:oop:start#abstract_classes|more ...]]
+
+==== Traids ====
+
+Traids are class snippets. They can be applied anywhere needed. We can add capabilities to multiple unrelated objects as boilerplate core.
+
+<code php>
+trait Audit [
+  public function getAuditTrail() {
+    return "nothing changed";
+  }
+}
+
+class Princess {
+  use Audit;
+}
+
+$daisy = new Princess();
+echo $daisy->getAuditTrail();
+</code>
+
+==== Exceptions ====
+
+Exceptons are Objects, they can be extended. PHP itself throws exceptions like PDOException.
+
+**Catching Exceptions**
+<code php>
+try {
+  $db = new PDO("foo", "bar");
+} catch(PDOException $e) {
+  echo some DB fail occured" . $e->getMessage();
+} catch (Exception $e) {
+  echo "an unknown error occured" . $e->getMessage();
+} finally {
+  echo "all done";
+}
+</code>
+
+**Throwing Exceptions**
+<code php>
+function addTwoNumber($a, $b) {
+  if ($a*$b == 0) {
+    throw new Exception("zero is Boring!");
+  }
+  return $a + $b;
+}
+
+echo addTwoNumbers(3,5); // 8
+echo addTwoNumbers(0,5); // error
+</code>
+
+**Extending Exceptions**
+<code php>
+
+class DontBeDraftException extends Exception {
+  public function getMessage() {
+    return "Don't be Draft";
+  }
+}
+
+function inspectCurtains($colour) {
+  if ($colour == "orange" || $colour == "spotty"") {
+    throw new DontBeDaftExeption($color . ' is daft');
+  }
+  echo "The curtains are $colour\n";
+}
+</code>
+==== The Standard PHP Library SPL ==== 
+
+**SPL Highlights**
+  * ArrayObject class
+  * Standard iterator classes
+  * Really useful interfaces
+      * Countable
+      * ArrayAccess
+      * Iterator
+        * DirectoryIterator 
+        * FilesystemIterator
+        * RecursiveArrayIterator
+        * FileIterator
+        * RegexIterator
+        * RecursiveIteratorIterator
+  * Data Structures
+    * SplDoubleyLinkedList
+      * SplStack
+      * SplQueue
+    * SplHeap
+    * SplFixedArray
+  * Data types for storage
+  * Detailted exceptions
+    * BadFunctionCallException
+    * BadMethodCallException
+    * InvalidArgumentException
+    * LengthException
+    * LogicException
+    * OutOfRangeException
+    * OverFlowException
+    * RangeException
+    * RuntimeException
+    * UnexpectedValueException
+  * Autoloading
+
+**ArrayObject class**
+<code php>
+  $basket = new Basket(); 
+  $basket[] = 'pie';
+  $basket[] = 'apples';
+  $basket[] = 'map';
+  echo $basket[0]; // pie
+</code>
+
+
+**Itterator** defines how an object behaves "foreach"-ed
+<code php>
+Iterator extends Traversable {
+  abstract public mixed current (void)
+  abstract public scalar key (void)
+  abstract public void next (void)
+  abstract public rewind (void)
+  abstract public boolean (void) 
+}
+</code>
+
+
+===== PSRs =====
+
+==== PHP-FIG and PSRs ====
+
+PHP Standards Recommendation by the [[https://www.php-fig.org/|PHP Framework Interoperability Group]] 
+  * Aim to standardise common particles and interfaces between Libraries and Frameworks
+  * Allows libraries/components to be shared between frameworks
+  * Less Not-Invented-Here syndrome for PHP's future
+
+==== Autoloading ====
+
+  * [[https://www.php-fig.org/psr/psr-0/|PSR0]] was the original standard, introduced for PHP 5.3
+  * [[https://www.php-fig.org/psr/psr-4/|PSR4]] replaces PSR0 and is the current recommendation
+
+The autoloader examples show how code should be organised.
+  * All classes are case-sensitive
+  * All classes are in at least one level of namespace
+  * Namespace reflect the directory structure
+  * Classes are in a file called [classname].php
+  * Underscores are not considered as directory separators
+
+==== PSRs Code Style ====
+
+The coding standard are split into parts:
+  * [[https://www.php-fig.org/psr/psr-1/|PSR1]] is a very basic standard, ensuring that we can apply minimal standards to all components of every project 
+  * [[https://www.php-fig.org/psr/psr-2/|PSR2]] is more of a style guid, including whitespace and bracket placement directives
+PSRs Code Style is more of a style guide than mechanic syntax guid.
+
+**Implementing Coding Standards** with PHP Code Sniffer. It was build for [[https://www.php-fig.org/psr/psr-1/|PSR1]] and [[https://www.php-fig.org/psr/psr-2/|PSR2]].
+
+Install it via [[https://pear.php.net/|PEAR]]
+<code bash>
+pear install PHP_CodeSniffer
+</code>
+
+Check your code
+<code bash>
+phpcs --standard=psr2 MyClass.php
+</code>
+Can be integrated into using [[https://en.wikipedia.org/wiki/Traverse_(software)|Traverse]] or [[https://www.jenkins.io/|Jenkins]]
+
+  * **phpcs -i** showing supported standards
+
+
+==== Current and Future PSRs ====
+
+Overview
+  * 0 **Autoloading** basic autoloading absolute minimum
+  * 1 **Coding Standard** check with PHP code sniffer, how things should be named to make code understandable by everybody
+  * 2 **Coding Style Guide** check with PHP code sniffer, how things should be named to make code understandable by everybody
+  * 3 **Logger Interface** what method should be available to offer logging via interface, check the best logging tool ([[https://packagist.org/packages/monolog/monolog|monolog]])
+  * __4 **Autoloading**__ again ;-)
+  * 5 PHPDoc (draft) for phpdocumentor reading comments in code to build documentation
+  * 6 Caching (draft)
+  * 7 HTTP Messaging (draft)
+
+
+===== PHP Package Management =====
+
+  * [[home:php:pkg:composer|Composer]]
+
+
+
+===== PHP and Databases =====
+
+  * [[home:php:db:|PHP Database Integration]]
+
+
+===== Examples Scripts =====
+
+**args.php**
+<code php>
+<?php
+echo "Total arguments: " . $argc . " \n";
+print_r($argv);
+</code>
+
+**cli.sh**
+<code php>
+#!/usr/bin/php
+
+<?php
+echo "This is a shell script 
+";
+</code>

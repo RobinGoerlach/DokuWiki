@@ -1,0 +1,75 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP Token based Authentication & Authorisation**
+
+====== PHP Token based Authentication & Authorisation ======
+
+**/routes.php**
+<code php>
+<?php
+$router->get('/auth/register', 'UserController@create');
+$router->get('/auth/login', 'UserController@login');
+$router->get('/auth/{id}', 'UserController@show');
+$router->get('/auth/edit/{id}', 'UserController@edit');
+
+$router->post('/auth/login', 'UserController@store');
+$router->put('/auth/{id}', 'UserController@update');
+$router->delete('/auth/{id}', 'UserController@destroy');
+</code>
+
+**controllers/UserController.php**
+<code php>
+<?php
+namespace App\Controllers;
+
+use Framework\Database;
+use Framework\Validation;
+
+class UserController {
+  protected $db;
+  
+  public function__construct() {
+    $config = required basePath('config/db.php');
+    $this->db = new Database($config);
+    
+    /**
+     * @return void
+     */
+    public function login() {
+      loadView('user/login');
+    }
+    
+    public function create() {
+      loadView('user/create');
+    }
+  }
+</code>
+
+**/views/users/create.view.php**
+<code php>
+<?php
+<?= loadPartial('head'); ?>
+<?= loadPartial('navbar'); ?>
+
+<?= loadPartial('footer'); ?>
+</code>
+
+
+**/views/users/login.view.php**
+<code php>
+<?php
+<?= loadPartial('head'); ?>
+<?= loadPartial('navbar'); ?>
+
+
+
+<?= loadPartial('footer'); ?>
+</code>
+
+
+**/views/partial/navbar.php**
+<code html>
+<nav class="space-x-4">
+  <a href="/auth/login" class="text-white hover:underline">Login</a>
+  <a href="/auth/register" class="text-white hover:underline">Register</a>
+  <a href="/jobs/create" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded hover:shadow-md tranition duration-300"><i class="fa fa-edit"></i> Post a Job</a>
+</nav>
+</code>

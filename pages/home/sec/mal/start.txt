@@ -1,0 +1,187 @@
+**[[sec:|Start]]** -> **[[sec:|Security]]** -> **Malware Analysis Process**
+
+====== Malware Analysis Process ======
+
+  * [[home:sec:mal:tools|Malware Analysis Tools]] Linux tools and testing frameworks x86 assembler
+
+====== Introduction to Malware ======
+
+===== Types of Malware =====
+
+  * **Propagatin Malware**
+    * **Virus** is a malicious Software with two aims: propagating copies of itself to other computers and eveltually attacking its host 
+    * **Worm** is a special form of virus that propagates itself through a network without any user interaction
+    * **Trojaner** is a malicious Software pretending to be legitimate 
+  * **Non-propagating Malware** is malware that can not propergate itself and is usally installed by some form of attac its an execuabl file started by the attacker or is included in the list of programs that starts up automatically during system satrt or login. It could be a injectable module like a DLL injected into a existing program and uses that programs privileges and hide in that programs process
+    * **Spyware** is different normaly it doesn't propagat itself but trys to extract informations like passwords or bank accounts from its host computer for marketing purpose.
+    * **Adware** is like spyware it's designed for advertising, and could pop up in a pop up screen called PUPs (potential unwanted Programs) often installed while installing other programs 
+  * **Root kit** is dangerous software, it trys to implant itself into privilegt area of it's target and takes aktive measures to avoid being discovert and often opens a backdoor on its target
+
+**Antivirus programs** can detect some PUPs by checking all files coming into the system and tries to detect signatures of known PUPs and is typically only 95% effective. Requires regular signature updates every 4 hours, so viruses can get on to the system if it arrives before its signature is downloaded.
+
+==== Early Malware ====
+
+  * **Robert Moris** was the first Hacker covicted becase he developed the Christmas Tree worm in 1998, within a day 2000 Systems where infected and over 6000 Systems crashed. The worm infected DEC and SUN Systems and introduced early malware techniques
+  * **Malicios Hackers** deliberatly design malware to creat interuptions and maximize damage by the late 1990 maware was released regulaly onto the internet. **Melissa**, **I Love You** and **Code Red** are som of the wellknown attaking Windows 95, by infecting a USB Drive or by opening an attachment designed by gys having to much time as a fun project
+  * **Organized Crime** targeting users' banking systems, this are seasoned criminals seeing maware as lucrative, comming from Eastern Europe, developing tools creating large botnets with hundreds of thousands of zombies controlled from a botnet master console. Forming the botnet and instruct them to target specific computers in series of campains.
+
+==== New Malware ====
+
+  * **Ransomware** encrypts users' files and demands a payment for decrypting keys, **CryptoLocker** and **Petya** are early examples
+  * **State-Sponserd Malware** is the reused NSA malware leaked by Edward Snowden and CIA operations left code behind quickly picked up by cybercriminals and optimized for there own use. Highly sophisticated and hard to defeat
+
+===== How Malware works =====
+
+**Malware Delivery**
+  * Inserting a infected USB and is started by the automatic run feature that can be enabled for USB devices
+  * Click on an Email attachment, early version attach them self as executalbe code like Bill.pdf.exe, Viruses can also start by using a Macro to place code in a document
+  * Downloading from a website containing malicious code in the webpage useing a vunerabilety of your browser, seeking for propagation vectors to infect hosts
+
+**Worm Delivery**
+  * Search for vulnerable network targets, so the chalange is the need to avoid floding the network and if a target is infected how to prevent reinfection
+
+**Trojan Delivery**
+  * Tricks the user into downloading it, designed to breach the security.
+
+**Rootkit Delivery**
+  * Often the Payload of a trojan or a virus. The Exploid triggers the execution of a Dropper to drop the Payload by installing the Rootkit to the computer. The Dropper will stop execution after installing the Payload
+
+See Case study on sofosy attack
+
+==== How Malware archives persistence ====
+
+  * On system reboot, malware starts up automatically by the operating system or by one of the processes like a autostart extension point in wWindows registry HKEY_CURRENT_USER or HKEY_LOCAL_MACHINE (SOFTWARE\Microsoft\Windows\CurrentVersion\Run or HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run) or HKLM\SYSTEM\ControlSet001\Control\SesionManager or HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\or HKLM\SYSTEM\CurrentControlSet\Services
+  * Insert Code by modifiing the master boot record, mostly done by Rootkit, in the partition record of the disk
+  * DLL hijaking, the Malware presents itself as a legitimate DLL, therfor the Malware has to be placed in the DLL load path to be loaded earlyer than the legitimate. Requires Main execuatble is not in system32, the DLL is not in the KnownDLL object and the DLL is not in the same folder as its main executable
+Malware can use a number of techniques to aim persistence. Detecting persistence requires a thorough forensic examination therfor using winlogon.exe or explorer.exe for persistence or inject code into svchost.exe controlling network comunications.
+
+===== Why using Rootkits =====
+
+  * Basic malware persistence can be detecte
+  * Rootkits are hiden deep in the operating system
+  * Rootkits don't exploit vulnerabilities of the system
+  * Non-Propagating implant
+  * Installing a Rootkit
+    * Penetrating the target
+    * Use a dropper to infiltrate the rootkit
+      * Check whether the rootkit already exists on the target
+      * Check wether the target is a virtual machine
+      * Othe special checks, such as coutry
+    * If sutable target insert the rootkit
+    * Identify and disable antivirus and Intrusion Detection Software 
+    * Prepare to avoid forensic detection, so hide in the OS Kernel. Therfor Rootkits often developed as a driver (Loadabel Kernal Module). Microsoft provides the Windows Driver Development Kit (DDK) for developing those driver modules. Operator work in the deepest part of the operating system (ring 0)
+    * Rootkits in the Kernel run with elevated privileges and firstly start modificating the Direct Kernel Object removing itself from the Process Pointer List to be hidden in the Taskmanager, the list of open ports, dirver list and file list
+
+===== Automating Attack =====
+
+  * Cyberattac is resource intensive
+  * Require attacks at scale
+  * Cyberattack lends itself to automation by Botnets
+    * Botmaster runs commands and control (C&C) server, obscure to hide wen accessing the systems
+    * The C&C Server controlls the Zombies, to extract informations from a target, send emails or run a distribute DOS attack
+    * Domain generation algorithm hides IP dor Domain used by the C&C Server
+
+**Zeus Botnet** (released 2010 is a russian botnet and malware botnet kit) was created to steal online credentials like Internet Explorer password, Bank account credentials via the browser, steal bank text message codes
+  * Botnet construction kit
+  * Command and control capability
+  * Set of remote access trojan (RAT)
+  * Founded the Botnets Citadel, Ice IX, GOZeuS
+  * Targets computers and smatphones
+
+===== Virus Construction Kits =====
+
+  * Create viruses without coding
+  * Menu selection of prepacked modules
+    * User interface (GUI, menu) asking for the selecting requirements like type of replication, infection creteria, triggering conditions and what the virus will do when detonating
+  * Configuration file detailing the function of the virus
+  * Generally well documented and easy to use in professional quality and examples to study
+  * Generating Execuatable or source code to be modified by experanced programers
+
+**GenVir Kit** was the first attemte
+  * Shareware virus construction kit with limited free functionality and licensed to unlock full functionality
+  * Hacked versions known to have been distributed
+**Virus Creation Lab** created in 1992 by Nowhereman from the nuke group
+  * Transformed into **Phalcon** Skism mass-produce code  generator, the source code was distributed with the kit
+**Syp Eye**
+  * Credit card grabber, Firefox certificats, sox5 backdoor, pi backdoor, adpi backdoor
+**FireCrypt**
+  * Dual-purpose DDOS/ransom malware build by malware builder BleedGreen a command-line application to build execuatbles
+  * Presents a PDF or Word document, killing the Task Manager and encrypting files with AES-256
+**Trojan Development Kit (TDK)** for Android
+  * Available on Chines Websides running as an app on an android phone
+
+====== Malware Detection ======
+
+  * Signature-based detection (by anti virus software) finds known malware and investigating of incidents
+  * Indicator of Compromise (IOC)
+    * MD5 hash
+    * Command and control domain name
+    * Malicious IP address
+    * File or Registry key known to be used by malware
+    * Facilitate sharing of thread information
+    * timely, relevant, accurate, specific and actionable
+  * IOC Lifecycle 
+    * Identified compromise accured 
+    * investigation starts collecting data to determin what has happend
+    * analysing data determin how it happend delivers data how the malware works
+    * Creating IOCs
+    * Deploying IOCs to Intrusion Prevention System to ensure the same will not happen again
+
+Malware changes, but tools, technipues and procedures (TTPs) are relativly constant
+  * Process injection
+  * Credential dumping
+  * Token stealing
+  * Host enumeration
+So IOC and TTP can be an effective combination. Automating Sharing Threat Intelligance with teh standards Stix and TAXII
+  * Stix: defines the Thread inteligance (a language for modeling and representing cyberthreat intelligence)
+  * TAXII: defines how the information is comunicated (a protocol for exchanging cyberthreat intelligence)
+
+==== Indicator of Attack (IOA) ====
+
+  * IOCs are insufficient
+  * IOAs detect methods and intent of the attacker
+  * IOAs address hard problems
+    * Intrusion using legitimated credentials
+    * Zero-day exploits
+  * Linked to the cyber kill chain
+
+==== Cyber Hunting ====
+
+  * Manually searching for signs of intrusion
+  * Difficult to do effectivly, does not scale
+
+==== Anormaly Detection System (ADS) ====
+
+  * Monitors to detect malicious behavior (watching behaviour of data streams)
+  * Learning subsyste builds a model of normal data flows
+    * initially deployed in learning mode
+    * When ready, switched to detection mode
+    * allow manual entry for known anomaly thresholds (number of emails send per seconds from specific host, number of user access attempts)
+  * Protocol content is not used the ususal way of using it or behaviour anomalies could be an attemt to exploid an implementation bug
+  * Statistical anomalies propability score is build for each of the normal packages traffic, scored on the sample datat collected over a periode of time and stored in a profile, treshoald ist set for protocols and users, everything beond the threshold will trigger an allert
+  * Detection Issues
+    * False positives, are a significant weeknis - legitimate activity alerted used as a measurement of the quality of the XDS, so Error-prone systems are ignored
+    * False negative - intrusion not detected, only one needed to compromise a system
+
+==== Autonomous Response System ====
+
+Brings together intrusion and anomaly detection, using artificial intelligence to reduce fals positives/negatives
+
+==== Sandboxing Malware ====
+
+Allows the malware to execute in a containde environment, to watch its behavior. Detecting any behavioural characteristics that indicates malware , it can be deleted or quarantened. Using Next-generation advanced firewalls. Processing Stages filtering known malware IP source (blacklist filter), SSL decryption and signature-based filtering removes malware by filtering known hashes checking signatures (80% of malware will be removed, sandbox behaviour analysis by library called the Registry entries modified processes used network connections made, file extensions check
+  * Takes time so often run in passive mode allows the content through, thread has been detected an has to be cleand up manually. During this time the malware like **wannacry** can efect many systems. **Polymorphic** and **Metamorphic** malware will not been detected
+
+====== Advanced Techniques ======
+
+Hiding malware **Polymorphic** and **Metamorphic**
+
+  * **Polymorphic Malware** has two parts and works in three steps
+    * De-obfuscator XORing the body to decrypt the malware
+    * Obfuscated Malware the real malware
+    * The Malware wil be decrypte runs and decrypts itself with a new key before propagating itself
+
+  * **Methmorphic Malware** Malware code is chanded in eache iteration containg the 
+    * malware payload
+    * morphing engine reriting the routines placing metodes in differnt places changing registry use code permutation and expansion, code shrinking and garbage code insertion
+    * 

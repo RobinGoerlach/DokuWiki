@@ -1,0 +1,123 @@
+**[[home:|Start]]** -> **PHP**
+
+====== PHP ======
+
+<code php>
+<?php
+
+echo 'Hello World!';
+</code>
+
+===== PHP before we start =====
+
+[[https://www.php.net/manual/en/introduction.php|What is PHP and what can it do?]] from the **[[https://www.php.net/manual/en/|PHP Manual]]** 
+
+First question: [[https://turnkeystaffing.com/tech-trends/php-is-dead/|Is PHP dead?]] No PHP is still Relevant and Widely Used, PHP Hosting is cheap and so over 70% of web sides use PHP. PHP is on 14th place at the [[https://www.tiobe.com/tiobe-index/php/|Tiobe Index]]. So it's no dead and won't die soon
+
+Second Question: What is PHP? PHP is a Interpreter running on the Server unlike JavaScript that runs on the local browser.
+
+Third Question: Why learn PHP? Easy to get started and beginner friendly and bad code can be written in every language. Its powerful enough not only to build simple websites or CLI tools, it can also build very complex web applications at enterprise level. PHP has a huge ecosystem and some of the best frameworks, to build countless e-commerce application and can connect to countless third-party services. You can build company websites, CRM systems blogs, billing-, invoicing and warehouse management systems. 
+
+Some interesting resources might be the [[https://www.php.net/manual/en/|PHP Manual]] and [[https://wiki.php.net/start|PHP Wiki]]
+
+Interested in learning more take [[https://www.youtube.com/playlist?list=PLr3d3QYzkw2xabQRUpcZ_IBk9W50M9pe-|Learn PHP The Right Way - Full PHP Tutorial For Beginners]]
+===== Installing PHP =====
+
+[[https://www.php.net/manual/en/install.php|Installation and Configuration]] Manual of PHP
+==== Without installation (PHP online)  ====
+
+  * [[https://onlinephp.io/|PHP Sandbox]] Testing code across PHP versions (from 5.x to 8.x).
+  * [[https://www.w3schools.com/php/php_compiler.asp|PHP Online Compiler]] for absolute beginners
+  * **[[https://www.programiz.com/php/online-compiler/|Programiz - PHP Online Compiler]]** for Learners who want a clean, modern interface
+  * **[[https://onecompiler.com/php|OneCompiler - PHP]]** running interactive scripts and I/O testing
+
+If you want you can test your PHP code with this code tester other online PHP Interpreter like[[https://www.onlinegdb.com/online_php_interpreter|Online PHP Interpreter]] [[https://www.jdoodle.com/php-online-editor/|JDoodle PHP]]
+
+==== Manual Installation ====
+
+Manual installation and configuration of Database, Web Server, PHP and tools, depending on your OS, but max freedom
+
+=== PHP on macOS ===
+
+PHP is already installed with an Apache 2.x Webserver. The default Document Root Directory is **"/Library/WebServer/Documents"**
+
+=== PHP on Linux ===
+**Install PHP on CentOS**
+<code bash>
+sudo yum install epel-release -y
+sudo yum install https://rpms.remirepo.net/enterprise/remi-release-9.rpm -y 
+sudo dnf module reset php -y
+sudo dnf module enable php:remi-8.2 -y
+sudo dnf install php php-cli php-mysqlnd php-xml php-mbstring -y
+php -v
+sudo systemctl restart httpd
+
+echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+</code>
+
+**Install PHP on Debian/Ubuntu**
+<code bash>
+sudo apt update
+sudo apt install php libapache2-mod-php php-mysql -y
+
+php -v
+echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+</code>
+
+==== PHP on Windows ====
+
+  * [[http://laragon.org|Laragon]] Download Laragon full bringt Cmder, MySQL, HeidiSQL und Apache gleich mit 
+
+==== All in One Solution ====
+Contains a preconfigured Web Server, PHP, Databases and some tools
+  *  [[https://apachefriends.org/|XAMPP]]/MAMP/WAMP are all in one solution products, bundling preconfigured web server (Apache), PHP, database (MySQL/MariaDB) and useful tools (phpmyadmin). Alternatively use Docker or Virtual Machines, or install Apache, MySQL, PHP and phpmyadmin one by one.
+    * The installation of [[https://apachefriends.org/|XAMPP]] & Co is simple but does not support instilling multiple PHP versions at the same time out of the box. Not multiple MySQL Version, Difficult to maintain multiple projects
+    * Its not suited for production due to security. 
+    * "Works on my machine" with differing configuration between local setup and production. Differences could bin minor if you know what you are doing, or could be major like different versions in PHP or MySQL. Different in installed packages what end in "it works on my local machine but not in production. Using [[https://apachefriends.org/|XAMPP]] & Co is absolutely okay for getting things running fast or hobby projects and playing around with PHP. 
+
+Try [[http://localhost/dashboard/|XAMPP Dashboard]] to see if installation is working. Delete the content of htdocs or create a directory below htdocs and create a index.php file there.
+
+==== Virtual Machines or Docker Solution ====
+
+  * 
+
+
+
+
+
+===== Run a PHP Script =====
+
+<code bash>
+php index.php
+php -S localhost:8000 
+php -S localhost:8000 -t public
+</code>
+
+
+===== More on PHP ====
+
+  * __**[[home:php:basics:|PHP Basics]]**__ (Syntax & Operators, Variables & Data Types, Control Structures & Functions, Type Casting & Error Handling, php.ini & Web server configs, Working with Arrays and dates)
+    * [[home:php:dbg:|Debugging PHP]] (xdebug, phpdbg)
+  * [[home:php:pro:|Intermediate PHP]] (Classes & Methods, Object Oriented PHP, Code Style & PSR, Namespaces & Autoloading, Dependency Management, Super Globals, Cookies & Sessions, Database)
+    * __**[[home:php:oop:|PHP Object Oriented Programming]]**__
+    * [[home:php:db:|PHP Database Integration]]
+    * [[home:php:pkg:|PHP Package Manager]] ([[home:php:pkg:composer|Composer]])
+    * [[home:php:docgen:|PHP Documentation generator]] ([[home:php:docgen:doc:|PHPDocumentor]] a tool like JavaDoc or Doxygen)
+  * **Advanced PHP techniques** Testing, phpUnit, TDD, BDD, MVC & Routing, Caching & Security, Frameworks & PHP 8, Hosting and Deployment, Best Practices)
+    * [[home:php:test:|PHP Unit testing]] 
+      * [[home:php:test:unit:|PHPUnit]]
+    * [[home:php:mvc:|PHP Model-View-Controller]]
+    * [[home:php:jwt:|PHP Token based Authentication & Authorisation]]
+    * [[home:php:api:|PHP Application Programming Interface (API)]] as [[home:php:api:rest:|Rest API]] (Representational State Transfer)
+    * [[home:php:libs:|PHP Frameworks and Libraries]] 
+      * [[home:php:libs:lara:|Laravel]] 
+      * [[home:php:libs:synf:|Synfony]]
+
+  * [[home:php:sand:|PHP Sandbox]]
+
+==== PHP Tools ====
+
+  * Composer / PEAR
+  * PHPUnit
+  * PHP Documentor
+

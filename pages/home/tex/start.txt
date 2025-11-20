@@ -1,0 +1,14 @@
+[[home:|Start]] -> **LaTeX**
+
+====== LaTeX ======
+
+<code latex>
+{\LaTeX}
+</code>
+
+
+Es gibt verschieden Übersetzer, je nachdem ob DVI, PostScript oder PDF (Adobe Portable Document Format) erzeugt werden soll
+  * LaTeX Übersetzter
+  * PDFLaTeX Übersetzter
+
+Gibt es Fehler im Document wird der Übersetzungsvorgeng (LaTeX Lauf) abgebrochen, oft ist es auch notwendig ein Dokument mehrfach zu übersetzten, da der Übersetzter Teile des Dokumentes nicht auf anhieb übersetzen kann, z.B. ein Inhaltsverzeichnis oder ein Garafik bzw Tabellenverzeichnis kann erst erstellt werden wenn das Dokument min. einmal komplett übersetzt ist.

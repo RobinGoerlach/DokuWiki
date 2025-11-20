@@ -1,0 +1,7 @@
+**[[home:|Start]]** -> **IDE's**
+
+====== IDE's ======
+
+  * 
+  * [[home:ide:vs_code:|Visual Studio Code]]
+  * 

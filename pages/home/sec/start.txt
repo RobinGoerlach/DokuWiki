@@ -1,0 +1,9 @@
+**[[home:|Start]]** -> **Security**
+
+====== Security ======
+
+  * [[home:sec:mon:|Monitoring]]
+  * 
+  * [[home:sec:mal:|Malware Analysis]] from [[https://www.linkedin.com/learning/ethical-hacking-the-complete-malware-analysis-process|Ethical Hacking: The Complete Malware Analysis Process]] by [[https://www.linkedin.com/learning/|Linkedin learning]]
+  * 
+

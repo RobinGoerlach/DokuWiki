@@ -1,0 +1,392 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP API**
+
+====== PHP API ======
+
+An API is any interface a program offers, to be used by another program/module.
+
+===== Designing APIs =====
+
+Key features of good APIs
+  * **Consistencies**: always take input and send output in the same way e.g. take and return date/time in the same format, validation should work the same common way on each URL. The XML and JSON output should contain the same fields. Create APIs as a "MVC" with a backstop controller to handle our output. We don't need Views in the backend but we need common ways taking known data structure and then transferring them appropriately for each needed output (JSON, JSON p, XML, HTML, YAML, CSV, ..., Pritty printed)
+  * **Robustness**: is about how to deal with failure. Respond in a clear manner what went wrong, stick to standards, to make your APIs familiar to a user, that makes your API easy to use.
+
+A good API is easy to integrate, should have some documentation, should be pretty consistent or your competitors make the deal.
+
+===== Data Formats =====
+
+The best data format depends on the needs of the Users. Software is designed by User stories and thinking about how the Software will be used. With APIs there are no different.
+
+  * **Who will use this service?**, what will make sense to them, which platform will support what out of the box, how is network quality ... 
+  * **What will they do with it?**
+  * **What's their technology platform?** XML is great in .net and Java
+  * Try to support multiple formats wherever possible
+
+  * **JSON** Lightweight standard in most web languages with no data type information, quit small, not much bigger than the information to be send on the web. We deal with strings with great support in PHP. Particularly good for mobile applications
+  * **XML** eXtensible Markup Format, verbose and descriptive, is very precise how to describe data includes data type information, super powerful because of attributes and is complicated because of namespaces, representing many more things. It is heavier then JSON because more information's have to be transported, great for two server on a decent network connection.
+
+==== Content Negotiation ====
+
+When the client says what format it can handle, and the server works out what is best.
+
+Client accept header example
+<code text>
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+</code>
+
+| Format | Weighting |
+| text/html | 100% |
+| application/xhtml+xml | 100% |
+| application/xml | 90% |
+| */* | 80% |
+
+Test Content negotiation with cURL
+<code bash>
+$ curl -v -H "Accept: application/json http://api.joind.in/v2.1/talks/...
+</code>
+
+===== API Caching =====
+
+Caching APIs brings the same problems as in Web Caching, issues in caching images, CSS, JavaScript, ... everything all applies here. And again we do caching with headers the work that we returned without responses, without resources, if its restful inform what should happen here.
+
+__**Caching for a Finite Period**__
+<code text>
+Expires: Thu, 21 Aug 2014 20:00:00 GMT
+</code>
+Use the **Expires header** in the recourse, to set how long this resource or response is valid for, giving the client the permission to  cash that response until after the expires header date given. We don't check if it's outdated we just keep it, for things we know this doesn't change very often (Company Logo), this ideal. We can reduce load on the network and our server, this can improve the response time on the client.
+
+__**Check for Newer Content**__
+
+Use **Last-Modified** in the response from server sending a resource
+<code text>
+Last-Modified: Thu, 31 Oct 2013 17:00:11 GMT
+</code>
+
+In a later client request use **If-Modified-Since**
+<code text>
+If-Modified-Since: Thu, 31 Oct 2013 17:00:11 GMT
+</code>
+
+**The Response** is either new contented has status
+<code text>
+304 Not Modified
+</code>
+
+Alternatively use the **ETag** (a identifier or fingerprint of the current status of a resource) to check for newer content
+
+In the response from server sending a resource
+<code text>
+ETag: "8081-4ea0C61f81cc0;89-3f26bd17a2f00"
+</code>
+
+In a later client request
+<code text>
+If-None-Match: "8081-4ea0C61f81cc0;89-3f26bd17a2f00"
+</code>
+
+Response is either new content or has status
+<code text>
+304 Not Modified
+</code>
+
+ETag can produce a little mor load on the server for calculating the fingerprint but is much more effective than having to regenerate and then transfer a resource. 
+===== Authenticating for APIs =====
+
+Most APIs need to identify users.
+
+Authorisation Header sends credentials in the header.
+  * Simplest way: **Basic/Digest auth** both can be implemented very easily, Digest auth is a bit more secure then Apache basic auth. The webserver will be able to put it in. 
+  * Most flexible way: **OAuth2** good for working with third party products. After login the user gets an access token. Whatever needs to consume the API, only needs to send the token rather than the username and password.
+The advantage of a token is you can use it for users or applications. If you twitter bot drives mad you revoke the token and the problem is gone, no need for a password change or a contact with twitter support.
+
+See [[https://developer.github.com/v3/oauth/|Github Developer - OAuth API]], go to the GitHub website, login with username and password, generate a access token. Store the token in your header. Done!   
+===== Error Handling =====
+
+Error Handling is the true measure of your service. 
+  * Errors must be in the expected data format. Errors need to come back in the expected format that the client gets what he can consume and process. The client then has a chance to decode the error and understand what it is what the API is trying to tell them.
+  * Appropriate status codes must accompany errors. Not every client will check the content type or the status code, but the status code is vitally important. Status 200 and a String resource dose not look like an error, so it can be overlooked and undetected Errors may offer a lot of fun to the data and the users, due to unrecoverable data loss 
+  * Errors must be meaningful. There is nothing better than Error message not understandable to frustrate users and to kill clients.
+  * Errors should be collated. In case of multiple errors occurring show them all at once not one after the other. 
+
+Consider an output handler when returning information to a user, capture the incoming request format as early as possible. meaning you can return the correct request format to the user.
+===== PHP Web API =====
+
+**[[home:php:api:rpc:|PHP RPC API]]** Remote Procedure Calls as Web API
+
+
+**[[home:php:api:rest:|PHP REST API]]**
+  * A **specific type of API** that follows the REST (Representational State Transfer) architectural style.
+  * **Web-based**: REST APIs usually expose resources (data) over **HTTP**.
+  * Uses standard HTTP methods:
+    * **GET** → read data
+    * **POST** → create new data
+    * **PUT/PATCH** → update existing data
+    * **DELETE** → remove data
+  * Data is typically returned as **JSON** (sometimes XML).
+  * Example:
+    * **GET https://pokeapi.co/api/v2/pokemon/25** → returns JSON with data about Pikachu.
+So here, REST API is a way to build APIs for the web using REST conventions. REST API is a subtype of API designed for communication over the web using REST principles and HTTP. In modern development, REST APIs dominate because they’re easy and fast to use.
+
+**[[home:php:api:soap:|PHP SOAP API]]** Simple Object Access Protocol
+  * A **protocol** (not just an architectural style like REST).
+  * Uses **XML** for request and response messages.
+  * Works over many transport protocols (HTTP, SMTP, TCP, etc.), but HTTP is most common.
+  * Very **strict and standardized**:
+    * Every SOAP message must have an **envelope**, **header**, and **body**.
+    * Often uses a **WSDL (Web Services Description Language)** file to describe the service.
+  * Supports **built-in error handling**, security (WS-Security), and transaction compliance.
+  * Example request (simplified):
+<code xml>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <GetWeather>
+      <City>Berlin</City>
+    </GetWeather>
+  </soap:Body>
+</soap:Envelope>
+</code>
+SOAP still survives in **enterprise**, **financial**, and **legacy systems** where strong contracts and strict security are required.
+
+**GraphQL**
+  * Query **language & runtime** for APIs, created by Facebook (2015).
+  * **Not a protocol** → more like a way to ask for exactly the data you want.
+  * Works usually over **HTTP POST** requests.
+  * Uses a **single endpoint** (e.g. /graphql) instead of many like REST.
+  * Clients define the shape of the response → avoids **overfetching** (getting too much data) and **underfetching** (not enough data).
+  * Strongly typed schema (.graphql files) defines what queries are possible.
+
+**gRPC** Google Remote Procedure Call
+  * Uses **Protocol Buffers (Protobuf)** as the interface definition language (IDL) and data format → **binary & compact**.
+  * Runs on **HTTP/2**, which supports streaming, multiplexing, and better performance than REST’s HTTP/1.1.
+  * Defines **services with methods**, similar to calling functions remotely (RPC style).
+  * Strongly typed, auto-generates client/server code in many languages
+  * Supports **bidirectional streaming** (client ↔ server keep sending data in real-time).
+Google Remote Procedure Call is best for microservices, internal APIs, high-performance systems, especially when you need real-time streaming.
+
+
+===== Consuming API's with PHP =====
+
+PHP has a number of ways of working with HTTP, the way to choose depends on the application as the PHP **curl** Extension. The main benefit is this build-in everywhere, so it's a save choice. but it's not the nicest interface. Another build-in extension is the stream extension, so **fopen** can deal with URL's and requests like POST. A really good extension is the guzzle library, its available through composer, robust and easy to use.
+
+==== PHP consuming API with Curl Extension ====
+
+<code php>
+<?php
+
+// Init the request
+$curl = curl_init("https://api.github.com/users/lornajane-demo/gists");
+
+// set some options
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // echo is default :-(
+curl_setopt($curl, CURLOPT_HTTPHEADER, array("User-Agent: php-curl"));
+
+// make the request
+$response = curl_exec($curl);
+$info = curl_getinfo($curl);
+
+if($info['http_code'] == 200) {  // 203 redirect, 4xx, 5xx failure 
+  // echo $response;
+  // decode the response
+  $data = json_decode($response, true);
+  foreach($data as $gist) {
+    echo $gist['description'] . ": " . $gist['url'] . "\n";
+  }
+} else {
+  echo "Curl error: " . curl_error($curl);
+}
+
+curl_close($curl); // tidy up
+</code>
+**curl-gist.php**
+
+<code bash>
+php -f curl-gist.php
+</code>
+
+=== PHP Request authorisation with php-curl ===
+
+<code php>
+<?php
+
+// Include credentials from an external file
+include("githunb_access_token.php");
+$curl = curl_init("https://api.github.com/gists/9376b77a6994b48356f5/star");
+
+// set some options
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // echo is default :-(
+curl_setopt($curl, CURLOPT_HTTPHEADER, array("User-Agent: php-curl",
+                   "Authorization: token " . $gh_key,
+                   "Content-Length: 0"));  // no body needed
+curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+
+$response = curl_exec($curl); // make the request
+$info = curl_getinfo($curl);
+// ...
+</code>
+
+==== PHP consuming API with Streams Extension ====
+
+List of [[https://www.php.net/manual/en/context.php|streams kind]] from the [[https://www.php.net/manual/en/index.php|PHP Manual]]
+
+**GET Request**
+<code php>
+<?php
+//initialise the request
+$url = "https://api.github.com/users/lornajane-demo/gists");
+$options = array(
+  "http" => array(
+    "header" => array("User-Agent: php-curl")
+  ));
+    
+$response = file_get_contents($url, false, stream_context_create($options));
+
+if(false !== $response) { // check false, empty or look falsies
+  //echo $response;
+  //understanding the response;
+  $data = json_decode($response, true);
+  foreach($data as $gist) {
+    echo $gist['description'] . ": " . $gist['url'] . "\n";
+  }
+} else {
+  // all the meta data
+  print_r($http_response_header);
+}  
+</code>
+
+=== PHP Request authorisation with Stream ===
+
+<code php>
+<?php
+// include credientials from an external file
+include("github_access_token.php");
+
+$comment = json_encode(array("body" => "This is a great comment"));
+
+// initialize the request
+$url = "https://api.github.com/gists/bf6c595b6686d38f44ab/comments";
+$options = array(
+  "http" => array(
+    "header" => array("User-Agent: php-curl",
+      "Content-Type: application/json",
+      "Authorization: token " . $gh_key),
+    "method" => "POST",
+    "content" => $comment
+  ));
+  
+$response = file_get_contents($url, false, stream_context_create($options));
+
+// 201 expected and a redirect
+print_r($http_response_header);
+</code>
+
+<code bash>
+$ php -f stream-gist-comment.php
+</code>
+
+<code php>
+<?php
+include("github_access_token.php"); // include credentials from an external file
+
+$url = "https://api.github.com/gists/bf6c595b6686d38f44ab/star";
+$options = array(  // standard oauth header
+  "http" => array(
+    "header" => array("User-Agent: php-curl",
+       "Content-Length: 0", // no content send 
+       "Authorization: token " . $gh_key),
+    "method" => "PUT"
+  ));
+
+$response = file_get_contents($url, false, stream_context_create($options));
+
+// 204 expected so no response - empty rather than false
+//print_r($http_response_header);       
+</code>
+
+<code bash>
+$ php -f stream-gist-star.php
+</code>
+==== PHP consuming API with Guzzle Library ====
+
+Guzzle is a powerful Library for all HTTP from PHP, is the Swiss army knife. Guzzle has some great [[https://docs.guzzlephp.org/en/latest/|documentation]].
+
+<code php>
+<?php
+require "../vendor/autoload.php";
+
+$url = "https://api.github.com/users/lornajane-demo/gists";
+$client = new GuzzleHttp\Client();
+$response = $client->get($url);
+
+if($response->getStatusCode() == 200) {
+  $data = json_decode($response->getBody(), true);
+  foreach($data as $gist) {
+    echo $gist['description'] . ": " . $gist['url'] . "\n";
+  }
+} else {
+  echo $response->getBody();
+}
+</code>
+
+**Updating resource API**
+<code php>
+<?php
+
+require "../vendor/autoload.php";
+require "github_access_token.php"; // pull access creds from another file
+
+$url = "https://api.github.com/gists/bf6c595b6686d38f44ab/comments";
+$comment = json_encode(array("body" => "A comment is made here"));
+
+$client = new GuzzleHttp\Client();
+$request = $client->createRequest('POST', $url);
+$request->setHeader("Authorization", "token " . $gh_key);
+$request->setBody(\GuzzleHttp\Stream\Stream::factory($comment));
+$request = $client->send($request);
+
+echo $response->getStatusCode();
+</code>
+
+**As a PUT request**
+<code php>
+<?php
+
+require "../vendor/autoload.php";
+require "github_access_token.php"; // pull access creds from another file
+
+$url = "https://api.github.com/gists/bf6c595b6686d38f44ab/star";
+
+$client = new GuzzleHttp\Client();
+$request = $client->createRequest('PUT', $url);
+$request->setHeader("Authorization", "token " . $gh_key);
+$request->setHeader("Content-Length", "0");
+$request = $client->send($request);
+
+echo $response->getStatusCode();
+</code>
+
+<code bash>
+php -S localhost:8888
+curl "http://localhost:8888/server.php?a=44" -d b=6 -d c=33333
+</code>
+  * **curl -d** send data as POST
+
+===== PHP basic API Service =====
+
+**server.php**
+<code php>
+<?php
+echo "Host  : " . $_SERVER['HTTP_HOST'] . "\n";
+echo "URL   : " . $_SERVER['REQUEST_URI'] . "\n";
+echo "Method: " . $_SERVER['REQUEST_METHOD'] . "\n";
+echo "Accept: " . $_SERVER['HTT_ACCEPT'] . "\n";
+echo "Params: " . var_export($_GET, true) . " of the Query String \n";
+
+$body = file_get_contents("php://input"); var_dump($body);
+$vars = array();
+parse_str($body, $vars);
+echo "Fields POSTED to the body: " . var_export($vars, true) . "\n";
+</code>
+
+To do as a service
+  * Check the url
+  * Check the request (GET,POST, PUT, DELETE)
+  * Check headers

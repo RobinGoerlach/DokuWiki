@@ -1,0 +1,7 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:basics:|PHP Basics]]** -> **[[home:php:basics:ws:|Webserver]] ** -> **Laragon**
+
+====== Laragon ======
+
+**[[https://laragon.org/|Laragon]]** is a modern  replacement of [[home:php:ws:xampp:|XAMPP]]. It has more features and lets you quickly get up and running the same way XAMPP does, it's also much easier to switch between versions and has more features like 
+  * ngrok to sahre your local website
+You can not run multiple projects on different versions at the same time. Laragon is great and you should give it a try if your currently using XAMPP and don't want to use docker, which would be recommended to have the flexibility with working on different projects with different versions running at the same time and more power over configuration and dependencies, check [[laragon.org/docs/|Laragon Documentation]]

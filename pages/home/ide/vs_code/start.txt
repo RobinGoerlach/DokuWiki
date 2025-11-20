@@ -1,0 +1,25 @@
+**[[home:|Start]]** -> **[[home:ide:|IDE's]]** -> **VS Code**
+
+====== VS Code ======
+
+  * [[http://code.visualstudio.com|Visual Studio Code]] Download
+
+<code bash>
+mkdir ~/project && cd ~/project && touch index.php && code .
+</code>
+
+===== Erweiterungen =====
+
+==== PHP ====
+
+  * [[https://intelephense.com/|PHP Intelephense]] (Intelsense, Autocompletion, Parameter handling, ...)
+  * PHP DocBlocker add multible line comments after /** .. */
+ 
+
+  * PHP Extension (xdebug)
+  * Prettier
+
+===== Shortcuts =====
+
+  * cmd ~ öffnet das integrierte Terminal
+

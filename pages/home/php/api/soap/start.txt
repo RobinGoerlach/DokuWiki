@@ -1,0 +1,54 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:api:|PHP API]]** -> **PHP SOAP API**
+
+====== PHP SOAP API ======
+
+SOAP Services generate a strict format in XML for how the requests and response communicate, including the **soap fault** is a good spec for how the error information should be send back to the user. SOAP is not used often in PHP but in Enterprise technology stacks. There are tools to help publish and consume SOAP Services. WSDL (Web Service Description Language), spoken Wizzle, is the specification language for soap services.
+
+===== PHP build SOAP API =====
+
+<code php>
+<?php
+
+require "../api/Events.php";
+
+$options = array("uri" => "localhost:8080/server.php");  // handle GET events request & GET event by id
+$server  = new SoapServer(null, $options);
+$server->setClass('Events');
+$server->handle();
+</code>
+
+===== Web Service Description Language =====
+
+The wsdl language is a machine readable specification for which service is available, which parameters should be send, what data types should be send and the return parameter and type. Remember different languages have different data types, so publishing and consuming in different languages  can be a bit complicated. To generate a wsdl file use **php2wsdl**. PHPStorm or PHP-Eclipse have a button to generate the wsdl file, like many other IDE's.
+
+**composer.json**
+<code json>
+{
+  "require": {
+    "php2wsdl/php2wsdl": "dev-master"
+  }
+}
+</code>
+
+**Hind**: If you read a wsdl file read it from the end, there is service name and specification.
+
+<code php>
+<?php
+require "vendor/autoload.php";
+require "../..api/Events.php"; // the class we want to publish
+
+$gen = new \PHP2WSDL\PHPClass2WSDL("Events", "http://localhost:8080/wsdl");
+$gen_>generateWSDL();
+
+echo $gen->dump();
+</code>
+**generate.php**
+
+===== PHP consuming a SOAP Service =====
+
+<code php>
+<?php
+$client = new SoapClient(null, array("uri" => "http://localhost:8080/mysoap.php", "location" => "http://localhost:8080/mysoap.php"));
+$response = $client->getEvents();
+print_r($response);
+</code>

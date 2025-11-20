@@ -1,0 +1,546 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:test:|PHP Unit testing]]** -> **PHP Unit**
+
+====== PHPUnit ======
+
+  * [[https://www.linkedin.com/learning/php-test-driven-development-with-phpunit/welcome|PHP: Test-Driven Development with PHPUnit]]
+
+[[https://phpunit.de/|PHPUnit]] is the **de-facto standard testing framework for PHP**.
+It provides assertions, mocks, coverage integration, and CLI tooling for reliable, automated unit and integration tests.
+
+  * [[home:php:test:pest:|Pest]] — Alternative test runner
+
+**Tip**: PHPUnit tests are written as classes extending PHPUnit\Framework\TestCase.
+Each test method should verify one specific behavior.
+
+===== Installation =====
+
+Install PHPUnit locally with Composer (recommended):
+<code bash>
+$ composer require --dev phpunit/phpunit 
+</code>
+
+You can also install globally using Phive:
+<code bash>
+$ phive install phpunit 
+</code>
+
+Check version:
+<code bash>
+$ vendor/bin/phpunit --version 
+</code>
+
+===== Project Layout =====
+^ Path ^ Purpose ^
+| **src/** | Application code |
+| **tests/** | Test classes (unit/integration) |
+| **phpunit.xml.dist** | Default PHPUnit configuration |
+| **vendor/** | Composer dependencies |
+| **bootstrap.php** | Optional autoloader/environment setup |
+
+> Commit //phpunit.xml.dist// to version control and let developers copy it to //phpunit.xml// for local overrides.
+
+===== Example =====
+
+Code under test: src/Calculator.php
+<code php> 
+<?php 
+declare(strict_types=1);
+
+namespace App;
+
+final class Calculator {
+  public function add(int $a, int $b): int {
+    return $a + $b;
+  }
+}
+</code>
+
+Test: tests/unit/CalculatorTest.php
+<code php> 
+<?php 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
+use App\Calculator;
+
+final class CalculatorTest extends TestCase
+{
+  /** @test */
+  public function test_add_adds_two_integers(): void {
+    $calc = new Calculator();
+    $this->assertSame(5, $calc->add(2, 3));
+  }
+}
+</code>
+
+Run the tests:
+<code bash> 
+$ vendor/bin/phpunit 
+</code>
+
+<code text>
+/** @test */ the annotation tells PHPUnit this is a test method not a normal method
+public function test_add_adds_two_integers(): void { the test_ tells PHPUnit this is a test method 
+</code>
+You can choose which way you go to mark a test method.
+
+=== PHPUnit Assertions, Expectations, and Other Test Methods ===
+
+PHPUnit provides several groups of methods to help you write clean, structured, and reliable tests.
+
+The main categories are:
+
+  * **Assertions (`assert*`)** – Check that a condition holds true.
+  * **Expectations (`expect*`)** – Define expected behavior (e.g., exceptions or output).
+  * **Helper & Lifecycle Methods** – Prepare and clean up test environments.
+
+==== Assert Methods ====
+
+^ Method ^ Description ^
+| **assertTrue($condition)** | Checks that the condition is true. |
+| **assertFalse($condition)** | Checks that the condition is false. |
+| **assertNull($value)** | Checks that the value is `null`. |
+| **assertNotNull($value)** | Checks that the value is **not** `null`. |
+| **assertEmpty($value)** | Checks that the value is empty (`[], '', null, 0`, etc.). |
+| **assertNotEmpty($value)** | Checks that the value is **not** empty. |
+| **assertEquals($expected, $actual)** | Compares two values for equality (not identical, `==`). |
+| **assertSame($expected, $actual)** | Checks for strict equality (`===`). |
+| **assertNotEquals($expected, $actual)** | Checks that two values are **not** equal. |
+| **assertNotSame($expected, $actual)** | Checks that two values are **not** identical. |
+| **assertInstanceOf($class, $object)** | Checks that an object is an instance of a class. |
+| **assertNotInstanceOf($class, $object)** | Checks that an object is **not** an instance of a class. |
+| **assertContains($needle, $haystack)** | Checks that a value exists in an array or string. |
+| **assertNotContains($needle, $haystack)** | Checks that a value does **not** exist in an array or string. |
+| **assertCount($expectedCount, $array)** | Checks that an array has a specific length. |
+| **assertGreaterThan($expected, $actual)** | Checks that `$actual` is greater than `$expected`. |
+| **assertLessThan($expected, $actual)** | Checks that `$actual` is less than `$expected`. |
+| **assertStringContainsString($needle, $haystack)** | Checks that a string contains a substring. |
+| **assertStringStartsWith($prefix, $string)** | Checks that a string starts with a prefix. |
+| **assertStringEndsWith($suffix, $string)** | Checks that a string ends with a suffix. |
+| **assertFileExists($filename)** | Checks that a file exists. |
+| **assertFileDoesNotExist($filename)** | Checks that a file does **not** exist. |
+| **assertJson($string)** | Checks that a string is valid JSON. |
+| **assertMatchesRegularExpression($pattern, $string)** | Checks that a regex matches the string. |
+
+==== Expect Methods ====
+
+^ Method ^ Description ^
+| **expectException($class)** | Expects a specific exception to be thrown. |
+| **expectExceptionMessage($message)** | Expects a specific exception message. |
+| **expectExceptionCode($code)** | Expects a specific exception code. |
+| **expectOutputString($string)** | Expects a specific output (`echo`, `print`). |
+| **expectOutputRegex($pattern)** | Expects output that matches a regex pattern. |
+
+**Example:**
+<code php>
+$this->expectException(InvalidArgumentException::class);
+$this->expectExceptionMessage('Invalid user ID');
+</code>
+
+==== Other Useful Methods and Hooks ====
+
+^ Method ^ Description ^
+| **setUp(): void** | Runs before each test – used for initialization. |
+| **tearDown(): void** | Runs after each test – used for cleanup. |
+| **setUpBeforeClass(): void** | Runs once per test class before all tests. |
+| **tearDownAfterClass(): void** | Runs once per test class after all tests. |
+| **markTestSkipped($reason)** | Marks a test as skipped. |
+| **markTestIncomplete($reason)** | Marks a test as incomplete. |
+| **@dataProvider** | Provides test data to a test method (declared with annotation). |
+
+==== Category Overview ====
+
+^ Category ^ Purpose ^ Example ^
+| Assertions | Verify conditions | assertEquals(5, $result) |
+| Expectations | Define expected behavior (exceptions, output) | $this->expectException(...) |
+| Lifecycle Hooks | Setup and cleanup | setUp(), tearDown() |
+| Data Provider | Supply test data | @dataProvider provideValues |
+
+==== Tips on Tests ====
+
+Combine setUp() and tearDown() with assertions to make your tests clean, isolated, and repeatable.
+For example, prepare a database connection in setUp() and close it in tearDown().
+
+==== PHPUnit Command Line Options ====
+
+Below is a list of commonly used PHPUnit CLI options.  
+Use **./vendor/bin/phpunit [options] [tests]** to run your tests.
+
+==== Basic Options ====
+
+^ Option ^ Description ^
+| **--version** | Displays the PHPUnit version. |
+| **--help** | Shows all available command line options. |
+| **--list-groups** | Lists all defined test groups. |
+| **--list-tests** | Lists all discovered test methods. |
+| **--list-tests-xml <file>** | Saves the list of tests to an XML file. |
+| **--bootstrap <file>** | Loads a PHP file before running the tests (e.g. for autoload or setup). |
+| **--configuration <file>** | Specifies a custom PHPUnit configuration file (default: `phpunit.xml` or `.dist`). |
+| **--no-configuration** | Runs tests without loading any configuration file. |
+
+==== Running and Filtering Tests ====
+
+^ Option ^ Description ^
+| **--filter <pattern>** | Runs only tests whose name matches the given regex or substring. |
+| **--group <name>** | Runs only tests that belong to one or more specified groups. |
+| **--exclude-group <name>** | Excludes tests belonging to the given group(s). |
+| **--testsuite <name>** | Runs only a specific test suite defined in the configuration. |
+| **--repeat <n>** | Runs the test suite *n* times (useful for flaky tests). |
+| **--stop-on-failure** | Stops execution upon the first failed test. |
+| **--stop-on-error** | Stops upon the first error (not just failure). |
+| **--stop-on-warning** | Stops upon the first warning. |
+| **--stop-on-risky** | Stops upon the first risky test. |
+| **--stop-on-skipped** | Stops upon the first skipped test. |
+| **--stop-on-incomplete** | Stops upon the first incomplete test. |
+
+==== Output and Reporting ====
+
+^ Option ^ Description ^
+| **--colors=always|never|auto** | Enables, disables, or auto-detects colored output. |
+| **--verbose** | Increases verbosity level (shows more details). |
+| **--display-deprecations** | Displays deprecation warnings. |
+| **--display-errors** | Displays PHP errors that occur during testing. |
+| **--display-warnings** | Displays PHPUnit warnings. |
+| **--order-by=<order>** | Defines test execution order (`default`, `defects`, `random`, `duration`, etc.). |
+| **--reverse-list** | Reverses the test execution order. |
+| **--fail-on-warning** | Marks the run as failed if warnings occur. |
+| **--fail-on-risky** | Marks the run as failed if risky tests are detected. |
+| **--fail-on-incomplete** | Marks the run as failed if there are incomplete tests. |
+| **--fail-on-skipped** | Marks the run as failed if there are skipped tests. |
+
+==== Generating Reports ====
+
+^ Option ^ Description ^
+| **--log-junit <file>** | Writes results in JUnit XML format (used by CI tools). |
+| **--testdox-text <file>** | Creates a plain text report in TestDox format. |
+| **--testdox-html <file>** | Creates an HTML TestDox report. |
+| **--testdox-xml <file>** | Creates an XML TestDox report. |
+| **--coverage-html <dir>** | Generates an HTML code coverage report in the specified directory. |
+| **--coverage-clover <file>** | Generates a Clover XML coverage report (useful for CI). |
+| **--coverage-text** | Displays coverage summary in the console. |
+| **--coverage-php <file>** | Exports raw coverage data as a PHP file. |
+
+==== Miscellaneous ====
+
+^ Option ^ Description ^
+| **--debug** | Displays debugging information during test execution. |
+| **--dont-report-useless-tests** | Suppresses warnings for tests without assertions. |
+| **--extensions <ext>** | Loads PHPUnit extensions. |
+| **--process-isolation** | Runs each test in a separate PHP process. |
+| **--random-order-seed <n>** | Specifies a seed value for random test order (useful for reproducibility). |
+| **--cache-result** | Enables caching of test results. |
+| **--no-coverage** | Disables code coverage collection. |
+
+==== Tip ====
+
+You can combine multiple options.  
+Example:
+
+<code bash>
+./vendor/bin/phpunit --filter "DatabaseTest" --colors=always --stop-on-failure
+</code>
+This command runs only tests matching DatabaseTest, uses colored output, and stops on the first failure.
+===== Configuration =====
+
+The phpunit.xml configuration file or phpunit.xml.dist is stored in the project root
+<code xml> 
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="true"
+         bootstrap="vendor/autoload.php"
+         failOnRisky="true"
+         failOnWarning="true"
+         convertDeprecationsToExceptions="true"
+         cacheResultFile=".phpunit.cache/test-results"
+
+  <testsuites> 
+    <testsuite name="Unit"> 
+      <directory>tests/unit</directory> 
+    </testsuite> 
+  </testsuites> 
+  <coverage includeUncoveredFiles="true"> 
+    <include> 
+      <directory>
+        src
+      </directory> 
+    </include> 
+    <report> 
+      <html outputDirectory="build/coverage"/> 
+      <text outputFile="php://stdout" showUncoveredFiles="false"/> 
+    </report> 
+  </coverage> 
+</phpunit> 
+</code>
+
+Run with coverage:
+<code bash>
+$ vendor/bin/phpunit --coverage-html build/coverage 
+</code>
+
+> Open build/coverage/index.html in your browser for a visual report.
+
+===== Code Coverage =====
+
+Enable Xdebug or PCOV for coverage reporting:
+<code bash> 
+php -m | grep xdebug 
+</code>
+
+Common options:
+<code bash>
+vendor/bin/phpunit --coverage-text
+vendor/bin/phpunit --coverage-html build/coverage
+</code>
+
+> Coverage helps identify untested code paths — aim for meaningful tests, not 100 %.
+
+===== Test Doubles (Mocks & Stubs) =====
+
+Use PHPUnit’s built-in mocking API to isolate dependencies:
+
+<code php> $repo = $this->createMock(UserRepository::class); $repo->method('find')->willReturn($user); </code>
+
+Or set expectations:
+
+<code php> $service = $this->createMock(MailService::class); $service->expects($this->once())->method('send')->with('test@example.com'); </code>
+
+For more complex scenarios, external libraries like **Mockery** may be used.
+
+===== Continuous Integration (GitHub Actions) =====
+
+<code yaml> name: PHPUnit Tests
+
+on: [push, pull_request]
+
+jobs:
+phpunit:
+runs-on: ubuntu-latest
+strategy:
+matrix:
+php: ['8.2', '8.3']
+steps:
+  - uses: actions/checkout@v4
+
+  - uses: shivammathur/setup-php@v2
+    with:
+      php-version: ${{ matrix.php }}
+      coverage: xdebug
+      tools: composer
+
+  - name: Install dependencies
+    run: composer install --no-interaction --prefer-dist
+
+  - name: Run PHPUnit tests
+    run: vendor/bin/phpunit --coverage-text
+</code>
+
+**Explanation**:
+  * Automatically runs on each push and pull request.
+  * Tests multiple PHP versions (8.2, 8.3).
+  * Generates coverage output using Xdebug.
+  * Ensures consistent quality checks before merging.
+
+===== Best Practices =====
+
+  * Follow **AAA pattern** (Arrange–Act–Assert), alternatively use Given-When-Then 
+  * Use **assertSame()** for strict comparisons.
+  * Avoid hidden dependencies (DB, filesystem, HTTP).
+  * Keep test data local and deterministic.
+  * Run PHPUnit locally and in CI for fast feedback.
+
+===== Troubleshooting =====
+
+^ Problem ^ Likely Cause ^ Fix ^
+| Tests not running | Autoload missing | Include vendor/autoload.php in config |
+| No coverage output | Xdebug/PCOV disabled | Enable in php.ini or via PECL |
+| Class not found | Namespace mismatch | Check PSR-4 configuration |
+| Flaky tests | Shared state or I/O | Mock external resources |
+
+==== How to write good tests ====
+
+=== Strategy: How to cover all methods and cases ===
+
+Use a layered approach that combines *specification*, *systematic test design*, and *tooling*:
+
+  - **Define the contract per method** (inputs, outputs, side effects, invariants, exceptions).
+  - **Design a test matrix** (happy path, edges, invalid input, error handling).
+  - **Automate completeness** with coverage (line + branch), mutation testing, and CI gates.
+  - **Keep tests maintainable** with data providers, fixtures, and mocks/stubs.
+
+==== 1) Specify each method’s contract (short) ====
+For every public method, note:
+  * Accepted input domains (types, ranges, nullability)
+  * Output / return type and postconditions
+  * Side effects (DB writes, IO, logs) and interactions
+  * Error behaviour (which exceptions when, messages/codes)
+
+This becomes your checklist for tests.
+
+==== 2) Create a Test Matrix per method ====
+Use equivalence classes + boundary analysis. Start with this minimal grid:
+
+^ Case Type ^ Example(s) ^ Expected Outcome ^
+| Happy Path | Typical valid input | Correct result, no exception |
+| Boundaries | Min/Max, empty string, zero, 1 element, large sizes, locale quirks | Result correct, no exception |
+| Invalid Types/Values | null, wrong type, negative where not allowed | Specific exception thrown |
+| Preconditions Violated | Missing dependency, not initialized state | Specific exception or guard |
+| Side Effects | Writes to DB/FS, emits event | Interaction verified (mock) |
+| Concurrency/Order | Re-entrancy, double-call | Stable behavior or guarded |
+| Security/Robustness | Injection-like input, huge payload | Safe handling, limits, exception |
+
+**Tip**: Keep a small wiki page per class with one matrix per method.
+
+==== 3) Turn the matrix into tests with Data Providers ====
+Use data providers to cover many variants concisely.
+
+**Example (PHPUnit):**
+<code php>
+#[DataProvider('validInputs')]
+public function testCalculate_valid($input, $expected)
+{
+    $this->assertSame($expected, $this->svc->calculate($input));
+}
+
+public static function validInputs(): array
+{
+    return [
+        'simple'      => [[1,2,3], 6],
+        'empty'       => [[], 0],
+        'large'       => [range(1, 1000), 500500],
+    ];
+}
+</code>
+
+**Failure/exception path:**
+<code php>
+public function testCalculate_throwsOnNegative()
+{
+    $this->expectException(InvalidArgumentException::class);
+    $this->expectExceptionMessage('negative not allowed');
+    $this->svc->calculate([-1]);
+}
+</code>
+
+==== 4) Verify interactions with test doubles ====
+Mock collaborators to assert side effects and isolation.
+<code php>
+$repo = $this->createMock(UserRepository::class);
+$repo->expects($this->once())->method('save')->with($this->isInstanceOf(User::class));
+$svc = new UserService($repo);
+
+$svc->register('alice@example.com');
+</code>
+
+==== 5) Enforce completeness with coverage (line + branch) ====
+Run coverage locally (Xdebug or PCOV):
+
+<code bash>
+$ ./vendor/bin/phpunit --coverage-html build/coverage
+</code>
+
+In phpunit.xml enable branch coverage and include paths:
+<code xml>
+<phpunit colors="true">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory>app</directory>
+      <directory>src</directory>
+    </include>
+    <report>
+      <html outputDirectory="build/coverage"/>
+    </report>
+  </coverage>
+</phpunit>
+</code>
+
+Targets: Line ≥ 90%, Branch ≥ 80% (adjust to your risk appetite).
+Remember: Coverage shows what ran, not that logic is correct → see mutation testing.
+
+==== 6) Mutation Testing (catches weak assertions) ====
+Use a mutator (e.g., Infection) to ensure your tests fail when code is subtly changed.
+
+<code bash>
+$ composer require --dev infection/infection
+$ vendor/bin/infection --min-msi=80 --min-covered-msi=80
+</code>
+
+If MSI drops, add/strengthen tests.
+
+==== 7) Property-based tests for tricky logic ====
+For algorithms/validators, generate many inputs (e.g., Eris library) to discover edge cases automatically.
+
+==== 8) CI gates to keep quality steady ====
+In CI:
+  * Run unit tests with --fail-on-warning and --stop-on-failure for fast feedback.
+  * Publish coverage artifact, fail build if below thresholds.
+  * Run mutation tests nightly or on main branch.
+
+==== 9) Ready-to-use checklist (copy/paste) ====
+
+^ Item ^ Done? ^
+| Contract documented (input/output/errors) | |
+| Happy path covered | |
+| Boundary cases covered (min/max/empty/zero/1-item/large) | |
+| Invalid inputs raise correct exceptions (type/value/null) | |
+| Preconditions/illegal state handled (guards) | |
+| Side effects verified (mocks/stubs) | |
+| Error messages/codes asserted (not only class) | |
+| Branch coverage ≥ target | |
+| Mutation score ≥ target | |
+| Data provider used where multiple variants | |
+| Negative tests present for every public method | |
+
+==== 10) Small example tying it together ====
+
+**Method contract (summary):**
+  * parseIsoDate(string $s): DateTimeImmutable
+  * Accepts YYYY-MM-DD
+  * Throws InvalidArgumentException on invalid format or impossible dates
+
+Tests (sketch):
+<code php>
+#[DataProvider('validDates')]
+public function testParseIsoDate_valid($s, $y, $m, $d)
+{
+    $dt = $this->svc->parseIsoDate($s);
+    $this->assertSame($y, (int)$dt->format('Y'));
+    $this->assertSame($m, (int)$dt->format('m'));
+    $this->assertSame($d, (int)$dt->format('d'));
+}
+
+public static function validDates(): array
+{
+    return [
+        ['2025-01-01', 2025, 1, 1],     // boundary: year start
+        ['2024-02-29', 2024, 2, 29],    // leap day
+    ];
+}
+
+public function testParseIsoDate_invalidFormat()
+{
+    $this->expectException(InvalidArgumentException::class);
+    $this->expectExceptionMessage('invalid ISO date');
+    $this->svc->parseIsoDate('01/02/2025');
+}
+
+public function testParseIsoDate_impossibleDate()
+{
+    $this->expectException(InvalidArgumentException::class);
+    $this->svc->parseIsoDate('2025-02-30');
+}
+</code>
+
+==== TL;DR ====
+
+  * Write a test matrix per method (happy, boundary, invalid, state, side effects).
+  * Use data providers for breadth; expectations for error paths.
+  * Enforce completeness with branch coverage + mutation testing.
+  * Automate via CI gates so the bar stays high.
+
+===== Related Topics =====
+
+  * [[home:php:test:pest:|Pest]] – Simpler, expressive syntax on top of PHPUnit
+  * [[home:php:test:overview:|PHP Unit tests]] – General concepts and best practices
+  * [[home:php:pkg:composer|Composer]] – Dependency management
+  * [[home:php:automation:build-tools:|Build Automation]] – CI/CD pipelines
+

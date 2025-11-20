@@ -1,0 +1,499 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP Database Integration**
+
+====== PHP Database Integration ======
+
+  * A database allows you to collect, store, manage and retrieve data. It is a way to organize data so that it is easy to find and easy to update
+  * There are different types of database systems such as relational database systems and NoSQL database systems.
+  * SQL (Structured Query Language) is used to make queries to a relational database.
+
+===== PDO (PHP Data Objects) =====
+  * PDO is a object-oriented build-in extension that gives us an abstraction layer to connect and query our SQL database
+  * It presents a consistent interface so you can switch from MySQL to PostgreSQL and only change a few options
+  * PDO makes your app secure as it uses "prepared statements"
+  * PDO replaces the deprecated ways like MySQL connect 
+
+==== PDO Class ====
+
+The constructor takes a DSN (Data Source Name). 
+
+**For MySQL**:
+<code php>
+$db = new PDO('mysql:host=localhost;dbname=films','username','password');
+</code>
+
+**For SQLite**:
+<code php>
+$db = new PDO('sqlite:db.sqlite');
+</code>
+
+==== Selecting Data with PDO ====
+
+Making Queries
+  * **PDO::query** prepares and runs the SQL query
+  * Prepared statements gives MySQL information about where the variable data is for greater security
+  * For repeating queries, the preparation steps improves performance on subsequent runs
+
+<code php>
+<?php
+$sql = 'select * from country';
+$stmt = $db_>query($sql);
+while(($row = $stmt->fetch()) !== false) {
+  echo $row['country'] . "\n";
+}
+</code>
+Based on [https://dev.mysql.com/doc/sakila/en/|MySQL Sakila Sample Database]]
+
+Running queries with variables as prepared statements
+<code php>
+<?php
+$sql = 'select * from film where title = ? and language_id = ?'; // ? is placeholder for variable data 
+$stmt = $db->prepare($sql);
+$stmt->execute(array('ANTITRUST TOMATOS', 1));
+$stmt->setFetchMode(PDO::FETCH_ASSOC);  // return as associative array
+while(($row = $stmt->fetch()) !== false) {
+  print_r($row);
+}
+</code>
+
+Prepared statements in a cleaner way
+<code php>
+<?php
+$sql = 'select * from film where title = :film and language_id = :lang'; // ? is placeholder for variable data 
+$stmt = $db->prepare($sql);
+$stmt->execute(array(
+  ":film" => 'ANTITRUST TOMATOS', 
+  ":lang" => 1));
+$stmt->setFetchMode(PDO::FETCH_ASSOC);  // return as associative array
+while(($row = $stmt->fetch()) !== false) {
+  print_r($row);
+}
+</code>
+
+Prepared statements with bind variables
+<code php>
+<?php
+$sql = 'select * from film where title = :film and language_id = :lang'; // ? is placeholder for variable data 
+$stmt = $db->prepare($sql);
+$stmt->bindValue(":film", 'ANTITRUST TOMATOS',);
+$stmt->bindValue(":lang", 1));
+$stmt->setFetchMode(PDO::FETCH_ASSOC);  // return as associative array
+$stmt-execute();
+while(($row = $stmt->fetch()) !== false) {
+  print_r($row);
+}
+
+$stmt->bindValue(":film", 'DINASOURCE ACADEMY',);
+$stmt-execute();
+while(($row = $stmt->fetch()) !== false) {
+  print_r($row);
+}
+</code>
+
+==== Not Select Queries with PDO ====
+
+<code php>
+<?php
+$sql = 'update filme set title = :new_title where title = :title';
+$stmt = $db->prepare($sql);
+$stmt->execute(array(
+  ":new_title" => 'Shreck',
+  ":title"     => 'ANTITRUST TOMATOES'));
+echo $stmt->rowCount() . " rows affected\n"; 
+</code>
+
+==== Error Handling with PDO ====
+
+By default, you get neither errors nor Exceptions, check the value of **PDOStatement::errorCode()** - non-zero values indicate a problem.
+<code php>
+<?php
+$sql = 'update filme set title = :new_title where title = :title';
+$stmt = $db->prepare($sql);
+$stmt->execute(array(
+  ":new_title" => 'Shreck',
+  ":title"     => 'ANTITRUST TOMATOES'));
+if($stmt->errorCode() == 0) {
+    echo $stmt->rowCount() . " rows affected\n"; 
+} else {
+    $errors = $stmt->errorInfo();
+    echo($errors[2]);
+}    
+</code>
+
+Set Error Mode to **throw exception**
+<code php>
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+</code>
+===== Database tooling =====
+
+There are differnt types of software to directly manage your database. MySQL has a CLI, but you can also use GUI programms. Here are some common ones for MySQL/MariaDB:
+
+**Free**
+  * PHPMyAdmin
+  * MySQL Workbench (only MySQL and MariaDB)
+  * DBeaver
+  * HeidiSQL
+  * SQL Developer (Oracle only)
+**Commercial**
+  * DataGrip
+  * Navicat
+  * Sequel Pro
+  * TablePlus
+
+===== Using a Database =====
+
+**MySQL CLI**
+<code bash>
+mysql -u root -p
+</code>
+
+  * SHOW DATABASES;
+  * CREATE DATABASE blog;
+  * CREATE USER 'adm_blog'@'localhost' IDENTIFIED BY '123456';
+  * GRANT ALL PRIVILEGES ON * . * TO 'adm_blog'@'localhost';
+  * SHOW GRANTS FOR 'adm_blog'@'localhost';
+  * REVOKE ALL PRIVILEGE GRANT OPTION FROM 'adm_blog'@'localhost';
+  * DROP USER 'adm_blog'@'localhost';
+  * USE blog;
+  * SHOW TABLES;
+
+<code sql>
+CREATE TABLE posts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  body TEXTNOT NULL,
+  created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO posts (title, body) VALUES ('Post one', 'This is post one');
+
+SELECT * FROM posts WHERE id = 1;
+
+UPDATE posts SET body = 'This is an updated post' WEHRE id = 1;
+
+DELETE FROM posts WHERE id = 1;
+
+DROP TABLE posts;
+DROP DATABASE blog;
+</code>
+
+==== Connect with PDO ====
+
+<code php>
+$dbDriver ='mysql';
+$dbHost   = 'localhost';
+$dbPort   = 3306;
+$dbName   = 'blog';
+$dbUser   = 'adm_blog';
+$dbPasswd = '123456';
+
+$dsn="{$dbDriver}:host={$dbHost};port={$dbPort};charset=utf-8";
+$pdo = new PDO($dsn, $dbUser, $dbPasswd);
+try {
+  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Throw exception on errors 
+  $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE,PDO::FETCH_ASSOC);  // Fetch results as associative array
+  echo 'Database connected ...';
+} catch(PDOException $e) {
+  echo 'Connection failed: ' . $e->getMessage();
+}
+</code>
+
+==== Prepared Statement ====
+
+=== Search Data ===
+<code php>
+require 'database-php';
+
+$stmt = $pdo->prepate('SELECT * FROM posts'); // Prepare statement
+$stmt->execute();                              // Execute statement
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);  // Fetch results as associative array or set as $pdo
+
+echo '<pre>';  var_dump($results); echo '</pre>';
+</code>
+
+**Get a single database entry**
+<code php>
+<div class="p-4">
+  <h2 class="text-xl font-semibold"><a href="post.php?id=<?= $post['id'] ?>"><?= $post['title'] ?></a></h2>
+  <p class="text-gray-700 text-lg mt-2"><?= $post['body'] ?></p>
+</div>  
+</code>
+
+**Display single dataset**
+<code php>
+<?php
+  require 'database-php';
+
+  $id = $_GET['id'] ?? null;  //echo $id;
+  if (!id) { // No id given
+    header('Location: index.php'); 
+    exit;
+  }
+  
+  //$sql = 'SELECT * FROM posts WHERE id = ' .$id; // No No extremely dangerous
+  $sql = 'SELECT * FROM posts WHERE id = :id';
+  $params = ['id' => $id];
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);  //$stmt->execute(['id' => $id]);
+  $post = $stmt->fetch();
+?>
+
+...
+  <title><?= $post['title']; ?></title>
+</head>
+
+... 
+
+<div class="p-4">
+  <h2 class="text-xl font-semibold"><?= $post['title'] ?></h2>
+  <p class="text-gray-700 text-lg mt-2"><?= $post['body'] ?></p>
+</div>  
+</code>
+
+=== Insert Data ===
+
+Data send from HTML form with POST
+<code php>
+<?php
+require 'database-php';
+
+if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+  $title = htmlspecialchars($_POST['title']); // TODO: validation
+  $body  = htmlspecialchars($_POST['body']);  // TODO: validation
+  // echo $title . '<br>' . $body;
+  
+  $sql = 'INSERT INTO post (title, body) VALUES (:title, :body)';
+  $params = [
+    'title' => $title,
+    'body' => $body
+  ];
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+  header('Location: index.php');
+  exit;
+}
+</code>
+
+=== Delete Data ===
+
+<code php>
+<!-- Delete Form -->
+<form action="delete.php methode="post">
+  <input type="hidden" name="_method" value="delete">
+  <input type="hidden" name="id" value="<?= $post['id'] ?>">
+  <button type="submit" name="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none w-full">Delete</button>
+</form>  
+</code>
+
+**delete.php**
+<code php>
+<?php
+require 'database.php';
+
+$isDeleteRequest = $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_method'] ?? '' === 'delete');
+if ($isDeleteRequest) {
+  $id = $_POST['id'];
+  $sql = 'DELETE FROM posts WHERE id = :id';
+  $params = ['id' => $id];
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute($params);
+}
+
+header('Location: index.php');
+exit;
+?>
+</code>
+
+=== Edit/Updata Data ===
+
+<code php>
+<a href="edit.php?id=<?= $post['id'] ?>" class="bg-green-500 text-white px-4 py-2 rounded block w-full text-center mb-4 hover:bg-green-600 focus:online-none">Edit</a>
+</code>
+
+**post.php**
+<code php>
+<?php
+// View a single blog post
+
+require 'database.php';
+
+$id=$_GET['id'] ?? null;
+if (!id) {
+  header('Location: index.php');
+  exit;
+}  
+$sql='SELECT * FROM posts WHERE id = :id';
+$param=['id' => $id];
+$stmt=$pdo->prepare($sql);
+$stmt->execute($params);
+$post=$stmt->fetch();
+
+?>
+...
+  <div class="p-4">
+    <h2 class="text-xl font-semibold"><?= post['title'] ?></h2>
+    <p class="text-gray-700 text-lg mt-2 mb-5"><?= post['body'] ?></p>
+  </div>  
+  <div class="flex items-center justify-between">
+    <a href="index.php" class="text-blue-500 hover:underline">Back ...</a>
+  </div>
+
+<!-- Edit Button -->
+<form method="post"> <!-- action="update.php"> -->
+  <input type="hidden" name="_method" value="put">
+  <input type="hidden" name="id" value="<?= post['id'] ?>">
+</form>
+<!-- Delete Button -->
+<form method="post" action="delete.php">
+...
+</code>
+
+
+**edit.php**
+<code php>
+<?php
+require 'database.php';
+
+$id=$_GET['id'] ?? null;
+if (!id) {
+  header('Location: index.php');
+  exit;
+}  
+$sql='SELECT * FROM posts WHERE id = :id';
+$param=['id' => $id];
+$stmt=$pdo->prepare($sql);
+$stmt->execute($params);
+$post=$stmt->fetch();
+
+// Check for form submit
+$isPutRequest $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['_Method'] ?? '') === 'put';
+if($isPutRequest) {
+  $title=htmlspecialchars($_POST['title'] ?? '');
+  $body=htmlspecialchars($_POST['body'] ?? '');
+  
+  $sql='UPDATE posts SET title = :title, body=:body WHERE id=:id';
+  $params=[
+    'title' => $title,
+    'body' => $body,
+    'id' => $id
+  ];
+  $stmt=$pdo->prepare($sql);
+  $stmt->execute($params); 
+  header('Location: index.php');
+  exit;
+}
+?>
+...
+<form method="post">
+  <div class="mb-4">
+    <label for="title" class="block text-gray-700 font-medium">Title</label>
+    <input type="text" id="title" name="title" placeholder="Enter blog title" class="w-full px-4 py-2 border rounde focus:ring focus:ring-blue-300 focus:outline-none" value="<?= $post['title'] ?>">
+  </div>
+  <div class="mb-6">
+    <label for="body" class="block text-gray-700 font-medium">Body</label>
+    <textarea id="body" name="body" placeholder="Enter blog message" class=w-full px-4 py-2 border rounded focus:ring focus:ring-blue-300 focus:outline-none"><?= $post['body'] ?></textarea>
+  </div>  
+  <div class="flex items-center justify-between">
+    <button type="submit" name="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none">Submit</button>
+    <a href="index.php" class="text-blue-500 hover:underline">Back ...</a>
+  </div>
+</form>
+<!-- Edit Button -->
+<form method="post"> <!-- action="update.php"> -->
+  <input type="hidden" name="_method" value="put">
+  <input type="hidden" name="id" value="<?= post['id'] ?>">
+</form>
+<!-- Delete Button -->
+<form method="post" action="delete.php">
+...
+</code>
+
+===== OOP Database usage =====
+
+**Database.php**
+<code php>
+<?php
+
+class Database {
+  public $conn;
+  
+  /**
+   * Constructor
+   * @param array $config
+   */ 
+  public function __construct($config) {
+    $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={config['dbname']}";
+    $options = [
+      PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+      PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC // $listing['title'] or PDO::FETCH_OBJ $listing->title 
+    ];
+    
+    try {
+      $this->conn = new PDO($dsn, $config['username'], $config['password'], $options);
+      // echo 'Database connected';
+    } catch (PDOException $e) {
+      throw new Exception("Database connection failed: {$e->getMessage()}");
+    }  
+  }
+  
+  /**
+   * Query the Database
+   * @param string $query
+   * @return PDOStatement
+   * @throws PDOException
+   */
+  public function query($query, $params = []) {
+    try {
+      $sth = $this->conn->prepare($query);
+      
+      // Bind named params as an associative array
+      foreach($params as $param => $value){
+        $sth->bindValue(':' . $param, $value);
+      }
+      
+      $sth->execute();
+      return $sth;
+    } catch (PDOException $e) {
+      throw new Exception("Query failed to execute: {$e->getMessage()}");
+    }
+  } 
+}
+</code>
+
+**config/db.php**
+<code php>
+<?php
+return [
+  'host' => 'localhost',
+  'port' => 3306,
+  'dbname' => 'workopia',
+  'username' => 'brad',
+  'password' => '123456'
+];
+</code>
+
+**public/index.php**
+<code php>
+<?php
+require '../helpers.php';
+
+require basePath('Database.php');
+$config = basePath('config/db.php');
+$db = new Database($config);
+</code>
+
+**model/user.php**
+<code php>
+<?php
+$config = require basePath('config/db.php');
+$db = new Database($config);
+$users = $->query('SELECT * FROM users')->fetchAll(); // inspect($users);
+
+</code>
+
+**controllers/home.controller.php**
+<code php>
+<?php
+require basePath('model/user.php');
+
+loadView('home');
+</code>

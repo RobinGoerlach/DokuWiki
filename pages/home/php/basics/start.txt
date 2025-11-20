@@ -1,0 +1,3117 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP Basics**
+
+====== PHP Basics ======
+
+What is a web server, normally while talking about a web server, it is not so specific what is mend. At the end it is a general purpose hardware storing and running a special software the web server software like Apache, NGINX, ISS and the source code of web sites and/or web applications. Client browser and web server talking over the internet in HTTP (called HTTP protocol). Is the requested information is not found by the web server software response with the great 404 message.
+
+If you like follow the request and response communication with [[https://www.w3schools.com/|w3school]] (The largest web developer site as they say about themself). Press **F12** or right click on the open webpage and select **Inspect**. Select the **Network tab** and **reload the page**. Click on the **first entry in Name column** and check **Headers** for Request and Response Headers. 
+
+[[https://www.youtube.com/playlist?list=PLr3d3QYzkw2xabQRUpcZ_IBk9W50M9pe-|Learn PHP The Right Way - Full PHP Tutorial]] - [[https://github.com/ggelashvili/learnphptherightway-outline|Learn PHP The Right Way - Source]]
+
+===== PHP IDEs =====
+
+  * **VS Code**
+  * **PHPStorm**
+  * **Eclipse** / **Netbeans**
+  * Sublime Text
+  * VIM / Notepad++ / Atom / Brackets
+
+===== PHP Webserver =====
+
+  * **[[https://www.apachefriends.org/|XAMPP]]** is the most popular PHP development environment. XAMPP is a completely free, easy to install Apache distribution containing MariaDB, PHP, and Perl. The XAMPP open source package has been set up to be incredibly easy to install and to use.
+  * **[[https://laragon.org/|Laragon]]**'s innovative design and architecture eliminate the sluggishness and unreliability often found in other development environments. With Laragon's rock-solid reliability, you can stay focused on developing your projects
+  * [[https://www.wampserver.com/en/|WampServer]] a Windows web development environment / [[https://www.mamp.info/en/mamp/windows/|MAMP]] installs a local server environment in a matter of seconds on your Windows or macOS computer.
+  * **[[https://www.easyphp.org/|EasyPHP]]** PHP, Apache, MySQL, PhpMyAdmin, Xdebug... for Windows since 1999 (from PHP/FI to 8.3)
+
+[[https://klickfieber.de/webhosting/xampp-alternativen/|Die 13 besten XAMPP Alternativen für deine lokale Entwicklungsumgebung]]
+
+===== How PHP works =====
+
+PHP lookes for a opening **"<?php"** and closing **"?>"** tag and try's to interpreted what's between. If your file only contains PHP code then you can skip the closing tag, it's redundant and makes shure that there are no accidently HTML code is added. If the code is embedded in HTML you need the closing tag. **A PHP statement ends with a semicolon**. This is great for embedded single statement code in HTML
+ 
+<code php>
+<?php
+echo "Hello World";
+
+?>
+</code>
+
+If you miss the semicolon, you will get, something like **Parser error:** unexpected end of file, expecting ';' or ',' ... There are some exceptions where a semicolon is not needed, like the last statement before the closing tag
+
+**Btw** The **echo** command is printing the stuff between the " " or ' ', as often you have multiple ways to do what you need. Alternatively you could use the print command which is essentially the same thing as echo, but print has a couple of differences. The print command has a return value, so print can be used within expressions while echo can't.
+
+Print and echo command can be used with parentheses or without, both will work the same. Without parentheses you can add a list of comma separated words to be printed by echo command, this will not work with the print command. The echo command is a bit faster then the print command.
+
+<code php>
+<?php
+echo 'Hello', ' ', 'World';
+</code>
+
+If you want to use a quote inside the text then use " " around the text with the ' inside or use \' to escape this quote.
+<code php>
+<?php
+echo 'John\'s Invoice';
+</code>
+
+==== PHP in Terminal ====
+
+The following command will run the PHP script stored in the index.php file
+<code bash>
+php index.php
+</code>
+==== PHP embedded in HTML ====
+<code php>
+<?php 
+echo "Hello From PHP";
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Learn PHP From Scratch</title>
+</head>
+
+<body class="bg-gray-100">
+    <header class="bg-blue-500 text-white p-4">
+        <div class="container mx-auto">
+            <h1 class="text-3xl font-semibold"><?php echo 'Learn PHP From Scratch ;-)' ?></h1>
+        </div>
+    </header>
+    <div class="container mx-auto p-4 mt-4">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold mb-4"><?= 'Welcome To The Course' ?></h2>
+            <p>In this course, you will learn the fundamentals of the PHP language</p>
+            <p>In this course, you will learn the fundamentals of the PHP language</p>
+        </div>
+    </div>
+</body>
+
+</html>
+</code>
+**index.php**
+
+<code php>
+<?php echo ... ?> 
+<?= ... ?> // short er version of <?php ... ?> 
+<?php
+  echo 'Hello', ' From PHP';   // called statement, Language constructs
+  print 'Hello From PHP';      // called statement, Language constructs
+  print_r('Hello From PHP');   // Function
+?>
+</code>
+
+If you want to execut php code you have to enclose within the opening and closing tag. If you need to print something you should use the shorter version of opening and closing tag. If you need to process some PHP then you need to enclose your PHP code block within <?php ... ?>.
+
+**BTW** In general it's not a good idea to mix HTML directly in your PHP. Business and presentation logic should be separated.
+
+
+===== PHP comments =====
+
+A comment is a text ignored by the PHP interpreter, just for developers to memorise or describe something within the code.
+
+<code php>
+// Single line comment or use # as a single line comment
+/* Multi-line comment */
+/** Doc block multi-line comment */
+</code>
+
+
+===== PHP Variables =====
+
+A Variable is an advanced 'M+' button on a calculator to memorise a value or a text for later usage. A Variable should start with a dollar sig
+
+  * Prefixed with a dollar sing ($)
+  * Must start with a letter or an underscore, the letter can either be uppercase or lowercase
+  * Can not start with a number or use special characters like @#
+  * Can only contain letters, numbers and underscores, that means it can start with underscore and then numbers like $_123Name
+  * Are case sensitive ($Name and $name are not the same)
+  * $this can not be used as a variable name
+
+<code php>
+$name = 'Robin';
+// echo $name;
+var_dump($name); // or var_export
+</code>
+Here we define a variable called $name and then we echo it out, or var_dump it out.
+
+Variables are assigned by value
+<code php>
+<?php
+$x = 1;
+$y = $x // Not x = y = 1 x = 1 and y =1
+$x =3;
+echo 'x: ', $x;  // 3 
+echo 'y: ', $y;  // 1
+</code>
+If you want $y changes simultaneously then we need to assign $y by reference, therefor we have to add the ampersand
+<code php>
+$y = &$x;
+</code> 
+So now y is equal to x and now anytime x changes y will also change
+
+=== Using Variables ===
+
+Using variable in echo command
+<code php>
+<?php
+$firstname = 'Robin';
+echo 'Hello $firstname';
+</code>
+This will not work because we're enclosing it within single quotes. In singe quotes the text gets printed as it is, this means you can't use Variables inside. If you want to get the value of the variable then you need to change to double quotes or switch to comma separation. Inside double quotes you can also encapsulate the variable in curly brackets, which is quit common.
+<code php>
+<?php
+$firstname = 'Robin';
+echo "Hello {$firstname}";
+</code>
+
+Variables where they can be assigned and could be overridden after definition, because PHP works from top to bottom
+<code php>
+<?php
+$firstname = "Karl";
+$firstname = "Joe";
+echo $firstname;
+</code>
+
+=== Naming Conventions===
+
+  * Lowercase:   $servername
+  * Underscore:  $server_name
+  * Camel Case:  $serverName   (Snake Case)
+  * Pascal Case: $ServerName
+
+==== Variables Variables ====
+A Variable variable takes the value of a variable and treats that as the name of a new variable
+
+<code php>
+<?php
+$foo = 'bar';
+$$foo = 'baz';  // $bar = 'baz';
+
+$foo, $bar;
+$foo, $$foo;
+echo "$foo, $$foo"; // not working
+echo "$foo, {$$foo}"; // works
+echo "$foo, ${$foo}"; // works
+</code>
+
+===== PHP Constants =====
+
+Constants can not change values once they are defined, unlike variables where they can be assigned and could be overridden after definition. There are two ways to define constants, one is with const command and the other is via define function. The define function accepts two parameters, the first one is the name and the second is the value. The define function can take a third optional parameter, which can be ignored, to declare the name as case sensitive or not, this is deprecated and you should not use it. The name of a constant follows the same naming rules as variables, the convention is to define constants name with all uppercase. 
+**Constants have global scope**
+<code php>
+<?php
+define('APP_NAME','My App');
+define('APP_VERSION','1.0.0');
+
+echo APP_NAME;
+echo APP_VERSION;
+</code>
+Notice there is no dollar sign as we would do in variable. 
+
+
+You can check if a constant is defined by using the defined command.
+<code php>
+<?php
+define('APP_NAME','My App');
+define('APP_VERSION','1.0.0');
+
+echo defined('APP_VERSION');  // true or false
+</code>
+
+Another way to define constants is using the const keyword. The main differences is that const is defined at complie time while define is set during runtime, so you can't define a constant with cont within a control structure like if else or switch.
+
+<code php>
+const DB_NAME = 'mydb';
+const DB_HOST = 'localhost';
+
+echo DB_NAME, DB_HOST;
+</code>
+
+==== Predefined Constants ==== 
+
+There are some **[[https://www.php.net/manual/en/reserved.constants.php|predefined constants]]** starting with **PHP_** like 
+  * PHP_VERSION
+  * PHP_BINARY
+  * PHP_CONFIG_FILE_PATH
+  * PHP_DEBUG
+  * PHP_EOL
+
+==== Magic Constants ====
+
+The**[[https://www.php.net/manual/en/language.constants.magic.php|predefined constants]]** are called magic because they an differ depending where they are used. Magic constants starts and end with a double underscore.
+<code php>
+<?php
+
+echo __FILE__;
+</code>
+
+===== PHP Datatypes =====
+
+PHP is a dynamically typed or also known as weekly typed language, that means you're not required to define the type of your variable and the variable type can be changed after it has been defined. The type checking on dynamically typed language happens at runtime while while statically typed language means that type checking happens at compile time. The dynamically comes at the price of performance and can sometimes result in unexpected bugs. PHP supports strict type behaviour if needed. PHP supports 10 primitive types, which are grouped by four scalar, four compound and two special types.
+
+**4 Scalar Types**
+  * **Boolean**:   variables can only be True or False as a value
+  * **Integer**:   variables are numeric values without the decimal points also known as whole number. It can be positive or negative
+  * **Float**:     variables are floating point numbers, also known as decimals or numeric values with the decimal point
+  * **String**:    variables are a series of characters that are enclosed within either quotes or double quotes
+**4 Compound Types**
+  * **Array**:     variables are basically just a list of items and this items can be of many different types like integers, Booleans or strings. In PHP this list can also take mixed datatypes. Arrays can't be displayed with echo but print_r.
+  * **Object**:    Collection of properties & methods
+  * callable:
+  * inerrable:
+**2 Special Types** 
+  * Resource:      File is a resource type stream ($file = fopen('sample.txt','r'); var_dump($file);)
+  * **Null**:      Represents a variable with no value, like delay of a cancelled train
+**2 Pseudo types** mainly used for readability
+  * mixed
+  * void
+
+Defining basic data type variables
+<code php>
+<?php
+# Boolean
+$completed = true;
+# Integer
+$i = 5;
+# Float
+$price = 3.99;
+# String
+$name = 'Robin';
+</code>
+
+How does PHP know that a variable is for example of type integer or float? Simply by assigning the value of a variable it gets its type. PHP will automatically determine the data type during runtime and PHP will figure out that a variable is defined by the type of value, by quotes, decimal point ...
+
+==== Strict Types ====
+
+By setting **declare(strict_types = 1);** at the top of the code you change the habit of PHP of dealing with data types. PHP will then not try to guess the data type of a variable and will throw errors if the data type do not match instead of converting them automatically.
+<code php>
+declare(strict_types = 1);
+
+function setSum(int $a, int $b): int {
+  return $a + $b;
+}
+
+echo getSum(1, 1.0);
+</code>
+
+==== PHP Typecasting ====
+There are a couple ways you could find out the type of a variable. There is something called **gettype** function. You can pass in the variable and it will return the type of the variable. Another way of finding out the type of a variable is something called **var_dump** function and then you provide the variable. The var_dump function will basically print everything it knows about the expression you give it to, like datatype and value.
+
+<code php>
+$name = 'Robin';
+echo gettype($name); // -> string
+var_dump($name);     // general information
+</code>
+
+=== Automatic Type conversion ===
+Called **Implicit Type Conversion** or type hinting is one way of PHP to converting data types. 
+<code php>
+<?php
+echo 3 + 3;   // -> 6
+echo '3 + 3'; // -> 3 + 3
+echo "3 + 3"; // -> 3 + 3
+echo 3 + '3'; // -> 6 converting string '3' into 3 as integer (type juggling or type correction)
+</code>
+PHP will try and convert the given value to the appropriate data type. This means that the type of the variable is determined by the context in which the variable is used. If PHP cannot do the conversion dynamically then it will throw an **Uncaught Type Error** and stop the execution.
+
+There is a way to enable **strict mode**. The 'strict mode' means that PHP will throw an error if you path a type other than expected, even if you pass something that could be converted dynamically.
+
+<code php>
+<?php
+declare(strict_types=1);
+echo 3 + '3'; // throw error
+</code>
+The conversion from integer to float will still work. Use strict types as much as you can, it provides a better quality of code if you know exactly what data type are accepted and it will avoid unexpected bugs.
+
+<code php>
+$num1 = 5;    // integer
+$num2 = 10.0; // Float
+$num3 = '20'; // String
+$fruit= 'apple';
+$bool = true; // true = 1; false = 0; 
+$null = null;
+
+$result = $num1 + num2; // Implicit Conversion int to float
+var_dump($result);
+
+$result = $num1 + $num3; // Implicit Conversion String to Integer
+$result = $num3 + $num1; // Implicit Conversion Int to String
+var_dump($result);
+
+// $result = $ num1 + $fruit; // Error
+
+$result = $num1 + $bool;  // 5 + true <=> 5 + 1 = 6
+var_dump($result);
+
+$result = $num1 + $null;  // 5 + nothing = 5
+var_dump($result);
+</code>
+
+
+=== Explicit Type conversion ===
+
+forces data type conversion by adding the name of the data type within parenthesis.
+<code php>
+<?php
+string $x = '5';
+echo 3 + (int)$x; // cast '5' into integer 5
+</code>
+
+<code php>
+$num1 = 5;    // integer 
+
+$result = (string) $num1;  // Convert int to string
+var_dump($result);
+
+$result = (bool) num1;     // Integer to Boolean; everything not zero is true
+</code>
+
+**Useful links**
+  * [[https://www.php.net/manual/en/language.types.type-juggling.php|Type Juggling]]
+  * [[https://www.php.net/manual/en/types.comparisons.php|PHP type comparison tables]]
+
+==== PHP Boolean ====
+
+A Boolean variable is a representation of a truth value it can either be true or false. and true and false are the predefined constants that come with PHP and they are also case insensitive. You can set them uppercase or lowercase or you can mix the letter. The recommendation is to stick to one and stay consistent, most time it's all lowercase.
+<code php>
+<?php
+echo true;  // -> 1
+echo false; // -> '' empty string because PHP tries to cast everything into a string
+var_dump(false); //  -> string(0) ""
+</code>
+
+Booleans are most likely used within control structures like loops or conditionals as follows.
+<code php>
+<?php
+$isComplete = true;
+if ($isComplete) {
+  // do something
+} else {
+  // do something else
+} 
+</code>
+
+There are different data types that can be converted to Boolean on the fly by PHP and they could be evaluated either true or false. Integer zero or negative zero will always be considered as false, same applies to floats 0.0 or -0.0 will also be evaluate to false. Empty strings will also evaluate to false a string '0' will also evaluate to false. An empty array will also evaluate as false, as the special type null will be understood as false. Anything else will evaluate to true even negative numbers, that are not zero, will evaluate as true.
+<code php>
+$isComplete = true;   //false;
+//$isComplete = -1;   //-0;
+//$isComplete = 1.0;  //0.0;
+//$isComplete = [1];  //[];
+//$isComplete = 'bla';  //'';
+//$isComplete = "bla";  //"";
+//$isComplete = null;
+if ($isComplete) {
+  echo 'success';
+} else {
+  echo 'fail';
+} 
+</code>
+
+The function **is_bool** will return true if the given variable between parenthesis is of type Boolean, otherwise false.
+
+<code php>
+<?php
+$isComplete = false;  //'false'; // -> true not an empty string ;-)
+var_dump(is_bool($isComplete));  -> true;
+$isComplete = (string) true;
+var_dump(is_bool($isComplete));  -> false;
+</code>
+
+==== PHP Integer ====
+
+Integer variable are variables that take number without any decimal point. The size of the integer depends on the platform, on 32-bit systems it's from -2 Billion (Milliarde) to 2 Billion on 64-bit systems much more. You can check that easily by using the predefined constants **PHP_INT_MAX** and **PHP_INT_MIN**. The predefined constant PHP_INT_SIZE gives you the size of an integer in bytes on your platform.
+
+Integers can be defined as base 10 numbers or as hexadecimal numbers, hexadecimal numbers are prefixed by zero x. Integers can also be defined as octal numbers and is prefixed by zero or represent them as binary numbers which are prefixed by zero b.
+
+<code php>
+<?php
+$x = 55;    // = 55 base 10
+$x = 0x2A;  // = 42 base 10
+$x = 055;   // = 45 base 10
+$x = 0b110; // =  6 base 10
+echo $x;
+</code>
+
+If count your integer over the PHP_INT_MAX value it will continue to count at PHP_INT_MIN and vice versa.
+<code php>
+<?php
+$x = PHP_INT_MAX;
+var_dump($x);
+$x += 1;  
+if ($x == PHP_INT_MIN) {
+  echo "Integer overflow \n";
+  var_dump($x);
+}
+
+$x = PHP_INT_MIN;
+var_dump($x);
+$x -= 1;  
+if ($x == PHP_INT_MAX ) {
+  echo "Integer underflow \n";
+  var_dump($x);
+}
+</code>
+When an Integer goes out of bounds the variable will switch type from integer to float. 
+
+You can type cast values by using **(int)** or **(integer)** both cases will work to cast the value into an integer. Other data types can cast into integers Boolean true will cast into integer one and false into integer zero. 
+
+The floating number will lose the decimal point, so this will basically get rounded down so 0.98 will become zero.  
+
+When strings are being converted to integers, if the string is numeric. If the numeric string is a decimal it will as well lose the decimal part, or get rounded down. If the string contains some kind of text with the number, when it's cast to integer PHP will attempt to convert this and resolve it as an integer, which means that it will only return the number. if the string can not be converted it will convert to zero.
+
+Null will always convert to zero.
+
+You can check if a variable is an integer by using a function called **is_int** and this will return true or false if the variable is of type integer or not.
+
+<code php>
+<?php
+$x = null; // (int) null;
+var_dump(is_int($x));
+</code>
+
+As of PHP 7.4 for readability purposes you could use underscore within your integer value, this can be useful for lang numbers.
+<code php>
+<?php
+$x = 2_000_000_000; // 2000000000 not so readable 
+$x = (int) '2_000_000_000'; // will convert int 2 because _ will be cut off
+</code>
+
+==== PHP Floats ====
+
+Floating point variables are the variables that takes floating point values, the numbers that have a decimal point. Floating point values can also be represented as floating point in exponential form or with underscore for better readability like we did with integers.
+<code php>
+<?php
+$x = 13.5e3; // 13.5 * 10^3
+var_dump($x);
+</code>
+
+The size of floating numbers depends on the platform, you can check that by using the predefined constants **PHP_FLOAT_MAX** and **PHP_FLOAT_MIN**. 
+
+**Hint**: One thing to remember when working with limited precisions.
+<code php>
+<?php
+$x = floor((0.1 + 0.7) * 10); // 0.8 * 10 = 8 & floor is round down
+echo $x;  // -> 7
+</code>
+The reason is 0.1 and 0.7 don't have a exact floating point representation as the floating point numbers in base 2. Binaries are internally used to store floating numbers and therefore when converting this into a binary internally it loses some of the precision. In this case (0.1 + 0.7) * 10 equals to 7.999999999999991118 and floor rounds all the numbers down and in this case it removes the entire decimals and we are left with seven. The opposite of that is called ceiling or ceil which rounds everything up and this would bring us 8 as expected. Check the following it's not about floor or ceil in general as you see  in the following.
+<code php>
+<?php
+$x = ceil((0.1 + 0.2) * 10); // 0.3 * 10 = 3 & ceil is round up
+echo $x;  // -> 4
+</code>
+So basically never trust the floating number to the last digit and never ever compare floating numbers direct for equality. Read [[https://floating-point-gui.de/|Working With Floats]].
+
+Some operations or calculations might result in an undefined which will be represented by the **NAN constant**. The value NAN stands for not a number and occurs when some operation or calculation cannot be computed and it just results in not a number like log(-1) provides. There is another constant called the infinity constant which is **INF**, you get this when you get out of bounds of float like PHP_FLOAT_MAX * 2 because the number cannot be represented, because of platform limitations it displays infinity. To verify use **is_nan** or **is_infinite** or **is_finite** do not try == INF of == NAN.
+
+Float type casting works by using floatcast as  or by using a function called **floatval** which has the same effect. The use (float) makes code more consistent
+<code php>
+<?php
+$x = 5;
+var_dump(floatval ($x));
+</code>
+Strings will be converted as within integer conversion.
+
+**PHP_FLOAT_DIG** and **PHP_FLOAT_EPSILON**
+==== PHP Strings ====
+
+A String is a sequences of characters enclosed in either quotes or double quotes. The main deferens between single and double quotes is that in single quotes variables will not work as variables, they are just text. For better readability its common to enclose variable in curly brackets in strings.
+<code php>
+<?php
+  $firstname = 'John';
+  $lastname = 'Doe';
+  $fullname = $firstname . ' ' . $lastname;
+?>
+...
+
+<?= 'Hello my Name is \'John\' <br />'?>
+<?= 'Hello my Name is ' . $fullname . '<br />'?>
+<?= "Hello my Name is $fullname <br />" ?><!-- will not work with single quotes -->
+<?= "Hello my Name is {$fullname}<br />" ?>
+</code>
+
+=== Strings as Arrays ===
+
+A String can be used as a array of chars. The index of the first character is 0 while -1 is the last letter, index 1 is the second character and -2 is the second last.
+<code php>
+<?php
+$fullname[4] = ',';
+echo $fullname; // -> John,Doe
+</code>
+Adding a character far behind the last will fill up the string with spaces in-between
+<code php>
+<?php
+$fullname[15] = '!';
+echo $fullname; // -> John,Doe       !
+</code>
+**Hint** in older PHP Versions, prior to PHP 8, $fullname{15} = '!'; would work the same way, but it's deprecated since PHP 7.4
+
+=== Heredoc and Nowdoc ===
+
+There are two more ways to encapsulate strings not only single and double quotes. Heredocs and Nowdocs are ways to handle multiline Strings that may contain complex expressions and can contain single and double quotes without the need to escape them. The main difference between both is __**Heredoc**__ treats the String as it where encapsulated in __**double quotes**__ while **Nowdoc** tread the String as it where encapsulated in **single quotes**. So in Heredocs you can use variables but in Nowdocs you can't. The Syntax for both is similar, the variable that takes the document, will be feed with three greater then sign followed by a freely selectable identifier, the identifier will show the end of the document, anything between the two identifier is the content. The difference to create a Nowdoc is the Identifier has to be encapsulated in single quotes at the beginning.
+
+**Heredoc**
+<code php>
+<?php
+$x = 2;
+$y = 3;
+$z = 4;
+// Heredoc
+$text = <<<TEXT
+"This is the 'content' of Here Document"
+Line $x
+Line $y
+Line $z
+TEXT;
+
+echo nl2br($text);
+</code>
+
+**Nowdoc**
+<code php>
+<?php
+// Nowdoc single quotes around the identifier 
+$text = <<<'TEXT'
+This is the content of Here Document
+Line 1
+Line 2
+Line 3
+TEXT;
+
+echo nl2br($text);
+</code>
+Heredoc and Nowdocs can be useful to take some HTML Code, and be delivered by PHP to the browser.
+
+=== String Functions ===
+
+  * **strlen('Hello World');**          /* -> 11 */
+  * **str_word_count('Hello World');**  /* -> 2 */
+  * **strpos('Hello World', 'World');** /* find specific char/substring by index */
+  * **substr('Hello World', 6, 5);**    /* start pos 6 next 5 chars -> World */
+  * **str_replace('World', 'Universe', 'Hello World');** /* find World in String at the end and replace with Universe */
+  * **strtolower('Hello World');** 
+  * **strtoupper('Hello World');** 
+  * **ucwords('hello world');**         /* -> Hello World */
+  * **trim('    Hello World     ');**   /* remove unneeded spaces */
+  * **strcasecmp('bla', 'Bla');** /* String compare case in sensitive */  
+  * **filter_var('robin@gmail.com', Filter_validate_email);** /* is it an email, url, int, etc. */ 
+
+**Get specific char by index**
+<code php>
+$string = 'Hello World';
+$output = $string[4]; // 0 .. strlen -1 
+echo $output; // -> o
+</code>
+
+[[https://www.php.net/manual/en/ref.strings.php|more functions ...]]
+
+==== PHP Null ====
+
+Null is a special data type, it represents a variable with not value. A variable can be a null if it's assigned with the constant null, it has not been defined yet or it has been unset.
+
+<code php>
+<?php
+$X = null;     // predefined null constant (case insensitive)
+
+echo $x;       // echo will convert null to empty string
+var_dump($x);  // -> NULL
+</code>
+
+You can check if a variable is null by using the function **is_null**, it will return true if its null otherwise false alternatively you can compare it with Trippel equal comparison operator.
+<code php>
+<?php
+$X = null;
+echo 'Is $x null: ' . is_null($x) . '<\br>';
+var_dump($x === null);
+</code>
+
+A undefined variable is also null
+<code php>
+<?php
+var_dump($y); // my show a warning but the value is null
+</code>
+
+The third way is to unset a variable to generate a null value, which essentially just destroys that variable, similar to an undefined variable. 
+<code php>
+<?php
+$z = 123;
+var_dump($z);
+unset($z);
+var_dump($z); // NULL
+</code>
+
+There are a lot of use cases for null, the main is to initialise a variable with a default value of null, so you can check if it has been set during processing the script, or as a return type if something failed. 
+
+=== Null casting === 
+
+  * When null is cased to String it is converted to an empty string 
+<code php>
+<?php
+$z = null;
+var_dump((string) $z); // string(0) "" -> empty String 
+</code>
+  * When null is cased to Integer it is converted to zero
+  * When null is cased to Boolean it is converted to false
+  * When null is cased to an Array it is converted to an empty Array
+
+==== PHP Arrays ====
+
+Arrays are a list of entries and it's defined between square brackets with comma separated values in between. Alternatively an Array can be defined by the array function, which is an older way. The values of arrays can easily be accessed by an index or key, starting with index zero for the first value. Arrays can't be indexed from the end with neg index numbers. To add additional values to an array add square brackets before the assignment (=) and then the value want to store at the end of the array, there are multiple ways to add values to an Array (see Array functions). 
+
+So Arrays can hold multiple pieces of data in a single variable with great advantages as
+  * Versatile Container
+  * Ordered Collections
+  * Mixed Data Types
+  * Easy Access by index
+  * Useful for Grouping
+  * Dynamic (re)Sizing
+
+<code php>
+<?php
+$empty = [];  // empty Array
+
+// $names = array('John', 'Jack', 'Jill'); // older way
+$names = ['John', 'Jack', 'Jill'];
+echo $names[1]; // Jack (index starting with 0)
+echo '<pre>'; print_r($names); echo '</pre>'; die(); // -> to inspect function/dump and die 
+
+$names[3] = 'Robin'; // Set a value or add value to array
+
+$names[] = 'Mary';  // Add value to array at end of array
+
+unset($name[3]); // remove Robin 
+$names = array_values($numbers);
+</code>
+If you use index numbers out of bounds, you'll get a warning Undefined array key. The value returned by accessing an undefined key is actually null. To avoid the warning you can check that a value for an specific key or index exists by using the function **isset**
+
+<code php>
+<?php
+$languages = ['PHP', 'Java', 'C++', 'C#', 'Python'];
+var_dump(isset($languages[3]));
+</code>
+
+To get the number of entries in an Array you can use the function count, which brings us to the next section Array Functions ;-)
+
+__**Array Typecasts**__
+<code php>
+$x = 5;
+var_dump((array) $x);
+</code>
+Casting a integer to an array, creates an array with one element
+
+=== Array Functions ===
+
+  * **count($names);** /* Number of entries */
+  * **sort($names);** 
+  * **rsort($names);**
+  * **isset($array[$key])** /* $key exists and value is not null */ 
+  * **array_key_exists($key, $array)**  /* $key exists */ 
+  * **in_array('Robin', $names);** /* true if Robin is a value of the array */
+  * **explode(',', $tags);** /* returns an array */
+  * **implode(', ', $users);** /* returns an string */
+  * **array_push($names,'Robin');** /* add multiple values to the end of th Array (in JS: names.push(...) */
+  * **array_pop($names);**  /* remove the last element +/
+  * **array_shift($names);** /* remove the first entry and reindex */
+  * **array_unshift($names, 'Robin');** /* find Robin and remove */
+  * **array_slice($name, 2, 2);** /* return array from index 2 with following 2 entries */
+  * **array_splice($name,0, 1,'Lisa');** /* replace John with Lisa */
+  * **array_column($jobs,'salary');** /* return a single column from an key, value array */
+  * **array_sum($values);**
+  * **array_map($func, $values);** /* $func is an anonymous Function working on every array value  */
+  * **array_search('Robin', $names);** /* returns the index id */
+  * **array_filter($jobs, $location);** /* returns a subset of the array filtered by $location */
+  * **array_flip($allowedFields);** /* in associative arrray flip keys and values */ 
+  * **array_intersect_key($_POST, array_flip($allowedFields))** /* return an array all values with keys found in second array */
+  * **unset($names)** /* remove the complete Array */
+  * **unset($name[2])** /* remove a value from the array by index no reindexing */
+
+[[https://www.php.net/manual/en/ref.array.php|more array functions]]
+
+=== Associative Arrays ===
+
+The index numbers of an array are generated automatically but you are able to define additional keys instead of an index to get a Key, Values pair, like dictionaries in Python or object literals in JS. If you define a names for keys it has to be either a string or an integer. If the key are strings, it's a so called **named key** and the array is called a **Associative Array**. With named keys the value of an Array can be accessed by the key
+
+<code php>
+<?php
+$user = [
+  'name' => 'John',
+  'email' => 'john@gmail.com',
+  'password' => '12345',
+  'hobbies' => ['Cooking', 'Video Games']
+];
+
+print_r($user);
+
+echo $user['name']; // John
+echo $user['hobbies'][0]; // Cooking
+$user['address'] = explode (',', 'Main St 123, 47533 Kleve');  // add address to $user
+echo '<pre>'; print_r($user); echo '<\pre>';
+unset($user['address']);  // remove address
+</code>
+If you try to access the Array with a key that does not exist you'll get a warning Undefined array key.
+
+<code php>
+<?php
+$language = [
+  'php' => '8.0',
+  'pyton' => '3.9',
+];
+
+$languages['go'] = ' 1.15'; // add a new element to the array
+echo '<pre>'; print_r($languages); echo '<\pre>';
+</code>
+
+Something to think over, why ha $array only on value and which is it?
+<code php>
+<?php
+$array = [true => 'a', 1 => 'b', '1' => 'c', 1.8 => 'd'];
+</code> 
+true will be casted to one, 1 will override the true 1 so b will override a , '1' will be casted to int 1 and will override b with c, 1.8 will cast to integer and loos the decimal so it's 1 and d will override c
+<code php>
+<?php
+$array[] = [null => 'e'];
+</code>
+Null will cats to zero, so the array gets a second value at index 0 8-)
+
+=== Multi usage Arrays ===
+
+  * Stacks
+  * Queues
+  * Collections
+  * Hash tables
+
+=== Multi-dim Arrays ===
+
+Arrays can have multiple values of different types like strings, Booleans, integers, floats and also arrays. As Arrays in Arrays you can generate multidimensional arrays meaning Arrays as values in Arrays
+
+<code php>
+$users = [
+  [id => '0', name => 'Robin', 'email' => 'robin@gmail.com', 'password' => 'aH23$a38', 'skills' => ['php', 'graphql', 'react'], ],
+  [id => '1', name => 'Lisa', 'email' => 'lisa@gmx.de', 'password' => 'K34h%28'],
+  [id => '2', name => 'John', 'email' => 'john@hotmail.com', 'password' => 'kwet6&']
+};
+
+$output = $users[0]['name']; // Robin
+$users[] = [id => '3', name => 'Karl', 'email' => 'karl@proton.ch', 'password' => 'Z{453}kg'];
+</code>
+This is a nice way to fake database access during development.
+===== PHP Expressions =====
+
+Expressions are assigning variables or constants to values or that evaluates to a value. PHP is an expression-oriented language where almost everything is an expression. If you assign a variable like x equals 5 then 5 is a literal value that evaluates to itself and therefore it's an expression. If you assign a variable x to a variable y in this case variable x evaluates to 5 and therefore this is an expression. As you see everything after the assignment operator is considered an expression, because it evaluates to some kind of value and that value can be of any data type. 
+
+Another example of expression is when you're comparing one variable to another e.g. z equals x compare equal to y, then x compare equals to  y is an expression, because this evaluates to a Boolean value. Functions are also considered expressions because typically they return a value that can be assigned to a variable. Expressions can be within control structures as conditionals and loops.
+
+===== PHP Operations =====
+
+An Operator is something that takes one or multiple expressions and results in a value. PHP offers quite a bit of operators. If an operator takes only a single value it's called a unary operator as !.
+If it takes two values it's called a binary operator, and most of PHP's operator are binary operators, if an operator requires three values it's called a ternary operator.
+
+==== Arithmetical Operations ====
+
+  * **'+'** Addition       +=
+  * **'-'** Subtraction    -=
+  * **'*'** Multiplication *=
+  * **'/'** Division       /=
+  * **'%'** Modulus        Division rest
+  * **' '** Exponentiation ^ (double star)
+
+<code php>
+<?php
+$num1 = 4;
+$num2 = 5;
+
+$output = $num1 + $num2; // $output = 9
+</code>
+
+This arithmetic operators can be used as a prefix to convert a variable value into an integer or a float. The result will result in a float unless both of the operands are integer and in a division they are evenly divisible something like 10 divided by 3 the result will be float data type and also if one of the operands is afloat the result will be a float. The result will be negative, if the operator that has to be divided has a neg. sign.
+
+A division by zero will in prior PHP Versions lead to an fatal error Uncaught DivisionByZeroError, which stops the execution of the program. In PHP 8 you'll get a warning and the return value will be INF for infinity. To avoid the warning there is a new function, introduced with PHP 8, **fdiv($x, $v)** it will return INF without a warning.
+
+The mod operator will cast into integer, the function **fmod($x, $y)** will deal with float operators as float.
+
+==== Assignment Operators ====
+
+  * **'='**     Normal assignment operator to assign the value from the right to the left
+  * **'+='**    Combined operator, combining assignment and Addition $x = $x + 3;
+  * **'-='**
+  * **'*='**
+  * **'/='**
+  * **'%='**
+  * **'  ='**   
+
+**Hints:** Assignment as default is done by value and not by reference, which means that PHP copies the value of the original variable to the new one. Do not mix this with comparison operator this is not the comparison operator. The comparison is double or Trippel equal sign.
+
+<code php>
+<?php
+$x = ($y = 10) +5;   // $y = 10; & x = 10 + 5; 
+$output *= 2;        // $output = 18
+</code>
+
+==== String Operators ====
+
+  * **'.'**      Concatenation operator
+  * **'.='**     
+<code php>
+$x = 'hello'; $x .= ' World'; echo $x; // -> Hello World 
+</code>
+
+==== Comparison Operators ====
+
+The comparison operators allow you to compare two values to each other. The return value of a comparison is true or false
+  * **==**    Loose comparison, only a comparison of values with typecast
+  * **===**   Strict comparison, compares values and data types, so false if data types differ
+  * **<>**    Not equal true if both values differ 
+  * **!=**    common alternative for <>   
+  * **!==**   Strict comparison for different values, not being equal
+  * **<**     Less than
+  * **>**     Greater than
+  * **<=**    Less than or equal 
+  * **>=**    Greater than or equal
+  * **<=>**   Spaceship operator, this will return 0 if both have the same value, -1 if less and +1 if greater 
+  * **??**    Null coalescing operator mainly used while working with null $y = $x ?? 'no value set' if isnull($x) 
+  * **?:**    Ternary operator use parenthesis because not using parenthesis is deprecated since PHP 7.4 and will result in an error in PHP 8 and its more readable
+
+<code php>
+  var_dump( 5 <= 10);  // -> true
+</code>
+
+=== Spaceship Operator ===
+
+=== Null Coalescing Operator ===
+
+The null coalescing operator mainly used while working with null $y = $x ?? 'no value set' if isnull($x)
+
+<code php>
+$factoryColor = 'red';
+//$color = isset($factoryColor) ? $factoryColor : 'blue';
+$color = $factoryColor ?? 'blue';  // ?? <=> isNull($factoryColor)
+</code>
+<code php>
+$x = 'Hello World';
+$y = strpos($x, 'H'); // $y = 0
+
+$result = $y === false ? ' H Not Found' : 'H Found at index ' . $y
+echo $result;
+/* short for
+if ($y == false) {  // 0 will convert to Boolean false
+  echo 'H not found';
+} else {
+  echo 'H Found at index ' . $y;
+} */
+</code>
+
+**Hints**: Before PHP 8 when compering a string with a number, the string was converted to a number and then it was compared, 'hello' would be converted to 0 so 'hello' equals 0 would be true, but now in PHP 8 this is no longer converted to a number, instead what happens is that when the string is not numeric the other side will be converted to string and then a string comparison will happen. More [[https://wiki.php.net/rfc/string_to_number_comparison|PHP RFC: Saner string to number comparisons]] and [[https://www.php.net/manual/en/types.comparisons.php|PHP type comparison tables]].
+
+If the string is numeric then the string gets converted into a number and then the number gets compared.
+In general use strict types and strict comparison when possible to avoid potential issues.
+
+=== Ternary Operator ===
+
+The Ternary Operator use parenthesis because not using parenthesis is deprecated since PHP 7.4 and will result in an error in PHP 8 and its more readable 
+
+**Condition ? True Expression : False Expression**
+
+<code php>
+<div class="bg-white rounded-lg shadow-md p-6 mt-6">
+   <?php if($isLoggedIn) : ?>
+     <h1 class="text-3xl"><?php isset($name) ? : "Welcome $name" : echo "Welcome to  the app!" ?></h1>
+   <?php else : ?>
+     <h1 class="text-3xl">Please log in!</h1>
+   <php endif; ?>
+</div>
+</code>
+
+==== Error Control Operators ====
+
+The Error Operator **@** if added to an expression all Error messages will be supressed from that expression and the errors that it supresses mainly depends on how you have your error handling configured in PHP.
+<code php>
+$file = @file('foo.txt');
+</code>
+The **warning file(foo.txt): Failed to open stream** will not show up, because of the @ operator. Recommendation don't use the @ operator at all unless you have a really really good use. In some cases maybe you want to suppress some api 
+<code php>
+<?php
+const DBG = true;  // global debug const from app config to check environment
+// ... later in code ...
+$file = DBG ? file('foo.txt') : @file('foo.txt');
+</code>
+The Error Operator silences your application it doesn't solve any issues it does not any problem and as a developer you might not even be aware that your application has these error because you were supressing it, try to build a better error handling  around your application.
+
+==== Increment & Decrement Operators ====
+
+You can use the incrementing operator **++** to increment values by one or use decrementing operator **--** to decrement values by one. There are two types of increment and decrement operators and these are pre and post-incremental/decrements. 
+
+  * **$x++;** post increment, first return the value then increment
+  * **$x--;** post decrement, first return the value then decrement
+  * **$++x;** pre increment, first increment the value then return the value
+  * **$--x;** pre decrement, first decrement the value then return the value
+
+<code php>
+<?php
+$x = 5; echo $x++; // first return value -> 5
+echo '<br />'; echo $x; // -> 6
+</code>
+Increment and decrement operator will only work with numbers and strings, but arrays, Booleans, resources and objects are not affected. Decrementing a null value has no effect but incrementing null will result in one.
+<code php>
+<?php
+$x = null; 
+echo ++$x; // -> 1
+</code>
+Decrementing also has no effect on the string values but incrementing has effect on the string value, it will increment the characters.
+<code php>
+<?php
+$x = 'abc';
+echo $x++; // -> abd
+</code>
+
+==== Logical Operators ====
+
+The logical Operators basically allow you to combine multiple conditions together so you could use these operators to basically combine and create a larger conditional statement. The operands don't have to be Boolean, they could be integer or any other data type that could be converted into true or false.
+
+  * **&&** and operator evaluate to true only if both operands evaluate to true
+  * **||** or operator evaluate to true if one or both operands evaluate to true 
+  * **!** not is a unitary operator it's just negation of the operand, if it's true it returns false and vice versa e.g. **I'm coming if it doesn't rain.**
+PHP has a second variation of these are the operators they do the same thing logically, they are different in PHP and the difference is in their precedence. Be careful if you decide to use these keywords, parenthesis may be helpful 
+  * **and** equal && logically
+  * **or** equals || logically
+  * **xor** true if only one is true
+<code php>
+<?php
+$x = true;
+$y = false;
+$z = $x && $y;  // -> false
+var_dump($z);
+
+$z = $x and $y; // -> true = has higher precedence to be read as ($z = $x) and $y -> and $y gets discarded
+var_dump($z);
+</code>
+**Alternative Operators**
+<code php>
+  var_dump( 10 == 10  or 5 == 20); // -> true
+</code>
+
+PHP does something called **short circuiting** when it comes to logical operators. If the result is already clear PHP stops evaluating the rest e.g. in an or evaluation if the first operand is true the result will be true, so don't care about about what comes. 
+<code php>
+<?php
+$x = true; // false; -> and will short circuit to false because $x is already false but || will not because the rest could evaluate to true
+
+function hello() {
+  echo 'Hello World <br />';
+  return false;
+}
+
+var_dump ($x && hello()); // -> Hello World bool(false)
+var_dump ($x || hello()); // -> true : if $x is true everything is true
+var_dump ($x && hello() || true); // -> true : $x && has higher precedence than the or operator like ($x && hello()) and is executed first -> false and then || true -> true
+</code>
+This is precedence and associativity at work ;-) 
+
+
+
+
+==== Bitwise Operators ====
+
+Bitwise Operators are used to perform bit level operations. Think of bits as on off switches, it's binary right so it's just zeros and ones and the following operands flip those switches. You can flip zero to one and one to zero or shift the bits left and right to get the desired result.
+
+  * **&** and operator (not the logic and) it will return bits set in both operands
+  * **|** or  operator (also not logical)  will return bits that set either in one of the operands
+  * **^** xor operator is an exclusive or operand it will return bits that are set in either one of the operands but not set in both
+  * **~** negation operator flips the bits 
+  * **<<** shift bits to the left  (every bit is multiplied by 2)
+  * **>>** shift bits to the right (every bit is divided by 2) discarding front bits 
+<code php>
+$x = 6;             //  0110
+$y = 3;             //  0011
+var_dump($x & $y);  // &0010 -> 2 not $x + $y
+var_dump($x | $y);  // |0111 -> 7
+var_dump($x ^ $y);  // ^0101 -> 5
+var_dump(~$x);      // ~1001 -> -7
+var_dump($x << $y); // shift 3 times left  (3 times *2) -> 110000 = 48
+var_dump($x >> $y); // shift 3 times right (3 times /2) -> 000000 = 0
+</code>
+If both operands will be converted into integers and then bitwise operations are applied. In case of strings the bit operations will be performed on the ASCII values of the characters that make up those strings.
+
+Use cases for bitwise operands are encryption in configuration files, status information's can be stored as bits or permissions similar to Unix as alternative to multiple SQL tables 
+
+==== Array Operators ====
+
+Some operators behave a bit differently as expected on arrays.
+
+  * **+**   union operator append two arrays
+  * **==**  loose comparison is only true if both have the same key values pares, if the keys are the same and values differ then it returns false, if data types differ it will cast data types and compare values afterwards
+  * **===** strict comparison is only true if both have the same key values pares with the same data types
+
+<code php>
+$x = ['a', 'b', 'c'];
+$y = ['d', 'e', 'f'];
+$z = $x + $y; // -> ['a', 'b', 'c', 'd', 'e', 'f'];
+</code>
+
+==== Execution Operator ====
+
+The execution operator allows to execute the content of backticks as shell commands (only if shell exec is enabled)
+  * **Backticks (`...)**  
+
+==== Type Operator ====
+
+  * **instanceof**
+
+==== Nullsafe Operator (PHP 8) ====
+
+  * '?->' 
+
+===== PHP Operator Precedence & Associativity =====
+
+It's all about what gets executed first when combining multiple operators to complex expressions. They're grouped by their **precedence** and if they have the same precedence then their associativity decides how they are grouped. The [[https://www.php.net/manual/en/language.operators.precedence.php|PHP Operator Precedence Table]] is sorted by precedence so the ones shown on the top have higher precedence than the once shown on the bottom. On the left side is the **associativity** (right, left or non-associative).
+<code php>
+<?php
+$x = 5 + 3 * 5;
+</code>
+If there was no precedence this would be 5 + 3 equals 8  and 8 * 5 equals 40, but because of we have precedence with * has higher precedence 3 + 5 equals 15 get executed first because multiplication has the higher precedence than the addition/subtraction and this get grouped together first and returns 15 and then we do the addition which is 20. The assignment has lowest precedence out of all these that's why everything on the right side of the assignment sign (=) happens, so the final is assigning 20 to $x.
+
+You can force precedence by using parentheses. The operands in-between the parenthesis will be executed first if you get parenthesis around 5 + 3 you will get 40 as discussed earlier. If operators have the same precedence than their associativity (right, left or no associativity) decides how they are grouped.
+
+If the precedence of the operators is the same because we are using the same operator in the following example then the associativity determines how they are grouped.
+<code php>
+<?php
+$x = $y = 5;
+</code>
+Because assignment has right associativity that it gets executed from right to left and therefore y = 5 is grouped together and then x equals to whatever this expression evaluates to.
+<code php>
+<?php
+$x = 5; $y = 2; $z = 10;
+$result = $z / $y * $x;
+</code>
+Multiplication and division have the same precedence and have left associativity, that means that it goes from left to right, that's why x is divided by y is grouped first and then multiplied by z and finally gets assigned to the variable $result.
+
+Operators that have the same precedence that are non-associative can't be used next to each other.
+<code php>
+<?php
+$x = 5; $y = 2; $z = 10;
+$result = $z < $y > $x;
+</code>
+This will not work and led to **Parse error: syntax error, unexpected token ">"**. If you have operators with different precedence and both have non-associative they can be used in the same expression.
+<code php>
+<?php
+$x = 5; $y = 2; $z = 10;
+$result = $z < $y == $x;
+var_dump($result); // -> bool(false)
+</code>
+Associative and Precedence are not intuitive in general so it's highly recommended to use parentheses, for two reasons, on it will add more clarity and readability to the code and you are also being explicit how you want your operators to be grouped instead of relying on associative and precedence.
+
+===== PHP Control Structures =====
+
+A PHP Script is made of series of statements where a statements, where statements can be and assignment or functions called loops, if else conditionals and soon. PHP Statements end with a semicolon and multiple statements can be grouped within curly braces. A control structure is something that allows you to group multiple statements and also allows you to control the flow of the code execution. You can for example execute code block a only if condition b passes or keep executing a until condition b is met. 
+
+==== PHP If Conditional Statement ====
+
+If some kind of condition is fulfilled then we execute a block of, in curly braces encapsulated, statements. This statements we put in the block of code will only be executed if the condition evaluates to true. The condition can be any kind of expression, it could be just a simple variable or it could be as complex as using multiple operators including the logical operators.
+<code php>
+<?php
+$score = 95;
+$condition = ($score >= 90);
+if ($condition) {
+  echo 'Your in High score - Great Player';
+}
+</code>
+The Message is only shown when $score is greater or equal 90. 
+If the statement block is only a single line it can be written in a shorter form without curly braces.
+<code php>
+<?php
+$score = 95;
+$condition = ($score >= 90);
+if ($condition) echo 'Your in High score - Great Player';
+</code>
+Recommendation is to write it always with curly braces, for better readability.
+
+What happens if the condition fails? What you can do if the condition fails you could execute a default block of code and that is by using a else case.
+<code php>
+<?php
+$score = 95;
+$condition = ($score >= 90);
+if ($condition) {
+  echo 'Your in High score - Great Player';
+} else {
+  echo 'Your failed the High score - Try again Player One';
+}
+</code>
+The else block is the code you want to execute in case when the expression does not evaluate to true. You can nest additional if's in an if or else branch.
+
+
+**Nested if**
+<code php>
+if ($age >= 18) {
+  echo 'You are allowed to vote!';
+} else { 
+    if  ($age >= 16) {
+      ...      
+    } else {
+      ...
+    }  
+}  
+</code>
+
+Sometimes you need multiple conditions and you can do that by using else if
+<code php>
+<?php
+$score = 95;
+$condition = ($score >= 90);
+if ($condition) {
+  echo 'Your in High score - Great Player';
+} elseif ($score >= 80) {
+  echo 'Your failed the High score - Try again Player One';
+} else {
+  echo 'Your failed retry - Ready Player One';
+}
+</code>
+There is an alternative to **elseif** you can write **else if** with a space between else and if. This will work exactly the same way there is a syntactic difference between the two but when you're using the alternative syntax which works perfectly in a PHP code block but in HTML you need to use the one without the space. For consistency it's recommended to use one without space in general.
+
+You can nest as many elseif with conditionals as you want in such an if.
+
+**If-Else-If**
+<code php>
+if ($age >= 18) {
+  echo 'You are allowed to vote!';
+} elseif ($age >= 16) {
+  ...
+  } else {
+    ...
+  }  
+}  
+</code>
+
+=== Conditional HTML ===
+Mixing HTML and PHP can produce really ugly code, therefore PHP offers an alternative syntax, using a colon and then the closing tag so we are opening PHP with <?php followed by if, else, elseif removing curly braces and a colon : followed by ?> closing tag. Therefor we have a new command **endif** to mark the end of the conditional code.
+
+<code php>
+<div class="bg-white rounded-lg shadow-md p-6 mt-6">
+   <?php if($isLoggedIn) : ?>
+     <?php if (isset($name)) : ?>
+       <h1 class="text-3xl">Welcome <?= $name ?></h1>
+     <?php else : ?>  
+       <h1 class="text-3xl">Welcome to  the app!</h1>  
+   <?php else : ?>
+     <h1 class="text-3xl">Please log in!</h1>
+   <php endif ?>
+</div>
+</code>
+
+This Syntax produces code that looks a lot cleaner as if you had tried to add the HTML Code into a PHP block.
+
+==== PHP Loops ==== 
+
+Loops are used to execute statements multiple times.
+
+=== PHP While Loop ===
+
+**While Loop Syntax**
+  * **initialization** must be before the while Loop starts 
+  * **while (condition) {**
+  * **condition update** -> somehow the condition has to change, if condition never changes, loop works infinite because condition is always true
+  * **}**
+
+The syntax of the While loop is similar to the if conditional statement. You start with the while keyword followed by parenthesis which contains the conditional expression and as long as this condition evaluates to true it will keep on running the statements that are contained within the curly braces. The conditional expression is evaluated at the beginning of every iteration and as soon as it evaluates to false then the loop will stop and the code behind the loop will be executed. If the condition evaluates to false the very first time then the loop will actually never run. 
+
+As an example we create a simple counter and print digits up to 15.
+<code php>
+<?php
+$i = 0;
+while ($i <= 15) {
+  echo $i++ . '<br />';
+}
+</code>
+
+If you forget to increment the counter variable this would introduce something called infinite loop. An infante loop is something that will continuously run your statements because the expression will always evaluate to true, this is mostly not what you want. 
+
+There are some use cases for infante loops one of those use cases for the infinite loop is when you want to wait for something to happen and **conditionally break out of the loop** using a statement called break. The break expression can take an optional parameter how many loops shout be braked out, if you have nested loops, 1 is the default parameter if not given.
+<code php>
+<?php
+$i = 0;
+while (true) {
+  echo $i++ . '<br />';
+  if(I >= 15) {
+    break 1;
+  } 
+}
+</code>
+
+**Code inside HTML**
+<code php>
+<?php $i = 0; while($i < =10): ?>
+  <?= $i ?> <br />
+<?php $i++; endwhile; ?>
+</code>
+
+Loops can be nested in loops, if you have a loop in a loop one is called inner loop and the other is called outer loop. 
+
+The statement **continue** is a way to skip a single iteration, watch out for your incrementation. If you you skip before the incrementation you create an infinitive loop. Similar to break statement continue also accepts an optional argument which will allow you to continue multiple nested loops. 
+
+PHP has an alternative Syntax to while loops similar to the if conditionals that are mainly used when embedding PHP  within HTML, instead of opening curly braces you could do colon and instead of the closing curly brace you could do endwhile and this will work the same way.
+
+
+  * **break** loop -> stop looping
+  * **continue** loop -> skip a value
+
+=== PHP DO-While Loop ===
+
+**Do-While Loop syntax**
+  * **initialization** must be before the do while Loop starts 
+  * **do {**
+  * **condition update** -> somehow condition has to change, if condition not changed loop works infinite because condition always true
+  * **} while (condition)**
+**This Loop will always run at least once**
+
+The Do-While loop is similar to the While Loop with the main difference being that the do-while loop guarantees that the statements within the loop will excite at least once because this conditional execution is checked at the end of an iteration instead of the beginning.
+<code php>
+<?php
+$i = 0;
+do {
+  echo $i++ . '<br />';
+} while ($i <= 15) 
+</code>
+In a while loop the conditional expression evaluated to the false in the beginning then the loop would never run. In the do while however the conditional expression and decide if he need to run again. If the condition evaluates to false the statements in the loop will run at least once. 
+
+**Code inside HTML**
+<code php>
+<?php $i = 0; do : ?>
+  <?= $i ?> <br />
+<?php $i++; } while($i < =10); ?>
+</code>
+
+The **break** and **continue** statements work in a Do-While as in a While Loop.
+
+=== PHP For Loop ===
+
+The For Loop takes three expressions that are separated by semicolons. The first expression evaluates the first time and initialises the counter variable. The second expression is the conditional expression and is evaluated at the beginning of each iteration and finally the third expression is evaluated at the end of each iteration.
+
+  * **for (initialisation; condition; update) { ... }**
+
+**Code inside PHP**
+<code php>
+for ($i = 0; $i <=10; i++) {
+  echo $i . '<br />';
+}
+</code>  
+
+**Code inside of HTML**
+<code php>
+<?php for ($i = 0; $i <=10; i++): ?>
+  <?= $i ?> <br />
+<?php endfor; ?>
+</code>
+
+Each of this for expressions can be empty, they are not required **for (; ;) {** and this would work just fine. This is essentially same thing as while(true) it's just an infinite loop, they can also contain multiple expressions separated by comma.
+<code php>
+<?php
+for ($i=0; $i<=15; print $i . '<br />', $i++) {
+}
+</code>
+If you have multiple expressions within the conditional expression the evaluation whether the loop should continue or not will be determined by the last expression
+<code php>
+<?php
+for ($i=0; print $i . '<br />', $i<=15; $i++) {
+}
+</code>
+Will work similar to the code before, this version will have one iteration more due to different evaluation of conditional expression and is evaluated at the beginning of each iteration and third expression is evaluated at the end of each iteration.
+
+For Loops can also be used to iterate over strings and put each character or iterate over arrays. 
+**Iterate through an String**
+<code php>
+<?php
+$text = 'Hello World';
+for ($i=0; $i < strlen($text); $i++) {
+  echo $text[$i] .'<br />';
+}
+</code>
+**Iterate through an Array**
+<code php>
+<?php
+$text = ['H','e','l','l','o',' ','W','o','r','l','d'];
+for ($i=0; $i < count($text); $i++) {
+  echo $text[$i] .'<br />';
+}
+</code> 
+Of course you could do the same thing using the While or Do While loop. This code above has a performance issue here the conditional expressions run at the beginning of each iteration so we're calling the strlen/count function on each iteration (12 times), which is not that big of a deal but in the cases where your array might be too big or your function call might be expensive this might cause some performance issues in my opinion it is always a good practice to not make unnecessary function calls so instead of doing this what you could do is create a variable outside the loop or in the first expression and use the variable in the conditional expression.
+<code php>
+<?php
+$text = 'Hello World';
+for ($i=0, $length = strlen($text); $i < $length; $i++) {
+  echo $text[$i] .'<br />';
+}
+</code>
+or in case of an array
+<code php>
+<?php
+$text = ['H','e','l','l','o',' ','W','o','r','l','d'];
+for ($i=0, $length = count($text); $i < $length; $i++) {
+  echo $text[$i] .'<br />';
+}
+</code> 
+This performance issues can also happen in While or Do-While Loops 
+
+**PHP Foreach Loop**
+
+The Foreach Loop is used to iterate over Arrays, especially associated Array or Objects.
+<code php>
+<?php
+$languages = ['Assembler', 'C++', 'C#', 'Go', 'Java', 'JavaScript', 'Pascal', 'PHP', 'Python', 'R', 'Rails', 'Rust'];
+foreach($languages as $language) {
+  echo $language . '<br />';
+} 
+</code> 
+The Foreach Loop will only work with Arrays an Object, anything not an Array or not an Object will give you an Error **foreach() argument must be of type array object**, You could also access the keys of the Array by using the key variable with equal and greater sign. The variable names can be anything you want not only key or language. The variable following the as keyword will still exist, after the foreach is done, with the value of the last iteration. This variable will not get destroyed after the foreach loop which means that if you decided to use this variable somewhere else this could case some issues in your code, especially if assigned by reference and you change the value you change the array in later code. To be sure destroy the variable manually with unset.
+<code php>
+<?php
+$languages = ['Assembler', 'C++', 'C#', 'Go', 'Java', 'JavaScript', 'Pascal', 'PHP', 'Python', 'R', 'Rails', 'Rust'];
+foreach($languages as $key => $language) {
+  echo $key . ': ' . $language . '<br />';
+} 
+</code> 
+
+**Looping through a Array by index**
+<code php>
+for ($i = 0; $i <=10; i++) {
+  echo $names[$i] . '<br />';
+}
+</code> 
+
+**Looping through a Array with foreach**
+<code php>
+<?php foreach ($names as $name) : ?>
+  <?= $name ?> <br />
+<?php endforeach; ?>
+</code>  
+
+**Looping through a Associative Array**
+<code php>
+<?php foreach ($users as $user) : ?>
+  <?php foreach ($user as $key => $value) : ?>
+    <?= $key . ' : ' . $value?> <br />
+  <?php endforeach; ?>
+<?php endforeach; ?>
+</code>  
+
+The each iteration of an foreach the current element of the array is assigned by value to the variable ($language, $user, $value) and it's assigned by value. However the value can be assigned by reference by adding an ampersand here and this is basically just the value of the current element by reference which means that if you modify this it will actually modify the original array.
+<code php>
+<?php
+$languages = ['Assembler', 'C++', 'C#', 'Go', 'Java', 'JavaScript', 'Pascal', 'PHP', 'Python', 'R', 'Rails', 'Rust'];
+foreach($languages as $key => &$language) {
+  echo $key . ': ' . json_encode($language) . '<br />'; // json_encode or impload(',', $language) to handle arrays inside array or is_array($language) loop through array in array
+} 
+</code>
+If you need this assignment by reference, then you can change the original Array from inside the loop.
+
+**Nested Loops** is loops inside loops, so the inner loop is inside the outer loop 
+<code php>
+for ($i = 0; $i <=10; i++) { //outer loop 
+  for ($j = 0; $j <=10; j++) { // inner loop
+     echo $i . ' - ' . $j . '<br />';
+  } // inner loop
+} // outer loop 
+</code>  
+**Nested for Loops**
+
+<code php>
+$i = 0;
+while ($i <=10) { //outer loop 
+  $j = 0;
+  while ($j <=10) { // inner loop
+     echo $i . ' - ' . $j . '<br />';
+     j++; 
+  } // inner loop
+  i++;
+} // outer loop 
+</code>
+**Nested while loops**
+
+<code php>
+$i = 0;
+do { //outer loop 
+  $j = 0;
+  do { // inner loop
+     echo $i . ' - ' . $j . '<br />';
+     j++; 
+  } while ($j <=10); // inner loop
+  i++;
+} while ($i <=10); // outer loop 
+</code>
+**Nested do while loops**
+
+**Nested for loops in HTML code**
+<code html>
+<div class="grid-container">
+  <?php for ($i=0; $i<5; $i++): ?>
+    <?php for ($i=0; $i<5; $i++): ?>
+      <div class="grid-item">
+        <=? $i . ' - ' . $j ?>
+      </div>
+    <?php endfor ?>
+  <?php endfor ?>  
+</div>
+</code>
+
+==== PHP Switch Statements ====
+
+The switch statement is similar to the if else if and else statements and it allows you to compare the same expression with multiple different values and run different parts of code. Based on which value matches the given expression.
+
+The keyword switch initiates the **switch** statement between following parentheses is the variable/expression, in which the value will be evaluated to one of multiple different cases. The expression can be as complex as needed or as simple as just a variable. After evaluation the variable or expression the code of the matching case branch will be processed of if no matching case is found the default case will be processed. The default case of switch equals the else of an if.  The default case is not required, so you don't have to use it if you don't need it. At the end of a case statement you can add a break statement, the break statement exits the case branch otherwise the following case branch will be processed until a break is found or the end of the switch statement. This might or might not be intended behaviour and it could introduce some unexpected bugs though there are some use cases to follow this fall through strategy and one of the use cases is that you might want to execute the same block of code for multiple values. Therefore you could have two cases glued to getter with case 'a': and case 'b': and the code for both following case 'b':
+
+<code php>
+<?php
+$dayOfWeek = date('l');
+
+switch ($dayOfWeek) {
+  case 'Monday': 
+    $message = 'Monday Blues!';
+    $color = 'blue';
+    break;
+  case 'Tuesday': 
+    $message = 'At least it\'s not Monday!';
+    $color = 'orange';
+    break;
+  case 'Wednesday': 
+    $message = 'Hump Day!';
+    $color = 'magenta';
+    break;
+  case 'Thursday': 
+    $message = 'One day till Friday!';
+    $color = 'pink';
+    break;
+  case 'Friday': 
+    $message = 'TGIF ;-)';
+    $color = 'green';
+    break;
+  case 'Saturday': 
+    $message = 'Best day of the week!';
+    $color = 'purple';
+    break;
+  case 'Sunday': 
+    $message = 'Have a nice weekend!';
+    $color = 'light-blue';
+    break;   
+}
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.ggstatic.com.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto&dispaly=swap" rel="stylesheet">
+<style>
+  body { 
+    font-family: 'Roboto', sans-serif;
+    background-color: <?= $color ?>;
+    color: white;
+    display: flex;
+    justify-connect: center;
+    align-items: center;
+    height: 100vh;
+  }  
+</style>
+</head>
+<body>
+  <h1><?= strtoupper($message) ></h1> 
+</body>
+</code>
+
+The switch statement does the loose comparison, it doesn't check the data types. The break in a switch statement will only break out of the switch statement, a surrounding loop, if there is one, would still continue. If you plan to exit the loop then add an optional integer how many level should be exited, so exit switch and loop add a 2 for break out of both. 
+
+You could use the continue statement similarly as the break statement, but it will result in a warning. The advantage of switch against multiple else if is the performance of evaluating switch once and evaluating elseif multiple times.
+
+
+==== PHP Match Expression ====
+
+The Match Expression is pretty much the same as the switch statement with just a few differences in syntax. The Match Expression was introduced with PHP 8 and will not work in previous versions. In match we use the value instead of case value followed by an arrow and the command to be processed.
+
+<code php>
+<?php
+$paymentStatus = 1;
+
+$paymentStatusDisplay = match($paymentStatus)
+  1 => 'Paid',
+  2,3 => 'Payment Declined',
+  0 => 'Pending Payment',
+  default => 'Unknown Payment Status';
+</code>
+The Match Expression is an expression and it evaluate to a value and therefor it can be assigned to a variable. The Match Expression does not need a break, it will return on value and is done, it will not fall through to all other cases. In the Switch Statement the default branch is optional, in Match Expression it's mandatory, if the branch is not found this could lead to an error if the specified branch is not found. The Match Expression does a strict comparison, while switch dose a loose comparison with data type cast on the fly. The Match Expression does not make the Switch Statement deprecated.
+
+==== PHP Return, Declare & Tickable Statements ====
+
+=== Return Statements ===
+The return statement can be used to return the program execution back to the environment it was called from when a return statement is used in a function it will stop execution of that function and will return the given argument or expression.
+
+<code php>
+<?php
+function int $x, int $y) {
+  return $x + $y;
+}
+
+$x = sum(5, 10);
+echo $x;
+ech '<br />';
+echo 'Hello World';
+
+return 0;
+</code>
+The Return will not stop the execution of the script it will just stop the execution of the function and it passes back the execution back to were it was called from.
+
+The return statement in the main script will stop execution of the current script. The expression near the return is optional and if don't specify anything then the null value will be retuned.
+
+=== Declare Statements ===
+
+There are three declare statement directives.
+  * **declare - ticks** is just an event that occurs for tickle low-level statements in PHP that are executed by the parser what means is that when PHP script is  executing it executes bunch of statements right and most of these statements causes something called a tick which is kind of like an event but not all statements are pickable for a statements here cause a tick you could register a custom function to execute on each tick so for example we can do that by doing function onTick. The register tick function set the on tick to use the declare statement and the syntax of declare statement is just declare and then we put the directive in here and then we put the directive in here and that is ticks equal sign an the number. This number tells PHP how many tick statements should pass before it before it actually triggers that tick or an event and before that register function runs. You should not use this and probably won't ever need it, it does not have many use cases. One case of use case is some sort of benchmarking or profiling to see how efficient the code runs.
+  * **declare - encoding** can be used to specify the encoding per script but you should not use this and probably won't ever need it. 
+  * **declare - strict_types** is what you might want to use, if you want to have strict type checking for type system and strict type casting, not doing type conversion implicit and on the fly, needed to be declared in every PHP file. 
+
+**Tickable Statements**
+<code php>
+<?php
+$x = 3;  /* time of one tick */
+
+function onTick() {
+  echo 'Tick<br />';
+}
+
+register_tick_function('onTick');
+declare(ticks=3);
+</code>
+
+**Encoding Statements**
+<code php>
+<?php
+</code>
+
+**Strict Type System**
+<code php>
+<?php
+declare(strict_types=1);
+
+/**
+ * Add two integer
+ */
+function sum($x, $y) {
+  return $x + $y;
+}
+
+echo sum(5, 10);    // -> 15 
+echo sum('5', 10);  // Uncaught TypeError
+</code>
+
+
+===== PHP Include Code Files =====
+
+While writing your code for your website or application in a single PHP file it is painful to maintain scale and extend your code and extend eventually we'll need to structure and organize your code to help yourself in the future or help other developers who might work with your code. You can take to organize your code is to split your code into multiple files and simply include them wherever needed. We have four statements in PHP that you could use to include files these are 
+
+  * **include** - will include a file and if it fails, it will throw a warning and continue to execute the script.
+  * **require** - will include a file and if it fails, it wil throw a fatal error and stop executing the script.
+  * **include_once** - will include a file only once. If it has already been included, it will not include it again.
+  * **require_once** - will include a file only once. If it has already been included, it will not include it again.
+
+these statements simply include and evaluate the given file based on the file path, so the syntax is the keyword of the statement and then quotes and you put the file path in here, this will try to evaluate that file and include  it within the current PHP file. 
+
+The main difference between include and require is that include will result in a warning (Failed to open stream) while require will result in an error (Uncaught Error: Failed opening required) and stop the script execution if the file is not found. The default directory for include files is set in php.ini configuration file under the include_path section. If the file doesn't exist there or is not set then it looks for the file in the current directory of the current script. If not found there it's giving us an error or a warning.
+
+<code php>
+include '../db/config.php';
+require '../db/mysql.php';
+</code>
+
+Declaring a variable in one file and modifying in another is a bad habit and should not be done. That is the best way to introduce complexity and possible bugs to the code. Best use case is code reusability and structure and for returning something from the included file. You could include some helper functions and then require that file in all other files that need those functions. 
+
+A quick node that the include statement will return false on failure and one on success unless you add the return statement to the included file. The result of include statement could be assigned to a variable and be used for verifying the success or failure. This variable would hold the value if you add a return statement to the included file, this variable could be used as a container for HTML code, like a navbar and be displayed by PHP or alter the content on the fly with str_replace('About', 'Über uns', $navbar).
+
+===== PHP Functions =====
+
+Functions in PHP are similar to functions in other programming languages, it's basically a block of code 
+which can take some input, do some magic and then return a value. There are a lot of build in functions available and ready to use in PHP but you can create your own custom functions.
+
+You can create a function by using the function keyword followed by the name of the function which starts either by an underscore or a letter followed by the list of parameters that are accepted within parenthesis, separated by commas, this is optional so you don't have to define any parameter and finally you put your code block within curly braces. **Functions return null if you do not have a return statement in your code**. 
+
+<code php>
+
+foo(); // call the function defined above 
+
+<?php
+function foo() {
+  echo 'Hello World';
+}
+</code>
+**Where to define Functions**: Function can be defined before or after calling the function. Defining it after calling the function will also work, PHP will load everything first before it starts to work, as long as the code is loaded into the current script.
+
+**Defining Functions conditionally**: In defining Functions are a couple of exceptions if you are defining Functions conditionally that has to happen before you call that function, otherwise you'll get Uncaught Error: Call to undefined function.
+
+<code php>
+<?php
+if (true) {
+  function foo() {
+    echo 'Hello World';
+  }
+}
+
+foo(); // call the function defined above 
+</code>
+**Inner Functions**: Another exception is when defining functions within functions, because within PHP you are able to have Functions within Functions. Functions have a global scope they can be called from outside the Function that defines it, as long as the outer Function was called first or you'll get Uncaught Error: Call to undefined function.
+
+<code php>
+<?php
+foo();
+bar(); // don't call bar() before foo()
+
+function foo() {
+  echo 'Foo '
+  function bar() {
+    echo 'bar';
+  }
+}
+</code>
+You can not have two Functions with the same name, so defining another function foo inside bar will lead to an Can not redeclare Error when calling bar().
+
+Defining Functions conditionally or within functions makes Code hard to read and can easily run into errors.
+
+==== PHP return types ====
+
+You are able to type hint a return value. In the following example PHP will try to dynamically figure out which type is appropriate.  
+<code php>
+<?php
+function foo() {
+  return 1; // int or float?
+}
+
+var_dump(foo());
+</code>
+
+We can type hint this wit a : int right after the closing parenthesis of foo() to tell PHP this return value should be an integer. 
+<code php>
+<?php
+function foo():int { // ...
+</code>
+If you don't want to return anything then use void, then you'll get NULL as return value. The type hint void will not work if you explicitly return null, then it is no longer void because you try to return some kind of value, even if it is NULL and therefor you'll get an error 'A void function must not return a value'. If you need this use nullable types, indicated by a question mark
+<code php>
+<?php
+function foo(): ?int {
+  return null; // ? indicates return is int or null
+}
+
+var_dump(foo());
+</code>
+Otherwise you would get an 'Return value must be of type ...' Error. Sins PHP 8 you can **type hint multiple types** separated by the pipe char like **int|float|array** if you have to many types you can type hint **mixed** to accept multiple data types, mixed is not nullable so **no ? with mixed**. If you are using mixed you are not explicit, reconsider to leave it at all or be explicit.
+
+==== Parameters & Arguments ====
+You are able to define parameters of the functions within the parenthesis of the function definition.
+<code php>
+function add($a, $b) {
+  return $a + $ b;
+}  
+
+echo add(1, 2);
+</code>
+BTW: **Arguments are the actual values of parameters**, so in our example the arguments are the 1 and 2 within the parenthesis of the function call of sum function.
+
+Arguments by default are passed by value (original variable will be untouched) and you could change that and specify to pass by reference instead by adding an ampersand to the parameter.
+<code php>
+function add(&$a, &$b) { ...
+</code>
+
+=== Type hint parameters ===
+Just like you were able to type hint the return values you're also able to type hint the parameters (Named Argumentes)
+<code php>
+function add(int $a, int $b) { ...
+</code>
+Here you type hint a as integer and b as well, if you are enforcing strict type you can't pass strings or floats anymore, you would get an Uncaught Type Error. Using strict type is highly recommended because wen you define the types you exactly know exactly what to expect as type of arguments and what to expect as return value type. As discussed with return types we can use union type with the pipe char for parameters also.
+<code php>
+function add(int|float $a, int|float $b) { ...
+</code>
+Remember to be explicate, because type coercion can be tricky especially when using union types and can result in unexpected values.
+
+Resources: [[https://www.php.net/manual/en/language.types.declarations.php#language.types.declarations.union.coercive|Coercive typing with union types]] 
+
+=== Default values ===
+You can set default values for parameters, so you can call a function without values and without an Uncaught Argument Count Error. Parameters with a default value are called optional parameter, while those without a default value called required. You can assign scalar, array and null values as defaults, it can not be a function call or it can not be an object or things like that, it has to be a constant expression. 
+
+Optional Parameters must be defined after any non-optional or required parameters. 
+<code php>
+function add($a = 1, $b = 2) { ...
+
+echo add();
+</code>
+
+=== Splat Operator ... ===
+**Variadic Functions** are functions that accept a variable number of argument by using the Splat operator dot dot dot. Splat operator is not an official name, sometimes its called ellipsis operator, unpacking operator (Rest Operator or spread operator in JS).
+If we don't know the amount or the number of parameters to take the use splat Operator .
+The Splat operator can be used instead of defining multiple parameters. To use the Splat operator which is dot dot dot flowed by the variable name. It will capture the arguments that are being passed to the function into an array and numbers will now be an array containing all those arguments and now you could use all the build in array functions to do all kinds of calculations to this, you could also iterate over that array and just calculate manually.  
+<code php>
+function addAll(...$args) {
+  return array_sum($args);
+  // $total = 0;
+  // foreach($args as $arg) { 
+  //   $total += $arg;
+  // }
+  // return $total;
+}  
+
+echo addAll(1, 2, 3, 4, 5);
+</code>
+Alternatively you could use a single Array as with values and pass these to a single parameter, but then you would miss the option to define the datatype of the Variadic parameter as type hint for each element, because then the type is Array. 
+The Splat operator can be used to unpack an Array into separate arguments
+<code php>
+$numbers= [1, 2, 3, 4, 5];
+addAll(...$numbers);
+</code>
+The Splat operator passes this as separate argument when calling the function. Since PHP 7.4 you can use the Splat operator to unpack arrays within other arrays as a spread operation.
+
+What you can do use some required parameters and at least add the parameter with the Splat operator, so additional values will be stored there in the Variadic parameter using the Splat operator.
+<code php>
+function addAll(bool $manual, ...$args) {
+  if ($manual) {
+     $total = 0;
+     foreach($args as $arg) { 
+       $total += $arg;
+     }
+     return $total;
+  } else {
+    return array_sum($args);
+  }
+}  
+
+echo addAll(true, 1, 2, 3, 4, 5);
+</code>
+
+=== Named Arguments ===
+
+Named arguments were introduced in PHP 8. Named arguments allows you to pass arguments to the function based on the parameter variable name, which means that it doesn't have to be in the parenthesis order of function declaration. 
+<code php>
+<?php
+function add($a = 1, $b = 2) { ...
+
+echo add(a: 3, b: 7); // Named arguments the order no longer matters
+</code>
+
+There are many use cases for this on use case of this is if you ever want to change the order of the parameters you have to find the function in your code and change the definition there., or you have a bunch or parameters with default values you can name only the parameter you want to change the value.
+<code php>
+<?php
+setcookie(name: 'foo', value: 'bar', httponly: true);
+</code>
+Every named parameter can not be use multiple times, you would get a Named Parameter overrides previous argument Error. If you mix positional arguments and named arguments, the positional arguments have to be the first. 
+
+In passing an associative array the keys will be understood as named parameter. 
+<code php>
+<?php
+$arr = [ 'y' => 2, 'x' => 1 ]; // parameter names changed to definition
+echo foo(...$arr);
+
+foo(int $x, int $y): int {
+  var_dump($x, $y);
+}  
+</code>
+In non-associative array elements will be treated as positional arguments
+
+Resources: [[https://www.php.net/manual/en/functions.arguments.php#functions.named-arguments|Named Arguments]]
+
+=== Variable Scope ===
+Variable scope simply indicates the boundary where the variables can be accessed. We have the global and the local scope. For the most part variables in PHP only have a single scope and it sans within the include and required files as well. When you define a variable it is in an global scop meaning that it's available through out the script, it will also be available to the scripts that are included after using the include or required statement.
+<code php>
+<?php
+$name = 'Alice'; // Global scope
+
+include('script1.php');  // $name can now be used in script1.php script
+
+function sayHello ($user = 'Otto') { /
+  return "Hello " . $user; // Local scope
+}  
+
+echo sayHello ($name);
+</code>
+If you define a variable in a function, that variable have local scope and are limited to the local function scope and not out of the function. Global scope is not so global as expected, variables defined outside a function are unknown inside a function and you'll get a Warning Undefined variable. If you want to access a variable from outside the function use the global keyword to access variables in the global scope.
+<code php>
+<?php
+$name = 'Alice'; // Global scope
+
+function sayHello ($name='Otto') { // inner $name != outer $name
+  global $name; // Global scope not Otto or Susi but Alice
+  echo "Hello " . $name;  
+  $name='Bob'; // Global scope by reference
+}  
+
+sayHello ('Susi');  // -> Hello Alice
+echo $name; // -> Bob
+</code>
+PHP stores global Variable in an an associative array called GLOBALS, where the key is the variable name and the value is the variable value, so you could access them that way instead of using the global keyword.
+<code php>
+<?php
+$x = 5;
+
+function foo() {
+  echo $GLOBALS['x'];
+  $GLOBALS['x'] = 10;
+}
+
+foo();
+echo '<br />';
+echo $x;
+</code>
+The GLOBALS variable is a so called super global and PHP offers some more super globales that you could use but in general you should avoid using the GLOBALS array at all costs. It makes code harder to read, harder to maintain and a lot easier to introduce bugs instead. Use function parameters and returns to get data in and out of the function.
+
+=== Static Variables ===
+A static variable is a regular variable with the local scope, the difference is that the regular variable gets destroyed outside of the scope boundary while the static variable does not get destroyed and it retains it's value.
+
+The use case of static variables is e.g. to cache values from very expensive functions 
+<code php>
+<?php
+function getValue() {
+  static $value = null;
+  if ($value === null) {
+    $value = someVeryExpensiveFunction();
+  }
+  // some more processing with $value
+  reurne $value;
+}
+
+function someVeryExpensiveFunction() {
+  sleep(2); // simulate hard work
+  echo 'Heavy calculations are on going ... <br />';
+  return 10;
+} 
+
+echo getValue() . '<br />';
+echo getValue() . '<br />';
+echo getValue() . '<br />';
+}
+</code>
+
+==== Variable Functions In PHP ==== 
+
+PHP supports a concept called variable functions and that simply means that you could call functions from variables by appending parenthesis next to the variable.
+<code php>
+<?php
+function sum(int|float ...$numbers): int|float {
+  return arra_sum($numbers);
+}
+echo sum(1, 2, 3, 4);
+</code>
+Code alternative as variable function
+<code php>
+<?php
+function sum(int|float ...$numbers): int|float {
+  return arra_sum($numbers);
+}
+$x = 'sum';
+echo $s(1, 2, 3, 4);
+</code>
+This code works the same, when PHP detects parenthesis next to a variable it will looks for a function with the name as whatever the variable evaluates to. If the function does not exists PHP will throw an Uncaught Error Call to undefined function. To avoid such errors you could use a function is_callable to check if the variable evaluated function can be called as a function
+<code php>
+<?php
+function sum(int|float ...$numbers): int|float {
+  return arra_sum($numbers);
+}
+$x = 'sum';
+if (is_callable($x)) {
+  echo $s(1, 2, 3, 4);
+} else {
+  echo 'Not Callable';
+}
+</code>
+Variable functions will not work with language constructs like isset, is_empty, unset, print, echo, include or require you would needt to build a wrapper function around them and call those instead. 
+
+==== Anonymous Functions In PHP ==== 
+**Anonymous Function** or also often known as Lambda Functions, are functions that have no name, created using function keyword.
+
+  * **Callbacks**: a anonymous function passed as an argument to another function.
+  * **Closures**: a anonymous function that captures variables from its surrounding scope.
+  * **Lamda**: a short anonymous function, often used inline (in PHP: arrow functions fn).
+
+Create a normal function and remove the name this now is an anonymous function. In Addition to not having a name anonymous functions also need to end with a semicolon, otherwise you'll get an Parser Syntax error.
+
+Now this function is not being called because we're not evoking from anywhere. Because of this is an expression we could assign this to a variable. 
+<code php>
+<?php
+$sum = function (int|float ...$numbers): int|float {
+  return arra_sum($numbers);
+};
+
+echo $sum(1, 2, 3, 4);
+</code>
+You could also pass anonymous functions as arguments to another function and you could even return them from other functions.
+
+To use variables form outside an anonymous function could access the variables in the parent scope by using the use keyword and passing the variables that you want to access. The use keyword after the closing parenthesis and then and then you would put the variables that you want to access within the parenthesis. You can access variables out of its local scope is also known as the closure note that the is being copied into the anonymous function.
+<code php>
+<?php
+$x=110;
+$sum = function (int|float ...$numbers) use ($x): int|float {
+  echo $x;
+  return arra_sum($numbers);
+};
+
+echo $sum(1, 2, 3, 4);
+</code>
+The variables in the use list are a by value transfer, if you need to change a value of a variable within the anonymous function you need to add an ampersand to the variable to be changed in the function 
+<code php>
+<?php
+$x=110;
+$sum = function (int|float ...$numbers) use (&$x): int|float { //...
+</code>
+
+==== Callable & Closure Functions In PHP ==== 
+When a function is passed to another function as an argument and then is called within that function it's called a callback function. PHP has a lot of build-in functions that expect a callback function as an argument like array_map, array_filter or u_sort and so on. These functions accepts callbacks which are of the type of callable or closure. Callable/Clousure  type is a data type for functions that you pass as an argument. The difference is clousure must be anonymous functions where callable can be a normal function. 
+<code php>
+$square = function ($number) {return $number * $number}; 
+echo 'The square of 5 is ' . $square(5);
+</code>
+Closures example: The variable $square its surrounding scope
+
+There a few ways to pass a callback function as an argument, the first way is that you could define an anonymous  function directly between the parenthesis of the calling function, which is quite common 
+<code php>
+<?php
+$array = [1, 2, 3, 4];
+$double = array_map(function($element) {
+  return $element * 2;
+}, $array);  
+
+echo '<pre>';
+print_r($array);
+print_r($double);
+echo '</pre>';
+</code>
+Another way you could assigning a anonymous function to a variable and pass the variable 
+<code php>
+<?php
+$array = [1, 2, 3, 4];
+$callback = function($element) {
+  return $element * 2;
+};
+$double = array_map($callback, $array);  
+
+echo '<pre>';
+print_r($array);
+print_r($double);
+echo '</pre>';
+</code>
+The third way is by defining a function with a name and pass it as a string.
+<code php>
+<?php
+$array = [1, 2, 3, 4];
+function callback($element) {
+  return $element * 2;
+};
+$double = array_map('callback', $array);  
+
+echo '<pre>';
+print_r($array);
+print_r($double);
+echo '</pre>';
+</code>
+Of course we could apply the array to a self-made function as an function, variable, string or  
+<code php>
+<?php
+function callback($element) {
+  return $element * 2;
+}
+
+$square= function (callable $callback, int|float ...$numbers): int|float {
+  return $callback(array_sum($numbers));
+};
+
+$array = [1, 2, 3, 4];
+echo $square('callback', ...$array);
+</code>
+Remember variable functions as Closures are not hoisted, so functions need to be defined before using it, not as classic defined functions and hoisted. 
+
+**Closures** example: The variable $counter its surrounding scope
+<code php>
+function createCounter() {
+  $count = 0;
+  
+  $counter = function() use(&$counter) }
+    return ++$count;  // not $count++ 
+  };
+  return $counter;
+}
+
+$counter = createCounter();
+echo $counter() . '<br>';
+echo $counter() . '<br>';
+echo $counter() . '<br>';
+</code>
+
+
+**Recap Callback Functions**
+<code php>
+$numbers = [1,2,3,4,5];
+$squaredNumbers = array_map(function ($number) {
+  return $number * $number;
+}, $numbers);
+print_r($squaredNumbers);
+</code>
+**Callbacks** example: the closure is provided directly as an anonymous inline callback inside the array_map() call.
+
+<code php>
+$numbers = [1,2,3,4,5];
+$square = function ($number) {
+  return $number * $number;
+};
+$squaredNumbers = array_map($square , $numbers);
+print_r($squaredNumbers);
+</code>
+**Callbacks** example: the closure is assigned to the variable $square first and then passed to array_map().
+==== Lambda / Arrow Functions In PHP ==== 
+Arrow or Lambda functions were introduced in PHP Version 7.4 and is a cleaner syntax of an anonymous function with just a few differences arrow function syntax. A Lambda function is just a short form of an anonymous function, lambdas can be written using the arrow function syntax fn. That's why they are often called Arrow Functions and they have to be one liners.
+<code php>
+<?php
+$add => fn($a, $b) => $a + $b;
+echo add(1, 2);
+</code>
+At the end Lambda functions are anonymous function with shorter syntax using fn() and an arrow, is especially useful as an inline callback function like passing it as an argument to many of the PHP build-in functions. 
+<code php>
+<?php
+$array = [1, 2, 3, 4];
+$array2 = array_map(fn($number) => $number * $number, $array);
+
+echo '<pre>';
+print_r($array2);
+echo '</pre>';
+</code>
+There are a few differences between Lambda and other anonymous functions, first difference is you can always access the variables from the parent scope within the arrow functions without the need to use the use keyword. The arrow functions use the variables from the parent scope with the by value variable binding, which means that you can not modify the variable that was defined in a parent scope within the arrow function. 
+<code php>
+<?php
+$array = [1, 2, 3, 4];
+$y = 5;
+$array2 = array_map(fn($number) => $number * $number * $y, $array);
+
+echo '<pre>';
+print_r($array2);
+echo '</pre>';
+</code>
+Another difference is that arrow functions have a single expression and it returns the value of that expression, you can not have multi line expressions as in JavaScript with {} for multiple lines.
+
+==== PHP Work With Dates, Time & Zones ====
+
+Dates, time and time zones is an important but painful topic. Therefore the main functions are **time()** and **date()**. If you run time() without any parameter it returns a large integer and this is integer is an unix timestamp in seconds. It's the number of seconds since 01.01.1970 (Epoch).
+<code php>
+<?php
+echo time();
+</code>
+You could add a number of seconds to this timestamp to give you the time in future or subtract number of seconds to get the time in the past.
+<code php>
+<?php
+$currentTime = time();
+echo $currentTime . '<br />';
+echo $currentTime + 5 * 24 * 60 * 60; // now plus 5 days in seconds
+echo $currentTime - 1 * 24 * 60 * 60; // yesterday
+</code>
+This large numbers are not so useful but we can convert this into a date because you can not just display number the number of seconds to the user. We can use a function called date which accepts the [[https://www.php.net/manual/en/datetime.format.php|date format]] and optional time step as argument. If no time step is given, it uses the current time. 
+<code php>
+<?php
+$currentTime = time();
+echo "The date is " .  date('d.m.Y', $currentTime);
+echo " and the time is " . date('H:i:s');
+</code>
+**Formatter**
+  * **Y** - The year four digits
+  * **y** - The year two digits
+  * **m** - The month numeric with leading zero
+  * **M** - Short three letter month
+  * **d** - The day 2 digits with leading zeros
+  * **D** - The day of the week short name (eng.)
+  * **l** - The full day name of the week (eng.)
+  * **N** - 1 for Monday through 7 for Sunday 
+  * **h** - The hour with leading zero 12 am/pm
+  * **H** - The hour with leading zero 24h
+  * **g** - The hour without leading zero 12 am/pm
+  * **G** - The hour without leading zero 24h
+  * **i** - The minute with leading zero
+  * **s** - The second with leading zero
+  * **a** - AM or PM
+**Examples**
+  * **date('Y');** /* Year of now -> 2025 */
+  * **date('Y', 936345600);** /* timestamp in 1999 -> 1999*/
+  * **date('d-m-Y', 936345600);** /* -> 03-09-1999 */
+  * **date('Y', strtotime('1999-06-12'));** /* -> 1999 */ 
+  * **date('d-m-Y', strtotime('1999-06-12'));**  /* convert a String to a unix timestamp -> 12-06-1999 */
+  * **date('d-m-Y:h:i:s a');**  /* -> 11.09.2025:08:53:28 am */
+  * **date('d-m-Y:H:i:s');**  /* -> 11.09.2025:14:38:39 */
+By default all date and time functions use the zone that is set in PHP's configuration file, but you could override that by using one of php's build-in functions at runtime. If you wanted to convert that to a different time zone you could do date_default_time_zone_set('UTC'); and pass in a [[https://www.php.net/manual/en/timezones.php|valid time zone]]. Set the time zone before using time and date function. To get the current time zone you can get it as return of the date_default_timezone_get function. It is recommended to set the time zone to UTC, that way makes it easy for you to manage multiple time zones and you could do the conversion whenever you're displaying the time to the user.
+<code php>
+<?php
+echo 'Current timezone: ' . date_default_timezone_get();
+$currentTime = time();
+echo ' The date is ' .  date('d.m.Y', $currentTime);
+echo ' and the time is ' . date('h:i:s');
+date_default_timezone_set('Europe/Berlin');
+$tz = date_default_timezone_get();
+echo ' The ' . $tz . ' time is ' . date('h:i:s');
+</code>
+
+You can use a function mktime to get the unix timestamp based on the arguments you pass like hour year month and so on
+<code php>
+<?php
+$hour=0;   // (optional)
+$minute=0; // (optional) 
+$second=0; // (optional)
+$month=4;  // (optional)
+$day=10;   // (optional)
+$currentYear=null; // null eq current year (optional)
+$is_daylight=-1; // DST: if dst, 0 if not, or -1 (the default) if it is unknown (optional)
+echo date('d.m.Y g:ia',mktime($hour, $minute, $second,, $month, $day, $currentYear, $is_daylight)); 
+</code>
+You can also convert a string repeantation of a date into unix timestamp using the strtotime function
+<code php>
+<?php
+echo date('m.d.Y', strtotime('1964-01-07 12:38:00'));
+</code>
+**Special dates / relative formats**
+  * **date('d.m.Y', strtotime('yesterday'));**
+  * **date('d.m.Y', strtotime('tomorrow'));**
+  * **date('d.m.Y', strtotime('first day of february'));**
+  * **date('d.m.Y', strtotime('last day of february 2020'));**
+  * **date('d.m.Y', strtotime('second friday of January'));**
+You could also parse the date using a function called date_parse, this will return an array containing details about the date. You can also use date_parse_from_format, but notice if you take the wrong format you'll  get a wrong result with some errors.
+<code php>
+<?php
+$date = date('d.m.Y', strtotime('second friday of January'));
+echo '<pre>'; print_r(date_parse($date)); echo '</pre>'; 
+echo '<pre>'; print_r(date_parse_from_format('m.d.Y', $date)); echo '</pre>'; 
+</code>
+
+
+==== Some PHP Build-in Functions ====
+
+  * rand();       /* 0 <= rand() <= getrandmax() */
+  * rand(1, 10);  /* 1 <= rand() <= 10 */
+  * round(4.7);   /* -> 5 */
+  * round(4.3);   /* -> 4 */
+  * ceil(4.2);    /* -> 5 */
+  * floor(4.9);   /* -> 5 */
+  * sqrt(4);
+  * pi(); 
+  * abs(-5.9);
+  * max(1, 2, 3);
+  * max([1, 2, 3]);
+  * min(1, 2, 3);
+  * min([1, 2, 3]);
+  * number_format(1234567.1234567, 2, ',', '.'); /* 2 decimals , as decimal separator . as thousands separator */
+
+===== PHP - Work With Arrays ===== 
+
+[[http://php.net/manual/ref.array.php|Array Functions]]
+
+Sometimes you might want to **split an array into chuncks of arrays** with specified length. The function **array_chunk**, accepts an array as first argument the second argument is length and then the third argument is optional which is whether you want to preserve keys or not. 
+<code php>
+<?php
+require 'helpers.php';
+$itmes = [ 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5 ];
+prettyPrintArray(array_chunk($items, 2, true));
+</code>
+The **array_combine** function **creates an array from the given keys and values**, it will throw an Uncaught Value Error if the number of elements in the first array don't match the number in the second array, prior PHP versions would throw just a warning and return false instead. The first Array will provide its values as keys and the second will provide the values and will provide a new array
+<code php>
+<?php
+require 'helpers.php';
+$keys =   [ 'a', 'b', 'c', 'd', 'e' ];
+$values = [ 1,    2,   3,   4,   5 ];
+prettyPrintArray(array_combine($keys, $values));
+</code>
+The **array_filter** function **iterates over each array value and it passes the value to the given call back**. The return of the call back is true then the value is returned into the resulting array otherwise the element will be discarded.
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+$even = array_filter($array, fn($number) => $number % 2 === 0);
+prettyPrintArray($even);
+</code>
+The call back function is optional, if not given all values evauluating to false, as empty Array, String will be filtered out. By default the value is passed to the call back as the argument but we can change that by specifying the mode flag as the third parameter
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+$even = array_filter($array, fn($number) => $number % 2 === 0, ARRAY_FILTER_USE_KEY); // ARRAY_FILTER_USE_BOTH
+prettyPrintArray($even);
+</code>
+  * null                    $number would now a value
+  * ARRAY_FILTER_USE_KEY    $number would now a key of a key, value pair
+  * ARRAY_FILTER_USE_BOTH   now you would have two parameters first is value, second is key
+To **re-index** an Array after reorganisation (delete, filter values) use **array_values**, which will **return all values of an array** and the returned array will be indexed numerically 
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+$even = array_filter($array, fn($number) => $number % 2 === 0, ARRAY_FILTER_USE_KEY); // ARRAY_FILTER_USE_BOTH
+$even = array_values($even);  // now index is not 1, 3, 5, 7, 9
+prettyPrintArray($even);
+</code>
+The function **array_keys** would **return all keys** of an associated array, so you could also search for specific values and only return the keys for the values that match, as an optional parameter 
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8, 'i'=> 9, 'j' => 10 ];
+$keys = array_keys($array, 10);
+prettyPrintArray($keys); // -> [10] => j
+</code>
+This does a loose comparison by default but it could do the **strict comparison by passing true as the third argument**.
+
+**array_map** is one of the other functions that you properly use more often like array_filter. It simply applies the call back to each element of the given array. 
+<code php>
+<?php
+require 'helpers.php';
+// array_map(callable|null $callback, array $array, array ...$arrays): array
+$array = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+$array = array_map(fn($number) => $number * 3, $array);
+prettyPrintArray($array);
+</code>
+You can use array_map with multiple arrays
+<code php>
+<?php
+require 'helpers.php';
+$array1 = [ 'a' => 1, 'b' => 2, 'c' => 3, ];
+$array2 = [ 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8, 'i'=> 9 ];
+$array3 = [  'g' => 7, 'h' => 8, 'i'=> 9, 'j' => 10 ];
+$array = array_map(fn($number, $number2, $number3) => $number1 * $number2 * $number3, $array1, $array2, $array3);
+prettyPrintArray($array);
+</code>
+Be aware that the resulting array is re-indexed numerically and it no longer has the string keys because we're passing more than on array. If passing multiple arrays it is best to use arrays of the same length because the call back will be applied in parallel if you have uneven length then the shorter will be extended with empty elements.
+Note that if you're passing only a single array to the array_map function it will preserve the keys.
+
+The **array_merge** function allows you to **merge multiple arrays**. If arrays have the same numeric keys then it will not override the values but instead they will be appended also numeric keys will be re-indexed starting from zero. If you have the same string keys, then the later values will override the previous.
+<code php>
+<?php
+require 'helpers.php';
+$array1 = [ 1, 2, 3 ];
+$array2 = [ 6 => 4, 7 => 5, 8 => 6 ];
+$array3 = [ 7, 8, 9 ];
+$merged = array_merge($array1, $array2, $array3); // reorder arrays
+prettyPrintArray($merged); // [0] => 1 ... [8] => 9
+</code>
+A really useful function is **array_reduce**, which will reduce the array to a single value using the call back function that you pass, as creating the total price of an array containing bill data. The first parameter is an array and the second is an call back. The first value of the call back is the return value of the previous iteration, the second argument of the call back is the current iteration value, the third argument can initialize the first argument at the first iteration.
+<code php>
+<?php
+require 'helpers.php';
+$invoiceItems [
+  ['price' =>   9.99, 'qty' => 3, 'desc' => 'Item 1'],
+  ['price' =>  29.99, 'qty' => 1, 'desc' => 'Item 2'],
+  ['price' => 149.99, 'qty' => 1, 'desc' => 'Item 3'],
+  ['price' =>  19.99, 'qty' => 2, 'desc' => 'Item 4'],
+  ['price' =>   4.99, 'qty' => 4, 'desc' => 'Item 5'],
+];
+$total = array_reduce($invoiceItems, 
+                      fn($sum, $item) => $sum + $item['price'] *  $item['qty'], 
+                      0
+         ); 
+echo $total
+</code>
+The **array_search** will return the key of the first matching value. The first argument is the key to search for, the second argument is the array to search in, the third is optional to set comparison mode. The search is case sensitive. Every search will return false if you can not find a value, but it can return zero if it finds the matching value at the zeroth position.
+<code php>
+<?php
+// array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false
+$array = ['a', 'b', 'c', 'D', 'E', 'ab', 'bc', 'cd', 'b', 'd'];
+$key = array_search('c', $array); // return first match position
+var_dump($key); 
+</code>
+Alternatively to array_search is the function **in_array** to check if the value exists in an array and insteade of returning the key it just will return boolean true or false
+<code php>
+<?php
+// array_search(mixed $needle, array $haystack, bool $strict = false): int|string|false
+$array = ['a', 'b', 'c', 'D', 'E', 'ab', 'bc', 'cd', 'b', 'd'];
+if(in_array('a', $array)) {
+  echo 'Letter found';
+} else {
+  echo 'Letter not found';
+}   
+</code>
+Sometimes you might want to find the difference between arrays there are quite a few functions that can help you do that. On of them is **array_diff** what it will do is that it will compare the values of the first array against the rest of the given arrays and will return the values from the first array that are not present in any of the other arrays. Note that array_diff only checks the values and not the keys.
+<code php>
+<?php
+require 'helpers.php';
+$array1 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5];
+$array2 = ['f' => 4, 'g' => 5, 'i' => 6, 'j' => 7, 'k' => 8];
+$array1 = ['l' => 3, 'm' => 9, 'n' => 10];
+prettyPrintArray(array_diff($array1, $array2, $array3)); // -> [a] => 1, [b] => 2
+</code>
+If you plan to check the keys you will need to use another function called **array_diff_assoc** 
+<code php>
+<?php
+require 'helpers.php';
+$array1 = ['a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5];
+$array2 = ['f' => 4, 'g' => 5, 'i' => 6, 'j' => 7, 'k' => 8];
+$array1 = ['l' => 3, 'm' => 9, 'n' => 10];
+prettyPrintArray(array_diff_assoc($array1, $array2, $array3)); // -> [a] => 1, [b] => 2, [c] => 3, [d] => 4, [e] => 5
+</code>
+The keys and the vaulue have to match, thats why 'd' => 4 in array1 doesn't match 'f' => 4 in $array2. If you want to compare only the keys you can use **array_diff_key** 
+
+There are also plenty of functions available to help you sort arrays. Note that that some of these array functions don't return a new array instead they return Boolean and they take the array argument as reference so it modifies the original variable. Here are some of them. We have a function called **asort** which will **sort array by values** and you can pass a different sorting flag if needed. 
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 'e' => 5, 'c' => 3, 'b' => 2, 'd' => 4, 'a' => 1];
+asort($array);
+prettyPrintArray($array);
+</code>
+If you want to **sort by keys** we have a function **ksort**, this will sort by keys instead of the values.
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 'e' => 5, 'c' => 3, 'b' => 2, 'd' => 4, 'a' => 1];
+ksort($array);
+prettyPrintArray($array);
+</code>
+
+Another useful sorting function is **usort** where you can pass custom call back and sort it whichever way you want, Note the usort() function sorts by value, not by key.
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 'e' => 5, 'c' => 3, 'b' => 2, 'd' => 4, 'a' => 1];
+usort($array, fn($a, $b) => $a <=> $b);
+prettyPrintArray($array);
+</code>
+The spaceship operator returns zero if a and b are equal, 1 or greater zero when a is greater than b, less then zero or -1 when a is less then b. Notice that the keys were removed and it is numeric now that's because usort will remove custom keys and it will use the numeric keys instead.
+
+You can pull variables out of array or destructure the array into separate variables. There for we can use a language construct called list or a shorthand version of it which is just a square brackets. List is not a build-in function and instead it's a language construct 
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 1, 2, 3, 4];
+list($a, $b, $c, $d) = $array; // [$a, $b, $c, $d] = $array;
+echo $a . ' ' . $b . ' ' . $c . ' ' . $d . '<br />';
+</code>
+Keep the comma and skip the variable, to skip a value transferred. You could also destructure nested arrays  
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 1, 2, [3, 4]];
+[$a, $b, [$c, $d]] = $array;
+echo $a . ' ' . $b . ' ' . $c . ' ' . $d . '<br />';
+</code>
+You could also specify keys 
+<code php>
+<?php
+require 'helpers.php';
+$array = [ 1, 2, 3];
+[0 => $a, 1 => $b, 2 => $c] = $array;
+echo $a . ' ' . $b . ' ' . $c . '<br />';
+</code>
+[[https://www.php.net/manual/en/ref.array.php|more about Array Functions]] from the PHP Manual 
+
+**prettyPrintArray** is a **custom function** that was build and created and stored in helpers.php 
+<code php>
+<?php
+function prettyPrintArray (array $value) {
+  echo '<pre>'; print_r($value); echo '<\pre>'; 
+}
+</code>
+
+
+====== Advanced PHP Basics ======
+===== PHPs Configuration File - PHP.INI  ===== 
+
+Customize PHP by configuring the php.ini. The location of the configuration file depends on a few factors like operation system and so on. A few things to note here text enclosed in square brackets is ignored, semicolon indicates that it's a comment. Comments are often used as a in file documentation. The individual setting, so called directives are entries in the form something equals something else  like short_open_tags=Off and everything above is just comments explaining what this directive does. 
+
+You can change settings manually or you could use functions **ini_get** and **ini_set()** to get and update the directives, but some of these directives can not be updated through php during runtime it can only be updated through the php.ini file. There are a lot of options that can be configured check the [[https://www.php.net/manual/en/ini.list.php|List of php.ini directives]] and the [[https://www.php.net/manual/en/ini.core.php|Description of core php.ini directives]]
+
+The Changeable entry in the list indicates where this directive can be changed from, if it says ionize system or purdue then you cannot use ini_set to update the directive. Directives as mentioned can be updated during runtime and will only be effective during the script execution. 
+
+Note that once you update your php.ini you might need to restart your Apache server, for those changes to take effect.
+
+  * **error_reporting** allows to set different levels of php error reporting
+    * E_ALL will report all errors including warnings notices and everything will get reported. You can use bitwise operators to decide the level of your reporting E_ALL & ~E_DEPRECATED & ~E_STRICT will hide deprecated and strict notices from the page. While during the development you want E_ALL just reports everything as mentioned you could change this during the runtime.
+  * **display_errors** display errors on the screen (1) or not (0)
+  * **error_log** indicates where the error should be logged
+  * **post_max_size** determins how much data can be posted in a request
+  * **max_execution_time** sets the maximum numbers of seconds can run before it is timed out and terminated, by default it's set to 30 seconds 
+  * **memory_limit** is the maximum amount of memory a script can consume. The memory_limit=-1 removes the limit entirely but it's recommended to optimise memory management to see where the memory is being consumed, not to run in memory issues.
+  * **file_uploads** enables or disables the file uploads.
+  * **upload_tmp_dir** indicates the temp folder where the temp files will be stored when doing file uploads.
+  * **upload_max_filesize**
+  * **date.timezone** is the default time zone 
+  * **include_path** specifies the list of directories where the require and include functions deal when opening files would look for files by default.
+<code php>
+<?php
+if (ini_get('error_reporting') == E_ALL) {
+  ini_set('error_reporting', E_ALL & ~E_WARNING);
+}
+</code>
+
+===== Basic Apache Webserver Configuration ===== 
+
+The Apache can be installed and configured manually that's the point of why it's important to at least understand and know how the configuration looks like and how to change it if needed, like how to rewrite urls using htaccess and so on. This is not directly part of PHP but rather it's a part of Apache itself, but it's still an important topic, because it affects PHP programming.
+
+The Apache configuration file location will depend on a few factors but the default location is something **/usr/local/apache2/conf/httpd.conf** or apache2.conf. In addition to the configuration file you could also view logs somewhere around **/var/log/apache2/**. The location depends also on a few factors and you're able to customize them in the httpd.conf.
+
+The configuration file contains one directive per line and the number sign indicates that it's a comment, so it will be ignored. The file is self documented and it's mostly self-explanatory. Note that the changes to configuration files take effect only after starting or restarting Apache Server. The configuration file, where the document rule are set, will be different for production and development, depending on what you use.  
+
+  * **ServerRoot** the top of the directory tree of configuration files
+  * **Listen** allows you to bind Apache to specific IP addresses and/or ports
+  * **DocumentRoot** is the root directory of your website (web pages and apps)
+  * **LoadModule** Modules are basically just extensions of Apache
+  * **<IfModule ...>** here you could include certain directives conditionally only if the specified module is present
+    * **ServerAdmin** Your mail address, where problems with the sender should be e-mailed
+    * **ServerName** DNS name and port of the server used to identify itself
+  * Scope directive sections **<Director />** or **<Directory /var/http>** is a section when directives are placed in the main configuration file outside of the section they are applied to the entire server. You can scope the directives and enclose them in sections to only apply them to certain parts of the server, you can apply them to specific files, directories or urls and you could even nest multiple scope sections if needed. The <Director /> specifies all directories on the server, as default deny access to the entire file system of the server. You need explicitly allow access to specific directories. That's what happens at <Directory /var/http> allowing certain access to htdocs (/var/www) directory to control what directives can be used within the htaccess files. 
+  * The section **<Files ".ht*">** indicates that all files that start with .ht are denied, like .htaccess or .htpasswd, will not be able to be accessed. Most of this directives can be put in scoped sections, some of them don't make sense to be put in certain section like ErrorLog.
+  * **ErrorLog** 
+  * The **Include** directive can be used to include other configuration files. Which allows you to split and organize your configuration files so instead of putting all or your configurations into one file you could actually split them and put them into separate configuration files and then include them within your main configuration file and one of the important files here is the httpd-vhost configuration for configuring virtual host
+    * You can run multiple web sites on a single server at the same time this is called virtual hosting. You can have IP or name based websites. Meaning you can have different IP's for each website or you could have different name for each website for the same IP. You're able to apply configuration directives to specific hosts or websites by using the **virtualhost** scope directive and apply the directives within it only to that specific website
+      * At least you need the **DocumentRoot** directive and the **ServerName** for reflecting on DNS naming
+
+The htaccess files are just configuration files also called distributed configuration files that allow you to make configuration changes on a per directory. If we put a .htaccess file in a directory it will apply the configuration changes to this  directory and any subdirectories within it. The .htaccess files are read on ever request and changes to these files are effective immediately meaning that you don't need to restart the Apache server. 
+
+Not all directives can be placed in .htaccess files, you should check the context of the directive in the Apache documentation and also the main configuration file controls what directives can be placed in .htaccess files (AllowOverride in <Director /> not allowing overriding anything but in the htdocs <Directory /var/www> we have AllowOverride All). It is highly recommended that you don't use .htaccess files unless you really need to, the reason behind that is because .htaccess are read on every request and you can impact the server's performance. 
+
+Any configuration that you can put in .htaccess file, can also be put in the main configuration file and be scoped to specific directory. If you don't have root access to the server or access to the main configuration file like in a shared hosting providers infrastructure will not allow root access or changing main configuration. If you have root access the suggestion is to disable .htaccess at all by changing AllowOverride All to None in <Directory /var/www>. That way the server does not even attempt to look fo .htaccess files. 
+
+The most common usage of htaccess files is to rewrite URL's. If you have root access store this in the main configuration file and it will work fine or even better or put it in a separate configuration file like the virtual host file  and include it from the main configuration file than leaving it in .htaccess. The syntax in the identical in every way.
+
+Rewriting URL's needs the [[https://httpd.apache.org/docs/current/mod/mod_rewrite.html|Apache Module mod_rewrite]] loaded in the main configuration file. The rewrite module allows you to rewrite and manipulate request URLs. You could perform redirects, you could do pattern matching using regular expressions and so on. 
+
+URL Rewriting to pretty URLs (.../blog/your-post-title, .../about, ... without .php or .html) therefor we need to tell our server to process all of these requests through a proxy (index.php), so index.php will be the entry point to our application.
+
+**.htaccess**
+<code conf>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  
+  RewriteRule ^ index.php [L]
+</IfModule>
+</code>
+  - Check if module is enabled by using if module command.
+  - Turn on Rewrite Engine and then write conditions and rules. 
+  - For the conditions we need to make sure, that the requested file name is **not an actual file %{REQUEST_FILENAME} !-f** or **an actual directory %{REQUEST_FILENAME} !-d**, the reason we're adding these two conditions we don't want physical directories or physical files to be processed by our index.php. If user were request an asset like an image or an css or JavaScript file we don't want to process that through index.php, we can just serv it as is.
+  - Redirect every request to index.php **^ index.php [L]**
+Now everything will be send to index.php, therefore we need to parse the request URL inside the index.php and requiring the necessary file or by using something called routing. 
+<code php>
+<?php
+var_dump($_Server['REQUEST_URL']);
+</code>
+**index.php** as a primer
+
+The **rewrite configured in main config file**. The only difference is the **slash in front of index.php**.
+<code conf>
+<VirtualHost *:80>
+  ##ServerAdmin webmaster@dummy-host.example.com
+  DocumentRoot "/var/www"
+  ServerName sasd.de
+  ##ErrorLog "/var/log/apache2/error.log"
+  ##CustomLog "/var/log/apache2/access.log" common
+  
+  <IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+      
+    RewriteRule ^ /index.php [L]
+  </IfModule>
+</VirtualHost>
+</code>
+===== Nginx - PHPFPM VS Apache =====
+
+Apache comes by default with something called mod.php it basically means that PHP interpreter is embedded within Apache web server and runs PHP as an Apache module (phpinfo(); -> **Server API: Apache 2.0 Handler** - indicate usage of mod.php). The downside of mod.php is that the footprint for each Apache process is larger because it requires more resources when the PHP interpreter is embedded within Apache. The Process will still contain PHP interpreter even when the request is for non-php files like static HTML files, through this can be solved by using content delivery network or cdn to load your assets. 
+
+[[https://www.php.net/manual/en/install.fpm.php|PHP-FPM]] stands for PHP FastCGI Process Manager, which is basically an alternative more advanced implementation of fast cgi. It's a gateway that sits in between your web server and your PHP code, so when the PHP file is requested [[https://nginx.org/en/|NGINX]] will communicate with FPM and have it processed, only the PHP files and not the static files like style sheets or images. Note that you could use FPM with Apache as well as NGINX.
+
+**Should you use NGINX with FPM instead of Apache?** That really depends on your application and what you want to do. If you're already working on Apache you don't need to switch to NGINX unless you're facing some issues and want to try NGINX, but usually it's not worth the time you would need to spend to switch from Apache to NGINX. If you're starting a new application then maybe given NGINX a try.
+
+ 
+[[https://www.f5.com/go/product/welcome-to-nginx|Nginx Config Docs]]
+
+
+
+More: [[https://www.variomedia.de/faq/Was-ist-PHP-FPM-und-wie-kann-ich-es-nutzen/article/239|Was ist PHP-FPM und wie kann ich es nutzen?]] or [[https://dev.to/arsalanmee/understanding-php-fpm-a-comprehensive-guide-3ng8|Understanding PHP-FPM: A Comprehensive Guide]]
+===== Docker =====
+
+If you plan to start a new project on your local and get to work though tools like XAMPP lacks in features and is not meant for production. This can introduce issues where your development environment is different from production environment and what works on your local might not work in production and vice versa. This is where docker can help you. You can be sure that your local development environment is very close to your production environment. Docker also allows you to work on multiple projects at the same time even if the PHP versions are different. It basically lets you bundle your development environment in isolated containers that are portable. This is hard to archive with tools like xampp and sometimes it's impossible. Docker can containerize your dependencies and your entire project which then can easily be shared, deleted or ported over to another OS. You can also split multiple services like PHP, source code, webserver, database and other services like Redis into multiple containers. So you can have the webserver in one container, create a separate container for PHP and the database in another container. You can decouple this services, this is always good because you can easily swap one container out with another, instead of messing with the container that contains everything. 
+
+  * A **Container** bundles up the application with all of its dependencies and necessary configuration. You could have all of your dependencies installed in one or in separate containers. Docker containers begins as a simple vanilla Linux that does not have anything installed for the application, then we tell the container what needs to be installed like all the dependencies that are needed to run the application. This is done through a file called Docker file is a text file where you write instructions on how to build a Docker image.
+  * The **Docker image** is a read-only executable package that includes everything needed to run your application like source code, dependencies, environment variables, configuration and so on. Docker images and containers are pretty much the same, the difference is that the images are read-only and they can exist without containers. However for containers to run they need an image in a way you can think of images like templates you cannot start or run these images but instead you can use them as a base or a template to build your containers so essentially a container is just a runtime instance of an image that can now be modified. These images or containers are stored in repositories that might be stored on private or public repositories like [[https://hub.docker.com/|Docker hub]] with lots of [[https://hub.dockermirror.com/u/library|free images]]. You can then pull those images from the repository and use them to build your containers on local staging or in production. 
+
+==== Installing Docker & Docker Compose ====
+
+If you don't have Docker & Docker Compose installed on your machine please go ahead install them from [[https://docs.docker.com/get-started/get-docker/|Get Docker]] for Mac, Windows or Linux and follow the [[https://docs.docker.com/compose/install/|Overview of installing Docker Compose]] for Mac, Windows or Linux
+
+==== Using Docker & Docker Compose ====
+
+Create a folder docker, for all the things about docker, and beside it a folder src for project code. Inside the docker folder docer-composer.yml file and a Dockerfile and create another folder called nginx. This is a project structure for a docker project, you could structure them in any way you want, you could have docker directory directory within your source code if you want. It's up to you how you want to structure it. The source will contain all the necessary php code, images, HTML pages, JavaScript code and all the other stuff not coming from a CDN. 
+
+**Dockerfile**
+<code docker>
+FROM php:8.0.2-fpm
+
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    zip \
+    vim \
+    unzip
+
+WORKDIR /var/www
+</code>
+The first line of the Dockerfile is **where we're pulling the image from**, so here we're using php 8.0.2 fpm image.. Try to [[https://hub.docker.com/search?q=php&type=image|search Docker hub for php images]] here you see all the images that match to the search and you can pick whichever you want. You could go into the official php image and there you'll see all the [[https://hub.docker.com/_/php/tags|available tags]] that we can use to pull from. Here you see PHP with Apache, with FTM and with different Linux distributions,
+
+In the Dockerfile you see the **installation of additional dependencies**, starting with **RUN apt ...** in our container, you could put your custom commands or dependencies that you have for your application. You might also need to set up some user and group and permissions depending on what os you're working with. Finally **set the working directory**. 
+
+This docker file by itself will work and we will get php fpm up and running but this will launch a single container. We need a container for the web server right in this case we  need a container for NGINX and later another container for MySQL and so on. So we need to run multiple containers at the same time and you can do that by using docker cli and some shell scripting to fire off a bunch of commands but there is a better way. There is a tool called docker compose which makes managing this container simpler via yaml files.
+
+**docker-compose.yml**
+<code yaml>
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: demo-php-app
+    restart: always
+    working_dir: /var/www/
+    volumes:
+      - ../src:/var/www
+  nginx:
+    image: nginx:1.19-alpine
+    container_name: webserver-nginx
+    restart: always
+    ports:
+      - 8000:80
+    volumes:
+      - ../src:/var/www
+      - ./nginx:/etc/nginx/conf.d
+</code>
+We are using the yaml verion 3.8 and we only two services right now. We have the **app service** as our application and we have the **nginx service** as our web server. In the app service we are telling the service to use the docker file that we just created above, in the context of the current directory. This is loading the docker file from here with additional parameters like container name. **Docker volumes** are important it's basically a file system that is mounted on the docker container and is stored on the host machine and in the app service it's referencing the source directory where the actual source code is. So Docker volumes basically maps and mounts the source directory on the host to /var/www directory in the container and then we have nginx service which is our web server.
+
+We are using NGINX 1.19 on alpine Linux, giving it a container name and we map the **ports** of the localhost to the port in the container. So we can go into the browser and type localhost port 8000 and access the website, but that port is mapped to the port 80 thats running in the container for NGINX. This allows you to have multiple projects at the same time on different ports. So if you had another project where you had a custom docker compose file for that you could set that port to be 8001 and then you could have both projects running at the same time one running on port 8000 and the other running on 8001. In this other project it would be the same thing the volumes we're sharing the source code and also we're sharing the configuration file because we want to use a custom configuration file for NGINX.
+
+**docker/nginx/nginx.conf**
+<code config>
+server {
+    listen 80;
+    index index.php;
+    error_log  /var/log/nginx/error.log;
+    access_log /var/log/nginx/access.log;
+    error_page 404 /index.php;
+    root /var/www/public;
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+        gzip_static on;
+    }
+}
+</code> 
+As you can see NGINX the configuartion file looks a lot simpler than Apache's configuration. We are telling NGINX to **listen** on port 80. The **application entry point** (index) is index.php. Setting **log files path** and we want a **404 error page** be handele by the index.php, this will prevent showing the default 404 page and we can have som custom logich in index.php that will bootstrap the application to decide how to display a 404 error page. Then we set the **document root** which is /var/www/public and we're matching PHP files in **location** so here we're basically telling nginx to pass php requests to php fpm **fastcgi_pass** which runs an **app service on port 9000**. We are setting the **fastcgi_index** file params and setting a script file name using the document root, then for **any non-php files** we try to locate that file in the document root and if the file can not be found then we let our index.php figure out how to load or handle that (try_file) and turn on gzip compression. You could also look at  the [[https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/|default NGINX configuration file on nginx website]] and see what other options they provide that you could customize.
+
+**src/public/index.php**
+<code php>
+<?php
+// phpinfo();
+
+echo '<pre>; print_r($_SERVER); echo '</pre>';
+</code>
+
+To test all that open a terminal and change into the docker folder and run 
+<code bash>
+docker-compose up -d 
+</code>
+to start docker as a background process. This will lead to many messages will downloading and configuring the necessary stuff in the containers. Run 
+<code bash>
+docker ps 
+</code>
+to see the currently running containers. In the IMAGE column you can see the app and the NGINX services running. 
+
+If you need a customised php.ini as well you could do that as well the same way through the Docker file or the Docker compose as we shared the nginx.conf.
+
+A quick note this setup is not production ready, it is for development only and for production you would need to tweak some settings and adjust few things.
+===== Error handling =====
+
+There are different types of errors that can be generated by PHP
+  * Fatal Errors
+  * Syntax Errors
+  * Notices
+  * Parser Errors
+  * ...
+Some of this Errors will stop the script execution like fatal errors but some will not like Warnings. PHP determines what errors to report based on the error reporting configuration in php.ini. You can override that by calling **error_reporting(0)** at runtime, which allows you to change the reporting level.
+  * error_reporting(0); turn off reporting
+  * error_reporting(E_ALL); report all errors and warnings
+  * error_reporting(E_ALL & ~E_WARNING); report all errors but not warnings
+You should always use the [[http://php.net/manual/en/errorfunc.constants.php|Predefined Error Constants]] to set the reporting level.
+  * **E_ERROR** Fatal run-time errors
+  * **E_WARNING** Run-time warnings
+  * **E_NOTICE** Run-time notices
+  * **E_USER_ERROR** 
+  * **E_USER_WARNING**
+  * **E_STRICT**
+You can manually trigger by calling the **trigger_error()** function.
+<code php>
+<?php
+trigger_error('Example error', E_USER_ERROR);     // Stop script
+trigger_error('Example warning', E_USER_WARNING); // Continue script
+echo "Hello";
+</code>
+You can only use _USER_ constants, you cannot trigger regular warnings like E_WARNING, this would lead to Uncaught Value Error.
+
+When an error happens in PHP, PHP will determine if the error has to be displayed or not by using the  display_errors configuration directive. You should always have this turn off in production, to avoid exposing some sensitive information and internal errors to the user. This errors can be logged for you to review even when you are not displaying then as long as you have the error logging turned on.
+The location of error log depends on a few factors. You can also log errors manually by using **error_log()** function
+<code php>
+<?php
+error_log()
+</code>
+But the question how to handle errors is still open. Luckily PHP allows us to create a custom error handler to tell PHP how to handle errors at runtime. This gives you the power to customize it to your needs, maybe you want to perform some clean-up actions, when the error is caught or log it in a certain way.  
+
+To register a customer error handler we need to **create a error handler function, normally called errorHandler**. The function accepts at least two arguments, the first argument has to be the error type and has to be an integer and the second is the error message as a string. You can also can accept the file and the line number where the error happened. In the error handler function you can do what you want, use if or switch statements to handle multiple errors. To **register the error handler use the set_error_handler**, which accepts the name of the error handler call back function as the first argument and the error level as the second argument so wen can set it to E_ALL to enable 
+customize error handling for all errors. You can customize this to every error level you need.
+<code php>
+<?php
+function errorHandler(int $type, string $message, ?string $file = null, ?int line = null) {
+  echo $type . ': ', $msg . ' in ' . $file . ' on line ' . $line;
+  // return ; // return error specific message, true/false or int value
+  exit; // stop the script for fatal or important errors
+}
+
+set_error_handler('errorHandler', E_ALL);
+</code>
+This customized error handler will override what ever you have set for error reporting in configuration setting. Parse and compile errors can not be handled in our customized error handler because it can only handle runtime errors. You can always **restore the previous error handler** by calling the restore error handler function.
+
+
+
+
+===== Working with File System in PHP =====
+
+You'll need to work with [[https://www.php.net/manual/en/ref.filesystem.php|Files and Filesystem Functions]] in PHP at some point. If you need, as an example, to list all files and directories the function is **scandir()** and that will just list all files and directories within the given path.
+<code php>
+<?php
+$dir = scandir(__DIR__);
+var_dump($dir);
+</code>
+Now you could use a loop to loop through the array and determine what to do with each entry. You can use things like **is_file()** or **is_dir()** to decide if the entry is a file or a directory. 
+
+You could create a new directory using the **mkdir()** function or using **rmdir()** to delete a directory. The built-in function mkdir accepts three arguments, the first is the directory name and you can pass the permissions as second argument and the third argument is whether you want to create directories recursively or not. The second and third argument are optional.
+<code php>
+<?php
+mkdir('foo/bar', recursive: true);
+rmdir('foo/bar');
+</code>
+When deleting a directory it has to be an empty directory, so every file and subdirectory has to be removed before, otherwise you'll get a warning.
+
+You could check if the file or directory exists by using a function called **file_exists()**. Something to be aware of here is that PHP will cache the return values of some of the file related functions for better performance. If you need to put content into a file we can use a function file put contents to do that.
+<code php>
+<?php
+if(file_exists('food.txt')) {
+  echo filesize('food.txt');
+  file_put_contents('food.txt', 'hello world');
+  // clearstatcache();
+  echo filesize('food.txt');
+} else {
+  echo 'File not found';
+} 
+</code>
+The filesize is cached from the first call so it has changed but PHP will not notice unless you use [[https://www.php.net/manual/en/function.clearstatcache.php|clearstatcache]] to clear file status cache.
+
+Mostly used is open a file with **[[https://www.php.net/manual/en/function.fopen.php|fopen]]** and read and process it line by line. Opening a file with [[https://www.php.net/manual/en/function.fopen.php|fopen]] allows multiple modes like reading only, writing or reading and writing. The result of [[https://www.php.net/manual/en/function.fopen.php|fopen]] ends in a data type resource. A resource is just a variable that referees to an external resource which can be a stream, file and so on. 
+<code php>
+<?php
+$file = @fopen('food.txt','r');
+if($file) {
+  // ...
+} else {
+  echo 'File not found';
+}</code>
+There are functions in PHP that create, return and work with resources and **[[https://www.php.net/manual/en/function.fopen.php|fopen]]** is one of them. In addition to opening local files you could also open remote files by specifying url but that might not always work because opening files remotely might be disabled by the server. If the file is not found [[https://www.php.net/manual/en/function.fopen.php|fopen]] will return false and display a warning. You could use error control operator to suppress this warning and then check if the return is false to see if the file was opened successfully or not. This is not good and you should avoid suppressing any errors, instead consider building a better error handling so instead of supressing errors, you could use one of the other functions to check if the file actually exists so you could do the following.
+<code php>
+<?php
+if(!file_exists('food.txt')) {
+  echo 'File not found';
+  return
+} 
+$file = @fopen('food.txt','r');
+</code>
+After opening the resource successfully, now we can read this file line by line with a while loop. The fgets function reads one line from the file and assigns it to the variable $line. Then we loop for every line until the retuned value from fgets is false. Note the use of a strict comparison here because the returned value from fgets might be a value that could evaluate to a false, so doing loose comparison could result in unexpected bugs, like stop reading the file after reading a empty line. Finally after working with a resource or with a file we just close that resource using the **fclose** function.  
+<code php>
+<?php
+if(!file_exists('food.txt')) {
+  echo 'File not found';
+  return
+} 
+
+$file = @fopen('food.txt','r');
+while ($line = fgets($file)) !== false)) {
+  echo $line . '<br />';
+}
+
+fclose($file);
+</code>
+
+You could also read from a csv file using **fgetcsv**, it's similar to fgets but fgetcsv parses the line when it rads it and it returns an array that contains the fields it has red the default delimiter for fields is comma, but you could change that by specifying it as one of the arguments.
+<code php>
+<?php
+if(!file_exists('food.txt')) {
+  echo 'File not found';
+  return
+} 
+
+$file = fopen('food.txt','r');
+while ($line = fgetscsv($file)) !== false)) {
+  echo '<pre>';
+  print_r ($line);
+  echo '</pre>';
+}
+
+fclose($file);
+</code>
+
+Another way of reading file content is by using **file_get_contents** function which will store the file content into a variable
+<code php>
+<?php
+if(!file_exists('food.txt')) {
+  echo 'File not found';
+  return
+} 
+$content = file_get_contents('food.txt', offset: 3, length:2);
+echo $content;
+</code>
+You could also specify the offset and length to get the content at specific location, like 3rd position two characters. You could also get the content of a remote file by specifying a URL, through this might not always work depending on the configuration on that server. Recommendation is not to use file_get_contents to get the content of a remote file. There is a better to get content of a file from a remote server and make http requests by using a library called curl. 
+
+You can write content into a file by using **file_put_contents** function which basically does the same thing as **fopen**, **fwrite** and **fclose** combined if file does not exist it will create it otherwise it will overwrite. You could also have content appended instead of overwriting it by specifying the flag for it as the third argument.
+<code php>
+<?php
+$content = file_put_contents('food.txt', 'hello', FILE_APPEND);
+</code>
+
+To **delete files** you could use a function called **unlink**
+<code php>
+<?php
+unlink('food.txt');
+</code>
+
+You can **copy a file** using a function called copy. If the target file already existed at the destination it would overwrite it.   
+<code php>
+<?php
+copy('food.txt','drinks.txt');
+</code>
+If you want to **move a file** instead of copying you could use a function called **rename** and rename will work for both **files and directories**.
+<code php>
+<?php
+rename('food.txt','drinks.txt');
+</code>
+
+To get informations about a file you could use a function called **pathinfo**, which will return an array containing things like file name extension, base name and so on.  
+===== Build-In Constants & Superglobals =====
+
+<code php>
+__DIR__  // equals the directory of the file queriying the function relative to Webserver Document root
+</code>
+
+  * Group of global variables that are accessible from anywhere in a PHP script, including functions and classes.
+  * They are associative arrays that store information about things such as the current request, the server, sessions, cooies and more
+  * They make PHP very practical, however, if you are not careful, they can be a source of security vulnerabilities
+
+  * **$GLOBALS**: References variables in the global scope
+  * **$_SERVER**: Contains info about the server such as hostname, file paths, etc
+  * **$_GET**: Variables passed to the script via query params and GET forms
+  * **$_POST**: Variables passed to the script via POST forms
+  * **$_FILES**: Items uploaded to current script
+  * **$_COOKIE**: Variables passed to the script via HTTP cookies
+  * **$_SESSION**: Session variable available to the script
+  * **$_REQUEST**: Contains the contents of $_GET, $_POST and $_COOKIE - not recommended
+  * **$_ENV**: Variable passed to the current script via environment method
+
+**Walk through a given Superglobal** 
+<code php>
+<?php
+function printAssocArray(array $arr): void {
+    foreach ($arr as $key => $value) {
+        echo $key . " => " . $value . PHP_EOL;
+    }
+}
+
+printAssocArray($_SERVER);
+?>
+</code>
+
+==== GLOBALS & ENV ====
+
+**The $GLOBALS superglobal in PHP is an associative array that stores references to all global variables in a script.**
+
+You can access any global variable from anywhere (including inside functions or methods) by using $GLOBALS['foo'].
+
+<code php>
+$foo = 'Global variable';
+
+function test() {
+  $foo = 'Local variable';
+  
+  // always use isset( )  or ?? ''; before accessing a SUPERGLOBAL to secure not set result
+  echo 'Local foo  ' . $foo ?? '';
+  echo 'Global foo ' . $GLOBALS['foo'] ?? '';
+}  
+</code>
+**Hint:** $GLOBALS['foo'] is $GLOBALS['foo'] not $_GLOBALS['foo']
+
+**Set and Get Environment Variable**
+<code php>
+// Set Environment Variable
+putenv('DB_HOST=localhost');
+putenv('DB_USER=root');
+
+// Get Environment Variable
+$host = getenv('DB_HOST') ?? '';
+$user = getenv('DB_USER') ?? '';
+
+echo getenv('HOME');
+var_dump(getenv()); // get all Environment Variable
+</code>
+
+==== SERVER ====
+
+  * **Request Method**: $_SERVER['REQUEST_METHOD']; -> GET, POST, etc.
+  * **Server Protocol**: $_SERVER['SERVER_PROTOCOL']; -> HTTP/1.1
+  * **Server Name**:$_SERVER['SERVER_NAME']; -> localhost, api.sasd.de
+  * **Server Port**: $_SERVER['SERVER_PORT']; -> 80
+  * **Server Software**: $_SERVER['SERVER_SOFTWARE']; -> PHP 8.2.7 Development Server, APACHE..., NGINX
+  * **Server Admin**: $_SERVER['SERVER_ADMIN']; -> Webmaster
+  * **Document Root**: $_SERVER['DOCUMENT_ROOT']; -> /var/www/html
+  * **Script FileName**: $_SERVER['SCRIPT_FILENAME']; -> Document root + index.php
+  * **Script Name**: $_SERVER['SCRIPT_NAME']; -> index.php
+  * **PHP Self**: $_SERVER['PHP_SELF']; -> index.php
+  * **Remote Addr**: $_SERVER['REMOT_ADDR']; -> 127.0.0.1
+  * **Connection**: $_SERVER['HTTP_CONNECTION']; -> keep_alive
+  * **Host**: $_SERVER['HTTP_HOST']; -> localhost:80
+  * **Referer**: $_SERVER['HTTP_REFERER']; -> https://google.co.uk/....
+  * **UserAgent**: $_SERVER['HTTP_USER_AGENT']; -> Mozilla/5.0 ... Chrome
+  * **QueryString**: $_SERVER['QUERY_STRING']; -> name=Robin (from index.php?name=Robin)
+  * **Request URI**: $_SERVER['REQUEST_URI'];  -> ?name=Robin (from index.php?name=Robin)
+
+==== Data send with GET ====
+
+**Variables passed to the script via query params and GET forms** 
+
+localhost:8000?query=footballs&sort=asc=limit=10
+<code php>
+// Verify value existence before reading it
+isset($_GET['query']) ? $query = $_GET['query'] :  $query = '';
+// or alternative
+$query = $_GET['query'] ?? '';
+</code>
+**Hint** never use echo $_GET['query'] without htmlspecialchars() around it!! -> try <script>alert(1);</script>
+
+==== Data send with POST ====
+
+<code php>
+<?php
+  $submitted = false;
+  $title = '';
+  $description = '';
+  if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+    $titel = isset($_POST['title']) ? htmlspecialchars($_POST['title']) : '';
+    $description = isset($_POST['description']) ? htmlspecialchars($_POST['description']) : '';
+    $submitted = true;
+  }
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Job Listing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="flex justify-center items-center h-screen">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+      <h1 class="text-2xl font-semibold mb-6">Create Job Listing</h1>
+      <form method="post">
+        <div class="mb-4">
+          <label for="title" class="block text-gray-700 font-medium">Title</label>
+          <input type="text" id="title" name="title" placeholder="Enter job title" class="w-full px-4 py-2 border rounded focus:ring focus:ring-blue-300 focus:outline-none">
+        </div>
+        <div class="mb-6">
+          <label for="description" class="block text-gray-700 font-medium">Description</label>
+          <textarea id="description" name="description" placeholder="Enter job description" class="w-full px-4 py-2 border rounded focus:ring focus:ring-blue-300 focus:outline-none"></textarea>
+        </div>
+        <div class="flex items-center justify-between">
+          <button type="submit" name="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none">Create Listing </button>
+          <a href="#" class="text-blue-500 hover:underline">Back to Listings</a>
+        </div>
+      </form>
+      <!-- Display submitted data -->
+      <?php if($submitted) : ?>
+      <div class="mt-6 p-4 border rounded bg-gray-200">
+        <h2 class="text-lg font-semibold">Submitted Job Listing:</h2>
+        <p><strong>Title:</strong> <?= $title ?></p>
+        <p><strong>Description:</strong> <?= $description ?></p>
+      </div>
+      <?php endif; ?>
+    </div>
+  </div>
+</body>
+</html>          
+</code>
+
+
+==== Get Data from $_Request ====
+
+**Not recommended to use, because mixing $_GET and $_POST can end in unwanted side effects.**
+
+<code php>
+$name = $_REQUEST['name'] ?? '';
+</code>
+
+==== $_FILES to Upload Files ====
+
+<code php>
+<?php
+  $submitted = false;
+  
+  if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+    // echo '<pre>'; var_dump($_FILES); echo '</pre>';
+    $file = $_FILES['logo']['name']; // logo set in form
+    $uploadDir = 'uploads'; // Specify where to upload TODO: from config file
+    if($file['error'] === UPLOAD_ERR_OK) {
+      if(!is_dir($uploadDir)) { mkdir ($uploadDir,0755, true)}
+    }    
+    $filename = uniqid() . '-' . $file['name']; // Create uniq filename
+    
+    // Make sure extension is allowed // TODO: get messages from a file (change Lang)
+    $allowedExtensions = ['jpg', 'jpeg', 'png']; // TODO: get extension from Config
+    $fileExtension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    if (in_array($fileExtension, $allowedExtensions)) {
+      if(move_uploaded_file($file['tmp_name'], $uploadDir . '/' . $filename)) {
+        echo '<script> alert("File uploaded successfully") </script>';
+      } else {
+        echo '<script> alert("File upload failed {$file['error']}") </script>';
+      }   
+    } else {
+      echo '<script> alert("Invalid Filetype") </script>';
+    } // TODO: check filesize // TODO: get maxsize from Config
+    
+    $submitted = true;
+  }
+?>
+  
+<div class="mb-4">
+  <label for="resume" class="block text-gray-700 font-medium">Logo</label>
+  <input type="file" id="logo" name="logo" class="w-full px-4 py-2 border rounded focus:ring focus:ring-blue-300 focus:outline-none">
+</div>  
+</code>
+
+==== $_SESSION ====
+
+  * Sessions allow developer to store and manage user-specific data on the server that persists through HTTP requests. This is used for logins, etc.
+  * The $_SESSION super global is used to store session data
+  * In order to use sessions, the function **session_start()** must be called.
+
+=== How Sessions Work ===
+
+  * **Session Initialization**: Session ID is created and stored in a cookie
+  * **Data Storage**: Data such as User Id can be stored in a session
+  * **Data Retrieval**: The server can retrieve data associated with the user session
+  * **Session Termination**: Session can expire or be terminated explicitly
+
+<code php>
+session_start(); // print_r($_SESSION); -> empty array
+$_SESSION['name'] = 'John';
+
+// On a different PHP page
+session_start();
+if(isset($_SESSION['name'])) {
+  echo $_SESSION['name'];
+}
+
+// When ever and where ever needed
+unset($_SESSION['name']; // delete entry in Session
+session_destroy();       // terminate ssession
+</code>
+==== $_COOKIE ====
+
+  * Cookies allow developer to store data on the user's client/browser, making it available through multiple pages, similar to sessions.
+  * The $_COOKIE super global holds the values of cookies sent by the client's browser to the server.
+  * These cookies are sent with HTTP requests, allowing the server to remember information about the user.
+
+=== $_COOKIE vs $_SESSION ===
+
+  * **Storage Location**: Cookies on the local user host, sessions on the remote web server
+  * **Data Persistence**: Cookies until timeout (if set) or manually deleted, sessions after timeout or session_destroy();
+  * **Security**: Cookies less secure (can be manipulated by user), sessions are more secure because not accessible by the client 
+  * **Storage Capacity**: Cookies are limited, sessions can store larger amounts of data
+  * **Easy usage**: Cookies are easy to work with they don't require server side scripting, sessions always need code running on the server
+  * **Cross Tab/Browser Communication**: Cookies are stored by the browser so yes for multi Tab no for multi browser, sessions normally Tab and browser specific so no for both at least challenging
+  * **Use Case**: Cookies for authentication tokens, user preferences, tracking user behaviour and sessions for authentication, temporary data (logging system)
+
+See Cookie in your browser: Dev tools/Application/Cookies
+
+<code php>
+<?php
+  $name = 'username';
+  $value = 'jdoe';
+  $expires_option = time() + 3600; // seconds since epoc (optional = 0)
+  $path = '/';   // accessible for hole domain 
+  $domain = '';  // 
+  $secure = false; // true if https is used
+  $httponly = false; // use http for cookies in https connection, so cookie is not accessible by JavaScript - more sec
+  setcookie($name, $value, $expires_option, $path, $domain, $secure, $httponly);
+  
+  var_dump($_COOKIE);
+
+  // Read cookie value
+  $username = $_COOKIE['username'] ?? 'Guest';
+  
+  // delete cookie
+  $name = 'username';
+  $value = '';
+  $expires_option = time() - 3600; // take a moment in the past so cookie is old and will be deleted by browser
+  $path = '/';   
+  setcookie($name, $value, $expires_option, $path);
+</code>
+
+
+===== Using Sessions =====
+
+<code php>
+<?php
+session_start();
+$_SESSION['sucess_message'] = 'Listing deleted successfully';
+</code> 
+**Create a Session and save a value**
+
+<code php>
+<!-- TODO: move Flash Message in a partial
+<?php if(isset($_SESSION['success_message'])) : ?>
+  <div class="message bg-green-100 p-3 my-3">
+    <?= $_SESSION['sucess_message'] ?>
+  </div>
+  <?php unset($_SESSION['success_message']); ?>
+<?php endif;  ?>
+</code> 
+**Use a Session** in a Flash Message
+
+
+
+===== Deprecated and Removed Features =====
+
+  * **register_globals** was a ... and has been removed with PHP 
+  * **register_long_arrays**
+  * **safe_mode**
+  * **magic_quotes**
+  * **allow_call_time_pass_reference**
+  * **y2k_compliance**
+  * **ereg*functions**
+
+====== Advanced PHP techniques =====
+
+  * [[home:php:pro:|Intermediate PHP]] (Classes & Methods, Object Oriented PHP, Code Style & PSR, Namespaces & Autoloading, Dependency Management, Super Globals, Cookies & Sessions, Database)
+    * [[home:php:oop:|PHP Object Oriented Programming]]
+    * [[home:php:dbg:|Debugging PHP]] (xdebug, phpdbg)
+    * [[home:php:db:|PHP Database Integration]]
+    * [[home:php:pkg:|PHP Package Manager]] ([[home:php:pkg:composer|Composer]])
+    * [[home:php:docgen:|PHP Documentation generator]] ([[home:php:docgen:doc:|PHPDocumentor]] a tool like JavaDoc or Doxygen)
+  * **Advanced PHP techniques** Testing, phpUnit, TDD, BDD, MVC & Routing, Caching & Security, Frameworks & PHP 8, Hosting and Deployment, Best Practices)
+    * [[home:php:test:|PHP Unit testing]] 
+      * [[home:php:test:unit:|PHPUnit]]
+    * [[home:php:mvc:|PHP Model-View-Controller]]
+    * [[home:php:jwt:|PHP Token based Authentication & Authorisation]]
+    * [[home:php:api:|PHP Application Programming Interface (API)]] as [[home:php:api:rest:|Rest API]] (Representational State Transfer)
+    * [[home:php:libs:|PHP Frameworks and Libraries]] 
+      * [[home:php:libs:lara:|Laravel]] 
+      * [[home:php:libs:synf:|Synfony]]
+
+  * [[home:php:sand:|PHP Sandbox]]
+
+

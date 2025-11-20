@@ -1,0 +1,167 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:test:|PHP Unit testing]]** -> **Pest**
+
+====== Pest ======
+
+Pest is a modern, minimal, and expressive testing framework built on top of [[home:php:test:unit:|PHPUnit]].
+It provides a simpler syntax, better readability, and an enjoyable developer experience — while remaining fully compatible with PHPUnit.
+
+  * [[home:php:test:unit:|PHPUnit]] — Core testing engine
+  * [[home:php:test:|PHP Unit tests]] — General concepts
+
+Tip: 
+
+> Pest focuses on expressive tests and developer happiness.
+It uses the same test runner as PHPUnit but replaces its verbose syntax with fluent, closure-based style.
+
+===== Installation =====
+
+Install Pest via Composer:
+<code bash>
+$ composer require --dev pestphp/pest 
+</code>
+
+Optionally install the Pest plugin for PHPUnit if you want to mix both styles:
+<code bash>
+$ composer require --dev pestphp/pest-plugin 
+</code>
+
+Initialize Pest in your project:
+<code bash>
+$ vendor/bin/pest --init 
+</code>
+
+This creates a default tests/Pest.php bootstrap file and sets up the folder structure.
+
+===== Project Layout =====
+^ Path ^ Purpose ^
+| src/ | Application source code |
+| tests/ | Pest and/or PHPUnit test files |
+| tests/Pest.php | Global configuration, custom expectations |
+| composer.json | Project dependencies |
+| vendor/ | Installed dependencies |
+
+> Pest and PHPUnit can coexist in the same project and share the same tests/ directory.
+
+===== Example =====
+
+Code under test: src/Calculator.php
+
+<code php> 
+<?php 
+declare(strict_types=1);
+
+namespace App;
+
+final class Calculator {
+  public function add(int $a, int $b): int {
+    return $a + $b;
+  }
+}
+</code>
+Pest test: tests/Calculator.pest.php
+
+<code php> 
+<?php 
+use App\Calculator;
+
+it('adds two integers', function () {
+  $calc = new Calculator();
+  expect($calc->add(2, 3))->toBe(5);
+});
+</code>
+
+Run the test suite:
+<code bash>
+$ vendor/bin/pest 
+</code>
+Pest automatically discovers tests in your tests/ folder and uses PHPUnit’s internal engine.
+
+===== Custom Expectations =====
+
+You can define your own expect() matchers in tests/Pest.php:
+<code php> 
+<?php 
+expect()->extend('toBeEven', function () { 
+  return expect($this->value % 2)->toBe(0); 
+}); 
+</code>
+
+Usage:
+<code php> 
+expect(4)->toBeEven(); 
+</code>
+
+===== Code Coverage =====
+
+Pest uses the same coverage backends as PHPUnit (Xdebug or PCOV).
+
+Generate coverage reports:
+<code bash> 
+$ vendor/bin/pest --coverage 
+$ vendor/bin/pest --coverage-html build/coverage 
+</code>
+
+> Open build/coverage/index.html to view the report in your browser.
+
+===== Continuous Integration (GitHub Actions) =====
+
+Example GitHub Actions workflow for Pest:
+
+<code yaml> 
+name: Pest Tests
+
+on: [push, pull_request]
+
+jobs:
+pest:
+runs-on: ubuntu-latest
+strategy:
+matrix:
+php: ['8.2', '8.3']
+
+steps:
+  - uses: actions/checkout@v4
+
+  - uses: shivammathur/setup-php@v2
+    with:
+      php-version: ${{ matrix.php }}
+      coverage: xdebug
+      tools: composer
+
+  - name: Install dependencies
+    run: composer install --no-interaction --prefer-dist
+
+  - name: Run Pest tests
+    run: vendor/bin/pest --coverage-text
+</code>
+
+Highlights:
+
+  * Runs automatically on push and pull request.
+  * Tests multiple PHP versions (8.2, 8.3).
+  * Generates coverage reports with Xdebug.
+  * Simple and fast syntax for CI pipelines.
+
+===== Best Practices =====
+
+  * Keep tests short and expressive — read like natural language.
+  * Prefer pure functions and deterministic outcomes.
+  * Use closures for test isolation.
+  * Use custom expectations to simplify repetitive checks.
+  * Mix with PHPUnit where necessary — Pest is fully compatible.
+
+===== Troubleshooting =====
+^ Problem ^ Likely Cause ^ Fix ^
+| Pest not running | No initialization | Run vendor/bin/pest --init |
+| Coverage missing | Xdebug/PCOV disabled | Enable via PHP configuration |
+| Tests not found | Wrong file naming | Ensure test files end with .pest.php |
+| Namespace issues | Missing autoload | Check Composer PSR-4 configuration |
+
+===== Related Topics =====
+
+  * [[home:php:test:unit:|PHPUnit]] – Underlying test framework
+  * [[home:php:test:overview:|PHP Unit tests]] – General testing concepts
+  * [[home:php:pkg:composer|Composer]] – Dependency management
+  * [[home:php:automation:build-tools:|Build Automation]] – Continuous Integration setup
+
+> Pest enhances PHPUnit with elegant syntax and a faster feedback loop — ideal for modern PHP projects.

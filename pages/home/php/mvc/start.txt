@@ -1,0 +1,319 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP Model-View-Controller**
+
+====== PHP Model-View-Controller ======
+
+The MVC (Model–View–Controller) pattern in PHP is a way to separate application logic into three parts:
+  * **Model** → Handles the data and business logic (e.g., database queries, validation, rules).
+  * **View** → Responsible for the presentation (HTML, templates, user interface).
+  * **Controller** → Acts as the middle layer, receiving user input (HTTP requests), calling the Model to get/update data, and selecting the right View to display.
+
+👉 In short: Controller talks to Model, Model gives data, Controller passes it to View.
+
+A tiny MVC example in PHP. This is just to show the structure, not a full framework.
+
+**1. index.php (entry point / router)**
+<code php>
+<?php
+require 'Model.php';
+require 'Controller.php';
+
+$controller = new Controller();
+$controller->showMessage();
+</code>
+
+**2. Model.php (data / logic**
+<code php>
+<?php
+class Model {
+    public function getMessage() {
+        return "Hello from the Model!";
+    }
+}
+
+**3. View.php (presentation)**
+<code php>
+<?php
+class View {
+    public function render($message) {
+        echo "<h1>$message</h1>";
+    }
+}
+</code>
+
+**4. Controller.php (glue between Model & View)**
+<code php>
+<?php
+require 'Model.php';
+require 'View.php';
+
+class Controller {
+    private $model;
+    private $view;
+
+    public function __construct() {
+        $this->model = new Model();
+        $this->view = new View();
+    }
+
+    public function showMessage() {
+        $message = $this->model->getMessage();
+        $this->view->render($message);
+    }
+}
+</code>
+
+🔄 Flow
+  - index.php creates a Controller.
+  - Controller asks the Model for data (getMessage()).
+  - Controller passes data to the View.
+  - View outputs it to the browser.
+
+Result in browser:
+<text>
+Hello from the Model!
+</text>
+===== PHP Router =====
+
+
+In an MVC (Model-View-Controller) architecture, the **Router** is the component responsible for handling incoming HTTP requests and directing them to the correct **Controller** and **action**. It acts like a traffic controller: based on the URL (and sometimes the HTTP method, like GET or POST), the Router decides which part of the application should process the request.
+
+Without a Router, you would need to create separate PHP files for every page. With a Router, you centralize all route definitions and let the application dynamically decide what to load. This makes the structure more organized, flexible, and easier to maintain.
+
+How it works
+  - **Receive Request** – The Router reads the current request URI and method (GET, POST, etc.).
+  - **Match Route** – It checks the defined routes to see if one matches the incoming request.
+  - **Dispatch Controller** – If a match is found, the Router calls the appropriate controller method.
+  - **Fallback / Error Handling** – If no match exists, the Router typically shows a 404 Not Found page.
+The router has to load different parts in an php application.
+
+More about **[[home:php:mvc:route|PHP MVC - Router]]** ...
+
+**routes.php**
+<code php>
+<?php
+/** ************************************************ *
+ *                 routes.php                       *
+ * ************************************************ */
+$router->get('/', 'HomeControler@index');
+$router->post('/', 'HomeControler@index');
+$router->put('/', 'HomeControler@index');
+$router->delete('/', 'HomeControler@index');
+</code>
+
+**route.php**
+<code php>
+<?php
+/* ************************************************ *
+ *                route.php                         *
+ * ************************************************ */
+
+namespace Core;
+
+use App\Controllers\ErroroController;
+use Core\Middleware\Authorize;
+
+class Router
+{
+  protected $routes = [];
+  
+  /**
+   * Add a new route
+   * @param string $method
+   * @param string $uri
+   * @param string $action
+   * @param array $middleware
+   * @return void
+   * */
+  public function registerRoute($method, $uri, $action, $middleware = []) {
+    list($controller, $controllerMethod) = explode('@', action);
+    $this->routes[] = ['method' => $method, 'uri' => $uri, 'controller' => $controller, 'controllerMethod' => $controllerMethod, 'middleware' => $middleware];
+}
+
+  /** 
+    * Add a GET route
+    * @param string $uri
+    * @param string $controller
+    * @param string $middleware
+    * @return void
+    * */
+  public function get($uri, $controller, $middleware = []) {
+    $this->registerRoute('GET', $uri, $controller, $middleware);
+  }
+  
+  /** 
+   * Add a POST route
+   * @param string $uri
+   * @param string $controller
+   * @param string $middleware
+   * @return void
+   * */
+  public function post($uri, $controller, $middleware = []) {
+    $this->registerRoute('POST', $uri, $controller, $middleware);
+  }
+  
+  /** 
+   * Add a PUT route
+   * @param string $uri
+   * @param string $controller
+   * @param string $middleware
+   * @return void
+   * */
+  public function put($uri, $controller, $middleware = []) {
+    $this->registerRoute('PUT', $uri, $controller, $middleware);
+  }
+  
+  /** 
+   * Add a DELETE route
+   * @param string $uri
+   * @param string $controller
+   * @param string $middleware
+   * @return void
+   * */
+  public function delete($uri, $controller, $middleware = []) {
+    $this->registerRoute('DELETE', $uri, $controller, $middleware);
+  }
+   
+  /**
+   * Route the request
+   * @param string $uri
+   * @param string $method
+   * @return void
+   * */
+  public function route($uri) {
+    $requestMethod = $_SERVER['REQUEST_METHOD'] ?? ''; // TODO: Check this ?? ''
+    if ($requestMethod ===POST && isset($_POST['_method'])) {
+      $requestMethod = strtoupper($POST['_method']); //Override request method with value of _method
+    }
+    
+    foreach($this->routes as route) {
+      $uriSegments   = explode('/', trim($uri, '/'));          //Split the current URI
+      $routeSegments = explode('/', trime$route['uri'], '/')); //Split the current URI  
+      $match = true;
+      // Check numbers of segments match
+      if((count($uriSegments) === count($routeSegments) && strtoupper($route['method'] === $requestMethod)) {
+        params = [];
+        match = true;
+        for ($i = 0; $i < count($uriSegments); $i++) {
+          if ($routeSegments[$i] !== $uriSegments[$i] && !preg_match('/\{(.+?)\}/', $routSegments[$i])) {
+            $match = false; break;
+          }
+          if (preg_match('/\{(.+?)\}/', $routeSegments[$i], $matches)) {
+            $params[$matches[1]] = $uriSegments[$i];
+          }
+        }
+        
+        if(match) {
+          foreach /$route['middleware'] as $middleware) {
+            (new Authorize())->handle($middleware);
+          }
+          $controller = 'App\\Controllers\\' . $route['controller'];
+          $controlerMethod = $rout['controllerMethod'];
+          $controlerInstance = new $controller();
+          $controllerInstance->$controllerMethod($params);
+          return;
+        }        
+      }
+    }
+  }
+
+</code>
+**Example in PHP** In short: The Router in MVC makes it possible to map clean, user-friendly URLs to controllers and their actions, keeping the codebase structured and decoupled.
+===== PHP Controller =====
+
+In the **Model–View–Controller (MVC)** pattern, the **Controller** acts as the central coordinator between user requests, business logic, and the final output.
+
+A **controller**:
+
+  * Receives input from the client (usually HTTP requests).
+  * Decides which **Model** to call for data and logic.
+  * Selects the appropriate **View** to present the response.
+
+In other words, the controller doesn’t hold the data itself (that’s the model) and doesn’t handle the layout directly (that’s the view). Instead, it interprets the request and decides what should happen next.
+
+The controller will at least load the view and normally collects data from the model needed by the view. See more about **[[home:php:mvc:control|PHP MVC - Controller]]** ...
+
+<code php>
+<?php
+class UserController {
+    // Handles showing a list of users
+    public function index() {
+        $users = UserModel::getAll();    // fetch data from model
+        require 'views/users/index.php'; // load the view
+    }
+
+    // Handles showing a single user
+    public function show($id) {
+        $user = UserModel::find($id);
+        require 'views/users/show.php';
+    }
+}
+</code>
+**Example (PHP Controller)** Here:
+  * UserController defines actions like index() or show().
+  * Each method corresponds to a route (e.g., /users or /users/1).
+  * The controller decides which model to query and which view to render.
+===== PHP Views =====
+
+In the **MVC (Model-View-Controller) pattern**, the **View** is responsible for presenting data to the user. It defines how the information coming from the **Model** is displayed, usually as HTML, JSON, or another format. The View should not contain business logic; its job is to format and render data in a user-friendly way.
+
+In PHP, a View is often a template file (.php, .html.php, or with a template engine like Twig or Blade) that receives variables from the controller and outputs them.
+
+How Views work:
+  - The Controller prepares the data (often retrieved from a Model).
+  - This data is passed to a View file.
+  - The View embeds the data into HTML (or another format) and outputs it to the browser.
+
+More about **[[home:php:mvc:view|PHP MVC - Views]]** ...
+
+<code php>
+<!-- views/user-profile.php -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+</head>
+<body>
+    <h1>Hello, <?= htmlspecialchars($name) ?></h1>
+    <p>Email: <?= htmlspecialchars($email) ?></p>
+</body>
+</html>
+</code>
+**Example View in PHP** Here, the View (user-profile.php) only handles presentation. It doesn’t know where $name and $email came from—it just shows them.
+===== PHP Models =====
+
+In an MVC (Model–View–Controller) architecture, the **Model** is the part of the application that deals with **data and business logic**.
+It represents the state of the application, defines how data is structured, how it is stored (in databases, files, or APIs), and how it can be retrieved or changed.
+
+The **Model** does not care about how the data is displayed (View) or how the user interacts with it (Controller). Its main responsibility is to provide clean methods for accessing and manipulating data.
+
+**Key points about Models in PHP (MVC)**:
+  * **Data Representation**: Models often map to database tables (e.g., a User model for a users table).
+  * **Business Logic**: They enforce rules, e.g., validating before saving.
+  * **Database Interaction**: Models usually contain methods for creating, reading, updating, and deleting records (CRUD).
+  * **Independence**: Models are reusable and can be tested separately from the rest of the application.
+
+More about **[[home:php:mvc:model|PHP MVC - Models]]** ...
+
+<code php>
+class User {
+    private $db;
+
+    public function __construct(PDO $db) {
+        $this->db = $db;
+    }
+
+    // Get user by ID
+    public function find($id) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Create new user
+    public function create($name, $email) {
+        $stmt = $this->db->prepare("INSERT INTO users (name, email) VALUES (:name, :email)");
+        return $stmt->execute(['name' => $name, 'email' => $email]);
+    }
+}
+</code>
+**Example: A simple PHP Model** In this example, the User model **represents the users data**, contains the **logic for interacting with the database**, and can be used by a Controller to serve information to the View. 

@@ -1,0 +1,197 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:mvc:|PHP Model-View-Controller]]** -> **PHP MVC - View**
+
+====== PHP MVC - View ======
+
+A View takes some HTML, CSS and maybe some additional PHP Code and/or JavaScript code
+
+In the **MVC (Model-View-Controller) pattern**, the **View** is responsible for presenting data to the user. It defines how the information coming from the **Model** is displayed, usually as HTML, JSON, or another format. The View should not contain business logic; its job is to format and render data in a user-friendly way.
+
+In PHP, a View is often a template file (.php, .html.php, or with a template engine like Twig or Blade) that receives variables from the controller and outputs them.
+
+How Views work:
+  - The Controller prepares the data (often retrieved from a Model).
+  - This data is passed to a View file.
+  - The View embeds the data into HTML (or another format) and outputs it to the browser.
+
+<code php>
+<!-- views/user-profile.php -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+</head>
+<body>
+    <h1>Hello, <?= htmlspecialchars($name) ?></h1>
+    <p>Email: <?= htmlspecialchars($email) ?></p>
+</body>
+</html>
+</code>
+**Example View in PHP** Here, the View (user-profile.php) only handles presentation. It doesn’t know where $name and $email came from—it just shows them.
+
+===== Version 1.00.00 =====
+
+**views/create.view.php**
+<code html>
+<h2 class="text-2xl font-bold mb-6 text-center text-gray-500">Job Info</h2>
+<?php if(isset($errors)) : ?>
+  <?php foreach($errors as $error) : ?>
+    <div class="message ng-red-100 my-3"><?= $error ?></div>
+  <?php endforeach; ?>
+<?php endif; ?>
+<div class="mb-4">
+  <input type="text" name="title" placeholder="Job Description" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['title'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <textarea name="description" placeholder="Job Title" class="w-full px-4 py-2 border rounded focus_outline-none" /><?= $listing['description'] ?? '' ?></textarea>
+</div>
+<div class="mb-4">
+  <input type="text" name="salary" placeholder="Annual Salary" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['salary'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="requirements" placeholder="Requirements" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['requirements'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="benefits" placeholder="Benefits" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['benefits'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="tags" placeholder="Tags" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['tags'] ?? '' ?> " />
+</div>
+<h2 class="text-2xl font-bold mb-6 text-center text-gray-500">Company Info &Location</h2>
+<div class="mb-4">
+  <input type="text" name="company" placeholder="Company Name" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['company'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="address" placeholder="Address" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['address'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="city" placeholder="City" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['city'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="title" placeholder="Job Description" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['title'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="state" placeholder="State" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['state'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="phone" placeholder="Phone" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['phone'] ?? '' ?> " />
+</div>
+<div class="mb-4">
+  <input type="text" name="email" placeholder="Email Address For Applications" class="w-full px-4 py-2 border rounded focus_outline-none" value="<?= $listing['email'] ?? '' ?> " />
+</div>
+<button class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 my-3 rounded focus:outline-none">Save</button>
+<a href="/" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 my-3 rounded focus:outline-none">Cancel</a>
+</form>
+</code>
+
+**views/show.view.php**
+<code html>
+<!-- Delete Form ->
+<form method="POST">
+  <input type="hidden" name="_method" value="DELETE">
+  <button type="submit" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded">DELETE</button>
+</form>
+</code>
+
+**views/error.view.php**
+<code html>
+<?php
+<?= loadPartial('head') ?>       <!-- HTML head with meta tags and body starter -->
+<?= loadPartial('header') ?>     <!-- SASD Logo, Navbar ... -->
+<?= loadPartial('top-banner') ?> <!-- -->
+
+<section>
+  <div class"container mx-auto p-4 mt-4">
+    <div class="text-center text-3xl mb-4 font-bold border border-gray-300 p-3"><?= $status ?></div>
+    <p class="block text-center text-2xl mb-4"><?= $message ?></p>
+  </div>
+  <a href="/" class="text-center">Go Back</a>
+</section>
+<?= loadPartial('footer') ?>     <!-- SASD footer and HTML </body></html> tag -->
+</code>
+Corresponding with [[home:php:mvc:control#version10000|Error Controller Version 1.00.00]]
+
+===== Version 0.00.00 =====
+
+**views/error/404.view.php**
+<code html>
+<?php
+<?= loadPartial('head') ?>       <!-- HTML head with meta tags and body starter -->
+<?= loadPartial('header') ?>     <!-- SASD Logo, Navbar ... -->
+<?= loadPartial('top-banner') ?> <!-- -->
+
+<?= // inspect($data); ?>
+<section>
+  <div class"container mx-auto p-4 mt-4">
+    <div class="text-center text-3xl mb-4 font-bold border border-gray-300 p-3">404 Error</div>
+    <p class="text-center text-2xl mb-4">This page does not exist</p>
+  </div>
+</section>
+<?= loadPartial('footer') ?>     <!-- SASD footer and HTML </body></html> tag -->
+</code>
+
+**views/show.view.php**
+<code php>
+<?php
+<?= loadPartial('head') ?>       <!-- HTML head with meta tags and body starter -->
+<?= loadPartial('header') ?>     <!-- SASD Logo, Navbar ... -->
+<?= loadPartial('top-banner') ?> <!-- -->
+
+<?= // inspect($data); ?>
+
+<!-- ... some HTML code ... -->
+<?php foreach($data as $date) : ?>
+  <!-- ... some HTML code ...  -->
+  <span class="text-xs bg-blue-500 text-white rounded-full px-2 py-1 ml-2"><strong>Created: </strong><?php $date['created']; ?></span>
+  <!-- ... some HTML code ...  -->
+  <a href="/details/?id=<?php $data['id'] ?>" class="block ...">Details</a>
+  <!-- ... some HTML code ...  -->
+<?php endforeach; ?>
+<!-- ... some HTML code ...  -->
+
+<?= loadPartial('footer') ?>     <!-- SASD footer and HTML </body></html> tag -->
+</code>
+**View Code** some PHP Code and all the HTML layout code
+
+===== Background =====
+
+The magic of the Details Page happens in the Router/routes pointing to the controller, asking the model for detailed infomations, sending the Informations as an Associative Array inside an Associative Array to the view. 
+
+<code php>
+loadView('home', [
+  'data' => $data, // $data is an Associative Array inside an Associative Array
+  'name' => $name  // $name is an Associative Array inside an Associative Array
+]);
+</code>
+**Controller Code** is loading the view and passes data into the view. The **loadView($view, $data)** is in the helpers.php
+
+The **route** in routes.php
+<code php>
+// ...
+$router->get('/jobs', '/controllers/listings/details.controller.php');
+// ...
+</code>
+
+The **Controller** is details.controller.php
+<code php>
+<?php
+$config = require basePath('config/db.php');
+$db = new Database($config);
+
+$id = $_GET['id'] ?? '';  //inspect/$id);
+//$data = $db->query('SELECT * FROM data WHERE id=' . $id)->fetch(); //No No!!
+$params = [
+  'id' => $id;
+];
+$data = $db->query('SELECT * FROM data WHERE id= :id', $params)->fetch(); // inspect($data); 
+
+loadView('details.view.php', ['data' = $data]);
+// ...
+</code>
+
+In the view will ony be some code parts like this
+<code php>
+<?= data['name']; ?>
+</code>
+or some similar output code.
+
+**Hint:** the details.controller.php __**should be named show.controller.php as a common convention**__, same with view and model.

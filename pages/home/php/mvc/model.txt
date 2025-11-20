@@ -1,0 +1,63 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:mvc:|PHP Model-View-Controller]]**  **PHP MVC - Model**
+
+====== PHP MVC - Model ======
+
+In an MVC (Model–View–Controller) architecture, the **Model** is the part of the application that deals with **data and business logic**.
+It represents the state of the application, defines how data is structured, how it is stored (in databases, files, or APIs), and how it can be retrieved or changed.
+
+The **Model** does not care about how the data is displayed (View) or how the user interacts with it (Controller). Its main responsibility is to provide clean methods for accessing and manipulating data.
+
+**Key points about Models in PHP (MVC)**:
+  * **Data Representation**: Models often map to database tables (e.g., a User model for a users table).
+  * **Business Logic**: They enforce rules, e.g., validating before saving.
+  * **Database Interaction**: Models usually contain methods for creating, reading, updating, and deleting records (CRUD).
+  * **Independence**: Models are reusable and can be tested separately from the rest of the application.
+
+===== What belong in a Model? =====
+__**1. CRUD methods (Data Access Layer)**__
+
+Models often contain methods to interact with the database:
+  * create() / insert() / **store()** – store new records
+  * read() / **findById()** / **findAll()** – retrieve records
+  * update() – change existing records
+  * **delete()** – remove records
+
+In frameworks like Laravel, this is often handled by Eloquent ORM, so you might not need to write all of them yourself, but the principle is the same.
+
+__**2. Business logic**__
+
+Models are responsible for implementing rules that are specific to your domain:
+  * calculateDiscount()
+  * applyTax()
+  * isEligibleForUpgrade()
+
+This keeps the business rules close to the data they affect.
+
+****3. Validation logic****
+
+You can add methods that validate data before saving or processing:
+  * validateEmail()
+  * validateOrder()
+
+In modern frameworks, **this might also be done in separate Validator classes**, but it’s acceptable to have lightweight checks inside models.
+
+****4. Relationships****
+
+Models usually define relations between entities:
+  * getOrders() inside a Customer model
+  * getAuthor() inside a Book model
+
+Frameworks like Laravel let you declare these with methods like hasMany(), belongsTo(), etc.
+
+===== What does not belong in a Model? =====
+
+  * ❌ Anything related to the View (HTML, templates, rendering)
+  * ❌ Anything related to the Controller (routing, request handling, session flow)
+
+===== Version 0.00.00 =====
+
+<code php>
+<?php
+namespace Model
+
+</code>

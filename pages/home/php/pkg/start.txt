@@ -1,0 +1,180 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP Package Manager**
+
+====== PHP Package Manager ======
+
+While **[[home:php:pkg:composer|Composer]]** has become the *de facto standard* package manager in the PHP ecosystem, there are (or were) a few **alternatives and complementary tools** that may still be relevant depending on your project type or environment.
+
+---
+
+===== Composer (Standard) =====
+  * **Status:** Actively maintained and dominant in modern PHP development  
+  * **Purpose:** Dependency management for PHP  
+  * **Registry:** https://packagist.org  
+  * **Highlights:**
+    * Fully supports PSR autoloading
+    * Deep integration with Git, Mercurial, and Subversion
+    * CLI examples:  
+<code bash>
+$ composer install
+$ composer update
+$ composer require vendor/package
+</code>
+    * Can also be used for global CLI tools via:  
+<code bash>
+$ composer global require vendor/tool
+</code>
+
+**Used by:** Laravel, Symfony, CakePHP, and most other modern frameworks.
+
+===== PEAR (PHP Extension and Application Repository) =====
+  * **Status:** Legacy, mostly outdated  
+  * **Purpose:** Predecessor of Composer  
+  * **Registry:** https://pear.php.net (partially offline/read-only)  
+  * **Characteristics:**
+    * Installs packages *system-wide* (not project-specific)
+    * Lacks proper dependency resolution
+    * Still found in older frameworks and shared hosting environments  
+
+**Example:**  
+<code bash>
+sudo pear install HTTP_Request2
+</code>
+
+**Note:** Use only for legacy support.
+
+
+===== Phive (PHAR Installation and Verification Environment) =====
+  * **Purpose:** Manages **PHAR executables** (PHP Archive CLI tools)  
+  * **Registry:** https://phar.io  
+  * **Typical tools:** phpunit.phar, phpcs.phar, phpstan.phar, etc.  
+  * **Command:**  
+<code bash>
+$ phive install phpunit
+</code>
+  * **Advantages:**
+    - Verifies GPG signatures for security
+    - Keeps PHARs separate from project dependencies in `vendor/bin`
+  * **Use case:**  
+    For developers managing multiple CLI tools across projects safely and reproducibly.
+
+**Phive complements Composer but does not replace it.**
+
+===== Symfony Flex =====
+  * **Type:** Composer extension  
+  * **Purpose:** Enhances Composer with automatic configuration recipes  
+  * **Registry:** https://symfony.sh  
+  * **Highlights:**
+    * Smart installer with package “recipes”
+    * Auto-configures Symfony bundles and environment files
+
+===== Other Notable Tools =====
+
+^ Tool ^ Purpose ^ Status ^
+| **Deployer** | Deployment automation tool (Composer-like syntax) | Active |
+| **Composer Patches** | Applies patches to installed packages | Active |
+| **Composer Merge Plugin** | Merges multiple `composer.json` files | Active |
+| **Packagist Private/Enterprise** | Private registries for internal packages | Active |
+
+==== Pyrus ====
+  * **Status:** Discontinued  
+  * **Purpose:** Intended as a modern replacement for PEAR using JSON manifests  
+  * **Reason for discontinuation:** Outpaced by Composer before gaining traction  
+
+
+===== Private Composer Registries =====
+If you need to host or distribute private packages internally:
+
+  * **Satis** – Simple static Composer repository (open source)
+  * **Private Packagist** – Commercial service by the Packagist team
+  * **Toran Proxy** – Composer proxy with caching and mirroring
+  * **Artifactory / GitLab / Nexus Repository** – Enterprise DevOps registries with Composer support
+
+
+===== Summary Table =====
+
+^ Category ^ Tool ^ Relevance ^ Notes ^
+| **Standard Package Manager** | **[[home:php:pkg:composer|Composer]]** | ★★★★★ | Modern PHP standard |
+| **PHAR Management** | **Phive** | ★★★☆☆ | Ideal for CLI tools |
+| **Legacy Compatibility** | **PEAR** | ★☆☆☆☆ | Only for old projects |
+| **Composer Extension** | **Symfony Flex** | ★★★★☆ | Adds configuration recipes |
+| **Private Registries** | **Satis, Private Packagist** | ★★★★☆ | Internal or enterprise use |
+
+===== Recommended Combination =====
+
+For modern PHP projects:
+
+  * Use **[[home:php:pkg:composer|Composer]]** for all project dependencies.  
+  * Use **Phive** for external CLI tools like PHPUnit or PHPStan.  
+
+This combination ensures a **clean, secure, and reproducible** development environment.
+
+==== Installation via Composer or Phive ====
+
+PHPDocumentor, PHPUnit or PHPStan can be installed either with **Composer** or **Phive**.  
+Both methods work well — the choice depends on how you prefer to manage your development tools.
+
+| **Scenario** | **Use** | **Reason** |
+| Team installs dev tools via Composer and runs them from `vendor/bin` | **Composer** | Keeps everything versioned per project; simple integration with `composer.json` scripts. |
+| You want tools isolated from your app’s dependencies | **Phive** | Installs signed PHARs into `./tools` without touching `composer.json`. |
+| You maintain one tool version across many repositories | **Phive** | Centralized version control and easy updates. |
+| You want reproducible builds inside the repo | **Composer** | Everything stays in your repository; CI runs `composer install`. |
+| You prefer verified PHARs (GPG signatures) | **Phive** | Adds cryptographic verification of tool downloads. |
+
+=== Option A – Composer (per project) ===
+Install PHPDocumentor, PHPUnit or PHPStan as a **development dependency**:
+<code bash>
+composer require --dev phpdocumentor/phpdocumentor
+</code>
+
+Run PHPDocumentor:
+<code bash>
+vendor/bin/phpdoc -d src -t docs
+</code>
+
+Optional shortcut via Composer script:
+<code json>
+{
+  "scripts": {
+    "docs": "phpdoc -d src -t docs"
+  }
+}
+</code>
+
+----
+
+=== Option B – Phive (tool isolation) ===
+If you prefer to manage standalone PHAR tools with signature verification:
+<code bash>
+phive install phpdocumentor
+# or explicitly:
+phive install phpdocumentor/phpdocumentor
+</code>
+
+Run PHPDocumentor:
+<code bash>
+./tools/phpdoc -d src -t docs
+</code>
+
+Commit the generated `.phive/phars.xml` file to ensure reproducible builds:
+<code>
+.phive/
+└── phars.xml
+</code>
+
+
+=== Recommendation ===
+If you aim for a **unified, lightweight toolchain** (PHPUnit, PHPStan, PHPCS, PHPDocumentor),  
+consider using **Phive** for all developer CLI tools — it keeps dependencies separate and provides GPG-verified integrity.
+
+However, if your project already uses **Composer for all dev tools**, it’s perfectly fine to stay with that approach for simplicity.
+
+**Tip:** 
+
+> You can also combine both — install via Composer in CI/CD environments,  
+> and use Phive locally for verified global tools.
+
+===== See also: ===== 
+  * [[https://getcomposer.org|Composer official site]]
+  * [[https://phar.io|Phive official site]]
+  * [[https://packagist.org|Packagist package registry]]
+  * [[https://symfony.com/doc/current/setup/flex.html|Symfony Flex documentation]]

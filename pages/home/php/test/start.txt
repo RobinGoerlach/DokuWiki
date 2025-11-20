@@ -1,0 +1,122 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP Unit tests**
+
+====== PHP Unit tests ======
+
+A high-level overview of unit testing in PHP — including core concepts, common tools, setup recommendations, coverage options, CI integration, and best practices.
+  * [[home:php:test:unit:|PHPUnit]]
+  * [[home:php:test:pest:|Pest]]
+
+**Tip**: Unit tests should be small, fast, and focused on one function or class. Prefer pure logic, avoid I/O (database, filesystem, network). For end-to-end flows, use integration or system tests instead.
+
+===== Why Unit Tests Matter =====
+
+  * Catch regressions early and refactor safely.
+  * Document expected behavior as executable specifications.
+  * Support continuous integration and confident releases.
+
+===== What Is a “Unit”? =====
+
+A unit is the smallest piece of code worth testing — typically a single function, method, or class with clear input/output.
+
+^ Test Type ^ Focus ^ Characteristics ^
+| Unit Test | One isolated function/class | Pure logic, deterministic, no external resources |
+| Integration Test | Multiple components together | Database, API, filesystem, or external dependencies |
+| End-to-End Test | Full user flow | Simulates the real environment or UI |
+
+===== PHP Testing Ecosystem =====
+
+^ Area ^ Tools (examples) ^ Notes ^
+| Test Runner / Framework | [[home:php:test:unit:|PHPUnit]], [[home:php:test:pest:|Pest]], Codeception | PHPUnit is the de-facto standard; Pest offers expressive syntax; Codeception adds functional & acceptance testing. |
+| Test Doubles | Built-in (PHPUnit), Mockery | Create mocks/stubs/spies to isolate collaborators. |
+| Coverage Engines | Xdebug, PCOV | Generate text or HTML coverage reports. |
+| Quality Gates | PHPStan, Psalm, PHPCS | Static analysis and coding style enforcement. |
+| Build & CI | Composer, Phive, GitHub Actions, Make | Automate installation, linting, testing, and coverage. |
+
+===== Project Layout (Suggested) =====
+
+^ Path ^ Purpose ^
+| src/ | Application code |
+| tests/ | Unit and integration tests |
+| bootstrap.php | Optional test bootstrap (autoload, env setup) |
+| composer.json | Dependency definitions (dev + runtime) |
+
+> Keep framework-specific configs (e.g. phpunit.xml.dist, pest.php) on their respective tool pages.
+
+===== Installing the Basics =====
+
+Use Composer (recommended):
+<code bash> 
+# Choose one or both frameworks
+$ composer require --dev phpunit/phpunit 
+$ composer require --dev pestphp/pest
+
+$ composer require --dev mockery/mockery #Optional: additional mocking framework
+</code>
+Always pin versions in composer.json to prevent unexpected breakage.
+
+===== Writing Effective Unit Tests =====
+
+  * **AAA pattern**: Arrange → Act → Assert — keep structure clear.
+  * **FIRST principle**: Fast, Isolated, Repeatable, Self-validating, Timely.
+  * **Descriptive names**: e.g., method_does_expectedThing_when_condition.
+  * **One concept per test**: multiple assertions are fine if they verify one behavior.
+  * **Deterministic**: avoid randomness, sleeps, real time, or network calls — use stubs/fakes instead.
+
+===== Using Test Doubles =====
+
+Test doubles isolate external dependencies (DB, HTTP, filesystem).
+^ Type ^ Purpose ^ Example ^
+| Stub | Return predefined data | Fake repository |
+| Mock | Verify interaction | Mock method calls or parameters |
+| Fake | Simplified replacement | In-memory database or cache |
+See [[home:php:test:unit:|PHPUnit – Test Doubles]] or [[home:php:test:pest:|Pest – Plugins & Mocks]] for concrete APIs.
+
+===== Code Coverage =====
+
+  * Enable **Xdebug** or **PCOV** for code coverage support.
+  * Coverage reports can be generated in text or HTML format.
+  * Treat coverage as a guideline, not a goal — prefer meaningful tests over 100 %.
+Common usage (runner-specific commands are listed on the framework pages):
+
+<code bash> 
+$ vendor/bin/phpunit --coverage-text 
+$ vendor/bin/pest --coverage 
+</code>
+
+===== Continuous Integration (CI) =====
+
+Integrate testing in your CI/CD pipeline for early feedback.
+
+Typical CI workflow:
+  * **Checkout → PHP setup → Dependencies → Lint → Test → Coverage artifacts**
+  * Test against multiple PHP versions (matrix builds).
+  * Separate **unit** from **integration** suites for faster runs.
+See [[home:php:automation:build-tools:|Build Automation]] for general CI examples.
+Runner-specific YAML snippets are provided on each framework page.
+
+===== Troubleshooting =====
+
+^ Problem ^ Likely Cause ^ Solution ^
+| Tests do not run | Missing autoload | Ensure **vendor/autoload.php** is included via bootstrap |
+| No coverage output | Xdebug/PCOV disabled | Enable and check with **php -m** |
+| Class not found | Namespace mismatch | Verify PSR-4 in composer.json and file paths |
+| Flaky tests | Hidden I/O or shared state | Isolate dependencies; reset state in **setUp()/tearDown()** |
+
+===== When to Use Which Test =====
+
+^ Scope ^ Purpose ^ Typical Tools ^
+| Unit | Verify isolated logic | PHPUnit / Pest |
+| Integration | Test component interaction | PHPUnit suites, Codeception |
+| End-to-End | Simulate user workflows | Codeception, browser-based tools |
+Follow the Test Pyramid: many unit tests, some integration tests, few end-to-end tests.
+
+===== Related Topics =====
+
+  * [[home:php:test:unit:|PHPUnit]] – Testing Framework (details & configuration)
+  * [[home:php:test:pest:|Pest]] – Testing Framework (expressive syntax & examples)
+  * [[home:php:docgen:doc:|PHPDocumentor]] – API documentation
+  * [[home:php:pkg:composer|Composer]] & [[home:php:pkg:phive|Phive]] – Dependency management
+  * [[home:php:automation:build-tools:|Build Automation]] – CI/CD and testing pipelines
+
+This page provides a general overview of PHP unit testing.
+See the linked framework pages for configuration examples and advanced topics.

@@ -1,0 +1,829 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **PHP Object Oriented Programming**
+
+====== PHP OOP ======
+
+In procedural programming an application or a program is divided into a set of functions that operate on some sort of data that are stored in variables, so you basically have some sort of global state or variables and a bunch of functions that work with those variables. It could have functions calling other functions and so on.
+
+In Object-Oriented Programming however you're basically combining or bundling related functions and variable into something called a class from which you create objects. You could access variable and call functions of the object if they if they are publicly available. We refer to the variables of the object or the class as properties and the functions as methods. A Class is a blueprint of an object and an object is something that you create or build from that blueprint. You could have many objects of the same class but each of those objects can be different in it's data. Objects are instances of the classes, the main advantage of object oriented programming is the ability to structure your code in a better way that is easier to maintain, test, extend, debug and so on. Through this does not mean that procedural programming is useless, there are some use cases for procedural programming, it might be a good pick for a small project that not require many features or much maintenance and you're the only one working on it. Not everything has to be object oriented but as your code grows and your project requirements increase you will find yourself in a trap where modifying extending and maintaining that code becomes difficult., especially when you're working in teams this is where object-oriented programming can help you, but do know that object-oriented programming does not mean your code will automatically be easier to maintain. Essentially it is up to you as a developer to ensure that you write your code in a way that is maintainable extendable readable and reusable. Object-oriented programming makes things easier for you to write such code. Also object-oriented programming is on demand meaning that you won't find many companies looking for programmers with experience in just procedural programming, most of them require object-oriented programming skills.
+
+Thus object-oriented programming mean MVC? No and this is th misconception that I see a lot in object-oriented  programming. Object-oriented programming does not automatically imply MVC, object-oriented programming is a paradigm while MCV is an architecture pattern of Model-View-Controller which uses the object-oriented programming principles. Simply object-oriented programming does not imply MVC.
+
+OOP is a fundamental programming paradigm that is based on the concept of "objects". Your code is structured to model real-world entities and their interactions within computer programs. Classes are created as "blueprints" for an object. Object-oriented programming has four main principles and these are encapsulation, abstraction, inheritance and polymorphism. 
+
+**Core Concepts of OOP**
+  * **Classes**: Blueprint or template to create and use an object
+  * **Objects**: Self containing unit that encapsulates properties and methods
+  * **Inheritance**: Allows one class to inherit properties/methods from another class
+  * **Encapsulation**: Bundling the data and methods into a single unit
+  * **Polymorphism**: Allows objects of different classes to be treated as objects of a common superclass
+
+**Benefits of OOP**
+  * **Modularity**: makes managing complex systems easier.
+  * **Reusability**: code recycling in multiple projects, or reuse a single class in multiple objects in a single project.
+  * **Scalability**: extend existing classes or functionality without disrupting existing code
+  * **Abstraction**: allows to abstract complex systems by modelling them with simplified objects
+
+  * Missing some [[home:php:basics:|PHP Basics]] ...
+===== Classes & Objects =====
+
+A class is like a blueprint and an object is something that you build from that blueprint or in other words an instance of that class. An object is an PHP data type with multiple variable (called properties) and fitting functions (called methods) to handle the data in such properties (variables). Check the [[https://www.php.net/manual/en/language.types.intro.php|PHP Language Reference on Types]]
+
+PHP has a generic class implementation called std class that could use to create generic objects or you could cast your variables that are of another data types into objects. In addition to being able to create objects using generic std class you can also create your own custom classes. The definition of a class must begin with a class keyword followed by the class name which should begin either with a letter or an underscore followed by letters, numbers or underscores. Then we add curly braces to enclose the class definition. Note that you could follow different standards and conventions when it comes to naming your variables or classes or overall your code structure. The recommended way is to have a single class per file and nothing else in that file, with the file named after the class name, or the class name is named like the file containing the class code. You don't have to name your classes after your file but that is the recommended and widely used convention. You could also have more than one class definitions in a file which would work perfectly fine but again it is not the recommended way.
+
+**controllers/User.php**
+<code php>
+<?php
+class User {
+  // Properties
+  public $name; // = 'John Doe';
+  public $email; // = 'john@gmail.com';
+  
+  // Methods
+  public function login() {
+    // ...
+  }
+}
+</code>
+Naming convention is to start classes with an uppercase letter. Public properties like $name can be accessed from out side the class, this is a no no use getter and setter methods (functions belonging to a class).
+
+To create an object out of that class, what widely happens in a different file, like index.php. To create a variable pointing to the class followed by parenthesis, we have to use the new keyword followed by the class name followed by parentheses. The parentheses is not always required, depending on your constructor but it's always a good idea to stay consistent and just parentheses regardless.
+
+**index.php**
+<code php>
+<?php
+require_once '../controllers/User.php';
+
+// Instantiate class as a new object
+$user1 = new User();
+
+// Set property values
+$user1->name = 'John Doe';
+$user1->email = 'john@gmail.com';
+var_dump($user1);
+
+// Run a method
+$user1->login();
+</code>
+The class file has to be explicitly included or required in the file using the class, to be able to create the object.
+
+===== Access Modifiers, Getters and Setters =====
+
+Properties (inside class variables) should not be accessed directly. Therefore the **visibility** (or access modifier) should not be public as in the example above. Sometimes not all methods (inside class functions) should be  accessible from outside the class. To define the visibility of the property to either
+  * **public**: The property or method can be accessed from anywhere inside or outside of the class. This allows interaction objects outside of the class. This is the default if no modifier is given. 
+  * **protected**: The property or method can be accessed from within the class OR any class that inherits from it
+  * **private**: The property or method can only be accessed from within the class
+and these are also **called access modifiers** and they should be added to both properties and methods so we start with the access modifier followed by the variable name. 
+
+Accessing properties should happen with methods, one for stetting a value (so called setter method) and on for property value reading (so called getter method). One big advantage of setters is you could check if the value to be set is within legal values of your application or getters could return a default value if non set up to now. You also could check user access rights, as is it allowed for this user to change or read the value. 
+
+To assign this values to the properties or to access the properties inside the object or class within the class itself we need to use a **variable called $this**. The **$this variable refers to the calling object** or in other words it refers to to the instance from which the method was called from. Due to properties not being accessible from outside the class we need methods to access the values assigned to properties. This methods are called **getters to retrieve the value** assigned to an property and **setters to assign a new value** to an property. 
+
+Only the class the property belonging to should be allowed to explicity change the values of properties. Explicitly changeing from outside the class should anything other than the class should be done through methods of the class like getters and setters or transcation methods.
+
+**controllers/User.php**
+<code php>
+<?php
+class User {
+  // Properties
+  private $name;
+  private $email;
+  private $status = 'active';
+  
+  // Getter and Setter
+  public function getName() {
+    return $this->name;
+  }
+   public function setName($chicken) {
+    $this->status = $chicken;
+  }
+    
+  public function getEmail() {
+    return $this->email;
+  }
+   public function setEmail($email) {
+    $this->status = $email;
+  }
+    
+  public function getStatus() {
+    return $this->status;
+  }
+   public function setStatus($status) {
+    $this->status = $status;
+  }
+    
+  // Methods
+  public function login() {
+    // ...
+  }
+}
+</code>
+The values of this properties will be set to null if you don't assign them the value, so null will be the default for them. There is one exception to this when using type hinting. 
+
+Accessing public properties of methods everyone interacting with the object even outside of the class we have to do is use **object operator** which is -> followed by the method or property to be accessed. Is the method or property is not accessible due to access modifier you'll get an Uncaught Error: Cannot access private property.  
+<code php>
+<?php
+$user2 = new User('Jane Doe', 'jane@gmail.com');
+$user2->setSatus('inactive');
+echo $user2->getName() . ' is ' . $user2->getSatus();
+</code>
+PHP 7.4 introduced typed properties, which means that you could set the type of the property in the definition. Type hinting is recommended but not required, it is up to you if you want to use it or not. **Recommendation is type hinting and strict type usage**. Note PHP is not able to determine whether a property that has a type was actually set or you simply forgot to set a value, that's why accessing a object without initialisation will lead to a Uncaugth Error: ... must not be accessed before initialisation. This is why the new state was introduced called uninitialized when type is defined and value is not assigned to a property it is in uninitialized state. If not using strict type, uninitialized properties will have the value NULL. To solve the issue of accessing properties before initialization is to actually assign some kind of value as default value either directly at the definition or in something called constructor or a so called setter. Something to note is that you're only able to assign constant values as the default values you cannot have complex expressions here like function calls and so on. If you need to the nullable property you would add the question mark in front of the type definition and you would set the default value to NULL, in that case it would work, but this kind of assignment doesn't really make sense.
+
+Setting values can alternatively be defined within something called constructor. A method to be called when creating an object out of the class with the new keyword.
+===== Constructors =====
+
+Due to have properties not publicly available with the private access modifier, which could cause some unnecessary bugs where properties are changed from outside the Class we need different ways to access the properties. The constructor is a method to be called when creating an object out of the class with the new keyword. The constructor can be used to initialize class properties. The constructor  method is a special function, also known as a magic function that will be called whenever a new instance of the class is created is named **construct() with double underscore at the beginning**. The constructor has no arguments by default but it accepts arguments, so you could add values to it to initialize the object with it to assign these values to the properties. 
+<code php>
+<?php
+class User {
+  // Properties
+  private $name;
+  private$email;
+
+  
+  //Constructors 
+  public function __construct() {
+    echo 'User Constructor ran ... <br />'; 
+    // ...
+  }
+
+  public function __construct($name, $email) { // Polymorphism
+    echo 'User Constructor ran ... <br />'; 
+    $this->name = $name;
+    $this->email = $email;
+  }
+  
+  // Methods
+  public function login() {
+    // ...
+  }
+}
+</code>
+If the constructor needs to get arguments and you call it without, you'll get an Uncaught ArgumentCountError. The construct method does accept the three dot variadic parameter, allowing you to pass any number of arguments when creating an object, but you should consider associative array then.
+<code php>
+<?php
+// Instantiate class as a new object
+$user1 = new User('jane Doe', 'jane@gmail.com');
+$user1->login();
+</code>
+
+
+===== Method chaining ===== 
+
+Lets assume we need multiple methods, of our object changing property values, that we have to call before getting the result we need. Instead calling one method after they other, or one by one you can chain methods by returning the current object from those methods so instead of returning nothing we could return 
+the $this variable which refers to the calling object which is an instance of the class. So we can use the class name as return type in method declaration, there is another way to specify this by using the self keyword. 
+<code php>
+<?php
+declare(strict_types=1);
+class Transaction {
+  private float $amount;
+  private string $description;
+  
+  public function __construct(float $amount, string $description) {
+    $this->amount = $amount;
+    $this->description = $description;
+  }
+  
+  public function addTax(float $rate): self {
+    $this->amount += $this->amount * $rate /100;
+    return $this;
+  }
+  
+  public function applyDiscount(float $rate): self {
+    $this->amount -= $this->amount * $rate /100;
+    return $this;
+  }
+  
+  public function getAmount(): float {
+     return $this->amount;
+  }
+  
+  public function setAmount(float $amount): float {
+     $this->amount = $amount;
+  }  
+}
+</code>
+Instead of calling each method one by one, we can chain them. 
+<code php>
+<?php
+declare(strict_types=1);
+require_once '../Transaction.php';
+
+$transaction = new Transaction(100, 'Initial Debit');
+// $transaction->applyDiscount(10);
+// $transaction->addTax(19);
+$transaction->applyDiscount(10)->addTax(19);
+
+echo 'Transaction Payload: ' . $transaction->getAmount();
+</code>
+Here everything still works but now we are able to do something like this where methods are changed as shown above. We could even change this to do something like the following. Put the new command in parenthesis and remove all class calls, this will still work. For better readability we could add a line break before each arrow, if we have many arrow calls, so we would have the methods on separate lines and this would still work. 
+<code php>
+<?php
+declare(strict_types=1);
+require_once '../Transaction.php';
+
+$transaction = (new Transaction(100, 'Initial Debit'))
+   ->applyDiscount(10)
+   ->addTax(19);
+
+echo 'Transaction Payload: ' . $transaction->getAmount();
+</code>
+Even better we can set $transaction to $amount if we don't care to have the reference to that object renamed. 
+<code php>
+<?php
+declare(strict_types=1);
+require_once '../Transaction.php';
+
+$amount = (new Transaction(100, 'Initial Debit'))
+   ->applyDiscount(10)
+   ->addTax(19)
+   ->getAmount();
+
+echo 'Transaction Payload: ' . $amount;
+</code>
+As you can see chaining methods creates this more readable way of building your objects and shorter code. Chaining methods will not always make sense, chaining methods would not make sense if we had to return some type of value not the current instance. Also try not to force yourself creating chained method structures in all of your classes. It only makes sense for certain classes where you want to build up the object  before getting the final value.
+
+===== Variables as Class name ===== 
+
+Another way you could create objects is by using variables instead of class name. Everything works the same as with hard coded class names.
+<code php>
+<?php
+declare(strict_types=1);
+require_once '../Transaction.php';
+$class = 'transaction';
+
+$amount = (new $class(100, 'Initial Debit'))
+   ->applyDiscount(10)
+   ->addTax(19)
+   ->getAmount();
+
+echo 'Transaction Payload: ' . $amount;
+</code>
+Dynamic class names are used when the class can or should change at runtime, as different database classes (MySQL, Postgres, SQLite). 
+
+===== Destructors ===== 
+
+The destructor message is the opposite of the constructor, it's also a magic message and therefore it starts with **two underscores** before the keyword **destruct**. The destruct method is called whenever there is no more reference available to the object or when the object is destroyed. The destructor can be used to perform some sort of cleanup or release locks or close open resources or database connections and so on. You do not need to define destructors a lot only when you really need to and have the actual use case for it. It is recommended that if you have a resource or a database connection open to close it as soon as you're done working with them and as soon as you no longer need them. Just in case you have a long run in script and you don't close the connection as soon as you're done using it it's going to keep that connection open until the script finishes running so unless you have a good use case for destructors. Try to stay away from them and close your connection as soon as you're done using them. 
+
+**Transaction.php**
+<code php>
+<?php
+   public function __destruct() {
+     echo 'Destruct Transaction' . $this->description . '<br />';
+   }
+}   
+</code>
+
+The destructor will show up each time the object is removed from the memory, basically it's destroyed 
+<code php>
+<?php
+declare(strict_types=1);
+$amount = (new Transaction(100, 'Initial Debit'))
+  ->applyDiscount(10)
+  ->addTax(8)
+  ->getAmount();
+
+echo $amount;
+</code>
+The Destruct Transaction message will be displayed before the amount value. This means the destruct method will be called first, this means there is no reference available to this transaction aside from here and therefore it's calling the destruct and it's printing destruct transaction and then we're printing the amount. 
+<code php>
+<?php
+declare(strict_types=1);
+$transaction = (new Transaction(100, 'Initial Debit'))
+  ->applyDiscount(10)
+  ->addTax(8);
+
+echo $transaction->getAmount();
+</code>
+This code would first show the amount value and afterwards the Destruct Transaction message, because we still have the reference available to the transaction object in the echo statement to print the amount first and then call the destruct method.
+
+<code php>
+<?php
+declare(strict_types=1);
+$transaction = (new Transaction(100, 'Initial Debit'))
+  ->applyDiscount(10)
+  ->addTax(8);
+$amount = $transaction->getAmount();
+echo $amount;
+</code>
+In this case the reference is still available until the end of the script. When the script ends that's when the destructor is called and that is why it first prints the amount and then it calls the destruct.
+
+<code php>
+<?php
+$transaction = (new Transaction(100, 'Initial Debit'))
+  ->applyDiscount(10)
+  ->addTax(8);
+$amount = $transaction->getAmount();
+
+unset($transaction); // $transaction=NULL; 
+echo $amount;
+</code>
+In this code the Object is destroyed before the scripts ends, so the Destroy Transaction message will show up before the amount value is displayed. 
+
+A couple of   things to know about destructors if you use exit statement to terminate your script you will still call the destructor. If you put an exit statement in the destruct method, whenever this specific destruct method runs no other destruct methods on other classes, which can cause some issues if you're performing some actions and relying on those methods to run that are within the destructors of other classes.
+
+===== PHP std class ===== 
+
+The std class can be used to create generic objects and also some functions return instances of std class and the keys of the array or the keys for the json, in the following code, will become the properties of the class and the values will become the values of those properties. so now you're able to use those properties using the object operator (->).
+<code php>
+<?php
+$str = {"a":1,"b":2,"c":3};
+$arr = json_decode($str, true); // convert to associated array
+$obj = json_decode($str);  // convert to an object as an instance of std class 
+
+var_dump($obj->a);
+</code>
+We can create custom objects by using the std class itself and then set the properties the way you would set a public property on your own custom class, using the object operator, so you would do objects property a equals something. 
+<code php>
+<?php
+$obj = new \stdClass();
+$obj->a = 'Hello';
+$obj->b = 'World';
+</code>
+
+**Type casting** from or to stdClass, works pretty similar as type casting works. 
+<code php>
+<?php
+$arr = [1, 2, 3];
+$obj = (object) $array;  // convert array to object with keys as properties 
+var_dump($obj->{0}); // = 1
+</code>
+The numerically indexed array is casted to an object with properties which is 0, 1 and 2. Remember to surround the properties with curly brackets.
+
+Converting Scalar into objects (Integer, Float, Strings, Boolean)
+<code php>
+<?php
+$obj = (object) 1;  // convert integer to object
+var_dump($obj->scalar); // = 1
+</code>
+<code php>
+<?php
+$obj = (object) false;  // convert bool to object
+var_dump($obj->scalar); // = 0
+</code>
+Null is casted into an empty object without any properties.
+
+===== Constructor Property Promotion =====
+[[https://wiki.php.net/rfc/constructor_promotion|Constructor Property promotion]] is a feature that was edit in PHP 8.0, it allows you to get ride of the boilerplate code where you define properties and then assignee them to the arguments that are passed in your constructor. Basically it lets you combine class properties constructor and assignment into one shorter syntax. The following code is perfectly fine.
+<code php>
+<?php
+declare(strict_types = 1);
+class Transaction {
+  private float  $amount;
+  private string $description;
+  
+  public function __construct(
+    private float  $amount,
+    private string $description
+  ) {
+    $this->amount      = $amount;
+    $this->description = $description;
+  }
+}
+</code>
+But now there is an shorthand version of this. Basically of this now you are able to add a visibility or access modifier directly in your constructor. PHP will interpreted both in the constructor the property and the constructor argument and it will assigned the value that is passed to the constructor to that property behind the scenes to basic it still does the definition and the property reassignment for you. You don't have to do that. 
+<code php>
+<?php
+declare(strict_types = 1);
+class Transaction {
+  public function __construct(
+    float  $amount,
+    string $description
+  ) {
+  }
+}
+</code>
+This code will do the same, in PHP 8.0, as the code before. So as you see Constructor Property Promotion feature offers a shorthand version with much cleaner syntax and less boilerplate code. While PHP behind the scenes does the same as before.
+
+There are a few things you need to be aware of. First thing you can **type hint any type except callable**, that's because can not type hint properties with callable type, PHP dose not allow that. As argument you can use callable as type hint without access modifier, because then you are not allowed to use it with an access modifier. 
+
+You are allowed to use promoted properties with class properties. So you don' have to promote all the properties. 
+<code php>
+<?php
+declare(strict_types = 1);
+class Transaction {
+  privat float $amount;
+  
+  public function __construct(
+    float  $amount,
+    string $description
+  ) {
+    $this->amount = $amount;
+  }
+}
+</code>
+Another thing you need to be aware of you **can not have duplicates** meaning you can not have **a property and promotes property** at the same time with the same name. You don't have to type hint properties you can also promote untyped properties. 
+
+Next thing you should know is you could assign default value to promoted properties, but have to **follow the same rules** you can only have a simple expression or constant values as default, we can not use function calls or complex expressions. 
+<code php>
+<?php
+declare(strict_types = 1);
+class Transaction {
+  privat float $amount = 100.50;
+  
+  public function __construct(
+    float  $amount,
+    private string $description = 'Hello'
+  ) {
+  }
+}
+</code>
+If you are assigning a default of **NULL** you will need to make that **property nullable typed**  
+<code php>
+<?php
+declare(strict_types = 1);
+class Transaction {
+  privat float $amount = 100.50;
+  
+  public function __construct(
+    float  $amount,
+    private ?string $description = null // ? makes it nullable
+  ) {
+  }
+}
+</code>
+**Accessing promoted properties** is by using the $this variable. Another way is to access the **promoted property simply without $this**. 
+<code php>
+<?php
+declare(strict_types = 1);
+class Transaction {
+  public function __construct(
+    float  $amount,
+    private string $description
+  ) {
+    echo amount;
+  }
+}
+</code>
+===== Nullsafe operator =====
+
+The Nullsafe operator allows to chain methods even if they return null. The nullsafe operator is a question mark ?-> used after the method name, which could return null, in the chain and before the object operator. Without the Nullsafe operator we need to nest a lot of null checks as you see in the following code, otherwise in case of property or method access returning null, we would get a Warning Attempt to read property ... on null.
+<code php>
+<?php
+require_once '../PaymentProfile.php';
+require_once '../Customer.php';
+require_once '../Transaction.php';
+$transaction = new Transaction(5, 'Test');
+$profileId = null;
+if ($customer = $transaction->getCustomer()) {
+  if ($paymentProfile = $customer->getPaymentProfile()) {
+    $profileId = $paymentProfile->id;
+  }
+}
+echo $profileId ;
+</code>
+How does the nullsafe operator work? The nullsafe operator basically solves this problem be short circuiting the property or method access and will return null immediately as soon as it is null without accounting the rest of the expression. In the following code, if customer is null the rest of the code in this line would be discarded. 
+<code php>
+<?php
+require_once '../PaymentProfile.php';
+require_once '../Customer.php';
+require_once '../Transaction.php';
+$transaction = new Transaction(5, 'Test');
+echo $transaction->customer?->paymentProfile?->id;
+</code>
+You can chain the nullsafe operator but this isn't very helpful in most cases. It is helpful working with the Null coalescing operator. There are a few things to know and be aware of when working with nullsafe operator, first of all it's read-only, meaning you can not write or assign a value to it, so the following code will not work.
+<code php>
+<?php
+$transaction->customer?->paymentProfile?->id = 42;
+</code>
+Also be careful not to pass important function calls, that needs to be executed even when null are present in the chain, be aware of short circuiting important function being not executed. Check [[https://wiki.php.net/rfc/nullsafe_operator|PHP RFC: Nullsafe operator]] 
+
+
+The Null coalescing operator ?? will return an alternative value if something fails on an object being null.
+<code php>
+<?php
+require_once '../PaymentProfile.php';
+require_once '../Customer.php';
+require_once '../Transaction.php';
+$transaction = new Transaction(5, 'Test');
+echo $transaction->getCustomer()?->getPaymentProfile()?->id ?? 'foo';
+</code>
+===== Namespaces =====
+When you define a function a constant or a class without a namespace definition by default they will be put in a global space. In this example here transaction class has no namespace definition may cause name collision where you might have multiple classes that have the same name. PHP will not know which one to instantiate because two classes with the same name. When requiring two classes with the same name and that are not namespaced meaning that they're in a global space this will cause an **Fatal Error Cannot declare class ..., because the name is already in use**. <code php>
+<?php
+declare(strict_types = 1);
+require_once '../PaymentGateway/Stripe/Transaction.php';
+require_once '../PaymentGateway/Paddle/Transaction.php';
+var_dump(new Transaction()); // which Transaction class to be use?
+</code>
+Before namespaces where introduced often this was solved by prefixing the class name with the vendor name or the namespace name within the class. In addition to the name collision fixes it also lets you better structure and organize your classes and code same thing would happen with the constants, interfaces, traits or functions. Think of namespaces as virtual directory structures for your classes. We can define namespaces using the namespace keyword on top of the file before any code and after declare(strict_types = 1); statement. 
+<code php>
+<?php
+declare(strict_types = 1);
+namespace core;
+</code>
+You could name the namespace what ever you want as an example you could take your name, a package name or whatever.
+Defining a name space in a script will define this for all classes, constants, interfaces, functions and traits after this point in the PHP script, to avoid conflicts in naming with other PHP files. If you require a class with namespace the location of the file will not change, so the require statement is the same but calling the class will change, otherwise PHP will throw an Uncaught Error: Class not found, because PHP is looking for the class by default in global space. There are two ways to fix this issue, one is we need to **add qualifying class name including the namespace** in here so we would do something like Stripe\Transaction.php or Paddle\Transaction.php. Another way is we could import this class 
+You can 
+
+**index.php**
+<code php>
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+require '../helpers.php';
+
+use core\Router;
+// use PDO;  // if needed
+
+$router = new core\Router(); 
+</code>
+
+**index.php**
+<code php>
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+require '../helpers.php';
+
+$router = new core\Router(); // crappy way because this has to be done multiple times
+</code>
+===== Static Members & Methods =====
+
+<code php>
+class MathUtil {
+  public static $pi=3.14; // Readonly?
+  
+  public static function add(...$num) {
+    return array_sum($nums);
+  }
+}
+
+echo MathUtil::$pi;
+echo MathUtil::add(1, 2, 3, 4, 5);
+</code>
+
+===== Inheritence =====
+
+<code php>
+<?php
+class Admin extends User {
+  private $level;
+  
+  // Constructor
+  public function __construct($name, $email, $level) {
+    echo 'Admin Constructor ran ... <br />'; 
+    $this->level = $level;
+    parent::__construct($name, $email);
+  }
+  
+  // Getter & Setter
+  // ...
+  
+  // Methods
+  public function login() { // Polymorphism 
+    echo 'Admin ' . $this->name . ' is logged in<br />';
+  }
+}
+
+$admin1 = new Admin('Tom Sawyer', 'tom@gmail.com', 5);
+var_dump($admin1);
+</code>
+
+===== Abstract Classes =====
+
+Abstract Classes are
+  * incomplete
+  * at least partially incomplete
+  * we cannot instantiate then
+  * if a class has a abstract method, the class must be marked abstract too
+  * common in parent classes
+
+<code php>
+abstract class Shape {
+  protected $name;
+  
+  abstract public function calculate();
+  
+  // Constrictor
+  public function __construct($name) {
+    $this->name = $name;
+  } 
+
+  // Concrete methods
+  public function getName() {
+    return $this->name;
+  }
+}
+
+
+class Circle extends Shape {
+  private $radius;
+
+  public function __construct($name, $radius) {
+    parent::__construct($name);
+    $this->radius= $radius;
+  }
+  public function calculate(){
+    return pi() * pow($this->radius, 2); // r^2
+  }
+}
+
+$circle = new Circle('Circle', 5);
+var_dump($circle); 
+
+
+class Rectangle extends Shape {
+  private $width;
+  private $height;
+
+  public function __construct($name, $width, $height) {
+    parent::__construct($name);
+    $this->width = $width;
+    $this->height= $height;
+  }
+  public function calculate(){
+    return $this->width * $this->height;
+  }
+}
+
+$rectangle = new Rectangle ('Rectangle ', 4, 6);
+var_dump($rectangle); 
+</code>
+
+===== Interfaces =====
+
+<code php>
+<?php
+interface ContentInterface {
+  public function display();
+  public function edit();
+}
+
+class Article implements ContentInterface {
+  private $title;
+  private $content;
+  
+  public function __construct($title, $content) {
+    $this->title = $title;
+    $this->content = $content;
+  }
+  
+  public function display() {
+    echo "<h2>{$this->title}</h2>";
+    echo "<p>{$this->content}</p>";
+  }
+  
+  public function edit() {
+    echo "Editing the article '{$this->title}'";  
+  }
+}  
+
+class Video implements ContentInterface {
+  private $title;
+  private $url;
+  
+  public function __construct($title, $url) {
+    $this->title = $title;
+    $this->url = $url;
+  }
+  
+  public function display() {
+    echo "<h2>{$this->title}</h2>";
+    echo "<iframe src='{$this->url}'></iframe>";
+  }
+  
+  public function edit() {
+    echo "Editing the video '{$this->title}'";  
+  }
+} 
+
+$article = new Article('Introduction to PHP', 'PHP is a versitile Scripting language');
+$video = new Video('PHP for Beginners', 'https://www.youtube.com/watch?v=BUCiSSyIGGU');
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <title>PHP from scratch</title>
+</head>
+
+<body class="bg-gray-100">
+  <header class="bg-blue-500 text-white p-4">
+    <div class="container mx-auto">
+      <h1 class="text-3xl font-semibold">PHP From Scratch</h1>
+    </div>
+  </header>
+  <div class="container mx-auto p-4 mt-4">
+    <!-- Output -->  
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+      <?= $article->display() ?>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+      <?= $video->display() ?>
+    </div>
+  </div>
+</body>      
+        
+</html>
+</code>
+
+==== Catch Errors ====
+  * **Exception** Base class for all exceptions
+  * **Error** Base class for all internal PHP errors
+  * **TypeError** Raised when a function argument or return value has the wrong type
+  * **ParseError** Raised when there is a syntax error in evaluated code (e.g. eval)
+  * **ArgumentCountError** Raised when too few arguments are passed to a function
+  * **ArithmeticError** Raised when an invalid arithmetic operation occurs (e.g. division by zero with intdiv)
+  * **DivisionByZeroError** Raised specifically when dividing by zero
+  * **UnhandledMatchError** Raised when a `match` expression has no matching arm
+  * 
+
+<code php>
+try {
+
+} catch (Execption $e) {
+  echo $e->getMessage();
+}
+</code>
+
+==== Throw own Errors ====
+
+  * **Throwable** Base interface implemented by both Error and Exception
+  * **Exception** Base class for all traditional exceptions
+  * **Error** Base class for all internal PHP errors (since PHP 7)
+
+  * **TypeError** Raised when a function argument or return value has the wrong type
+  * **ParseError** Raised when there is a syntax error in evaluated code (e.g. eval, include)
+  * **ArgumentCountError** Raised when too few arguments are passed to a function (since PHP 7.1)
+  * **ArithmeticError** Raised when an invalid arithmetic operation occurs (since PHP 7.0)
+  * **DivisionByZeroError** Raised specifically when dividing by zero (since PHP 7.0)
+  * **UnhandledMatchError** Raised when a `match` expression has no matching arm (since PHP 8.0)
+
+  * **CompileError** Raised on compilation-time errors (since PHP 7.3)
+  * **ValueError** Raised when a function receives a valid type but an invalid value (since PHP 8.0)
+
+  * **AssertionError** Raised when an `assert()` fails (since PHP 7.0)
+
+  * **FiberError** Raised when an invalid operation is performed on a Fiber (since PHP 8.1)
+
+  * **ClosedGeneratorException** Raised when resuming a closed generator (internal, since PHP 7)
+
+  * **PDOException** Raised by PDO operations (extends Exception)
+  * **ErrorException** Wraps traditional PHP errors as exceptions (useful with set_error_handler)
+
+<code php>
+class MyException extends Exception {}
+</code>
+
+===== Autoloader =====
+
+==== Simple Autoloader ====
+
+When PHP encounters a class or interface that has not yet been defined, it triggers the autoload mechanism. Functions registered with spl_autoload_register() are then called in sequence. Each of these functions receives the missing class name as an argument, and it is their responsibility to locate and load the corresponding file (for example by including it). Once the file is loaded and the class is defined, PHP continues execution as if the class had been available from the start. The goal is to **simplify require basePath('...');**, all class files needed do not have to be loaded individually by require
+
+**index.php**
+<code php>
+<?php
+require '../helpers.php';
+
+spl_autoload_register(function($class) {
+   $path = basePath('core/' . $class . 'php';
+   if (file_exists($path)) {
+     require $path;
+   }
+});
+
+//Initiate the router
+$router = new Router();
+</code>
+
+==== PSR-4 Autoloader ====
+
+The PSR-4 standard autoloader is working with the **[[home:php:pkg:composer|Composer]]** package manager for php, like npm in Node.js, with a composer.json file as application manifest. The composer can also specify an PSR-4 autoloader. 
+
+<code json>
+{
+   "name" : "robingoerlach/workopia-php",
+   "description": "Job Portal",
+   "authors": [ 
+      {
+        "name": "Robin Goerlach",
+        "email": "support@sasd.de"
+      }
+    ],
+    "autoload": {
+       "psr-4": {
+          "core\\": "core/",
+          "app\\": "app/"
+     }  
+}
+</code>
+**composer.json**
+
+  * **name**: Github Repo name
+  * **psr-4**: needs namespaces used in the application project
+
+<code bash>
+composer install
+</code>
+
+<code php>
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+require '../helpers.php';
+</code>
+
+The autoloader from composer searches also in subfolders of namespace corresponding folder.

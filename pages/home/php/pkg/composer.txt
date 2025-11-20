@@ -1,0 +1,606 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:pkg:|PHP Package Manager]]**  -> **Composer**
+
+====== PHP Composer ======
+
+===== Introduction =====
+Modern PHP development relies on reliable dependency and tool management.  
+This page explains the most common **package managers** used in the PHP ecosystem, with a focus on **Composer** and **Phive** — two tools that complement each other perfectly.
+
+While **Composer** handles *project dependencies* such as frameworks and libraries,  
+**Phive** securely manages *stand-alone developer tools* like PHPUnit or PHPStan.
+
+The goal of this documentation is to help developers:
+  * understand the difference between runtime and tool dependencies,
+  * set up reproducible, verifiable environments,
+  * and follow best practices for modern, team-ready PHP projects.
+
+Together, Composer and Phive form a clean, secure, and maintainable workflow for both open-source and enterprise PHP applications.
+
+===== Installation & Basics =====
+Download the package manager installer from the [[https://getcomposer.org/|Composer Project]] and install it. In the Project folder create the project by running 
+<code bash>
+$ composer init
+</code>
+this will generate a index.php and a composer.json
+
+To install dependencies, you may need to edit the composer.json file. Wen running the install command
+<code bash>
+$ composer install
+</code>
+composer will generate a composer.lock file and a vendor folder with the packages inside
+
+  * **composer.json** manually declaring dependencies in json format
+  * **composer.lock** automatically naming exactly dependency versions installed
+  * **vendor** folder should be excluded from source control (.gitignore)
+
+**[[https://packagist.org/|Packagist]]** is the main Composer repository, good packages can be found on **[[https://www.phpclasses.org/|PHP Classes Repository]]**. It aggregates public PHP packages installable with Composer.
+
+Basic **composer.json** 
+<code json>
+{
+  "name": "sasdgmbh/projectname",
+  "description": "Minimal PHP project with PSR-4 autoloading and phpDocumentor",
+  "type": "project",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Robin Goerlach",
+      "email": "support@sasd.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "App\\": "App/",
+      "Framework\\": "Core/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "phpdocumentor/phpdocumentor": "^3.3",
+    "phpunit/phpunit": "^11"
+  },
+  "scripts": {
+    "test": "phpunit --colors=always",
+    "docs": "phpdoc"
+  }
+}
+</code>
+
+  * autoload-dev → ensures that your test classes (e.g. Tests\SomethingTest) are found automatically, without manual inclusion.
+  * scripts → now you can just run composer test and Composer will call PHPUnit.
+  * Pay attention to the case of your folders: you have App/ (uppercase) and Core/ (uppercase), for tests/ you have lowercase → the folder name must exist exactly as it is.
+
+<code bash>
+$ composer update
+$ composer dump-autoload
+</code>
+Run composer update this will install PHPUnit and PHPDocumentor. Run composer dump-autoload so that the new autoload rules take effect.
+
+<code bash>
+$ composer docs
+</code>
+phpdoc allows you to conveniently generate the documentation with the command **composer docs**, same as vendor/bin/phpdoc. Documentation will be in docs/index.html, here you can find more about **[[home:php:docgen:doc:|PHPDocumentor]]**
+===== Missing Git =====
+**Composer could not detect the root package ...**
+
+Its recommended to use Git with Composer, so Composer can read Git-Tags.
+<code bash>
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git tag v0.1.0   # or v1.0.0 – SemVer usage
+</code>
+Let Composer know things have changed. Therefor run 
+<code bash>
+composer update
+</code>
+
+==== Not working with Tags ====
+If not working with Tags add Version No under extras in composer.json
+
+**composer.json**
+<code json>
+{
+  "name": "sasdgmbh/workopia-php",
+  "type": "project",
+  "extra": {
+    "branch-alias": {
+      "dev-main": "1.0.x-dev"
+    }
+  }
+}
+</code>
+and run 
+<code bash>
+composer update
+</code>
+not recommended but possible
+**composer.json**
+<code json>
+{
+  "name": "sasdgmbh/workopia-php",
+  "version": "1.0.0",
+  "type": "project"
+}
+</code>
+
+
+==== Workaround Tags ====
+
+<code bash>
+COMPOSER_ROOT_VERSION=1.0.0 composer require --dev phpunit/phpunit:^11
+COMPOSER_ROOT_VERSION=dev-main composer update
+</code>
+
+==== Tags Recommendation ====
+
+  * **Application**: ignore warning or Option 1 (Git + Tag)
+  * **Library**: Option 1 (Tags) or Option 2 (Branch-Alias) is best practice.
+
+
+===== Projectstructure ===== 
+
+<code text>
+your-project/
+│
+├── composer.json
+├── composer.lock         (Composer generated)
+├── phpdoc.xml            (optional) 
+├── vendor/               (Composer generated)
+├── src/                  <-- Sourcecode folder
+│   └── Example.php
+├── docs/                 <-- Documentation
+└── README.md
+</code>
+===== Project Package configuration =====
+
+As an example installation of [[https://packagist.org/packages/monolog/monolog|monolog]] run 
+<code bash>
+composer require monolog/monolog
+</code>
+or edit composer.json
+<code json>
+{
+  "require:{
+    "monolog/monolog": "1.10.0"
+   } 
+}
+</code>
+and run
+<code bash>
+# php ~/composer.phar install
+$ composer install
+</code>
+Composer will now install required packages into vendor folder. You don't need to be very specific with versions, you can use 1.10.* or ~2.1, that will give you 2.1, 2.2 or 2.3 but not 3.*, so composer can snidely update you project. To prevent installing development packages in production use --noDev.
+
+===== Additional commands =====
+
+Update Autoloader after adding new classes
+<code bash>
+composer dump-autoload
+</code>
+
+Generate documentation
+<code bash>
+composer docs
+</code>
+
+Optional phpdoc.xml.dist
+<code xml>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpdocumentor>
+  <title>Workopia PHP API Documentation</title>
+
+  <paths>
+    <!-- Source Code Folder -->
+    <directory>App</directory>
+    <directory>Core</directory>
+  </paths>
+
+  <output>
+    <!-- HTML-Documentation target folder-->
+    <directory>docs</directory>
+  </output>
+
+  <visibility>public,protected,private</visibility>
+
+  <!-- Optional: exclude Tests and packages -->
+  <ignore>
+    <directory>tests</directory>
+    <directory>vendor</directory>
+  </ignore>
+
+  <!-- Template for modern look -->
+  <template name="clean" />
+</phpdocumentor>
+
+</code>
+
+Verify security issues
+<code bash>
+composer audit
+</code>
+===== Publish own Packages =====
+
+**composer.json**
+<code json>
+{
+  "name": "SASD/library",
+  "description": "Fabulous example library",
+  "require": {
+    "php": "~5.4"
+  },
+  "autoload": {
+    "psr-4": {
+       "SASD\\"": "src/"
+       }
+    },
+    "license": "MIT"
+}
+</code>
+
+The preferred mechanism is to read from a GitHub repository and tag versions with version numbers and pull direct from master Branch.
+
+**composer.json** reading from different resources
+<code json>
+{
+  "repositories": [
+     {
+        "type": "vcs",
+        "url": "../lib"
+     }
+  ],
+  "require": {
+     "SASD"/library": "dev-master"
+   }
+}
+</code>
+
+===== Security Conditions with Composer =====
+Composer and PSR-4 autoloading are not insecure by design — but your security depends on the quality and maintenance of the packages you install.
+
+==== Main Risks ====
+
+  * Third-party risk: Each dependency introduces external code that can contain vulnerabilities.
+  * Supply chain attacks: Malicious actors may compromise package maintainers or inject code into popular repositories.
+  * Outdated dependencies: Failing to update means running code with known CVEs.
+  * Unsafe dynamic class loading: Never instantiate classes based on unvalidated user input (e.g., new $_GET['class']).
+
+==== Best Practices ====
+
+  * Use only trusted, well-maintained packages (check GitHub activity, license, and issues).
+  * Always commit your composer.lock file to ensure reproducible builds.
+  * Run composer audit regularly to detect known security issues.
+  * Keep dependencies up to date using composer outdated and composer update.
+  * Automate updates and audits with tools like Dependabot or Renovate.
+  * Never expose the vendor folder to the web directly.
+  * Avoid using user-controlled input for class or namespace names.
+
+==== Efficient Security Workflow ====
+
+| Task | Frequency | Time Cost | Method |
+| Audit dependencies | Weekly | ~1 min | composer audit | 
+| Update packages | Weekly | ~10 min | Automated PRs | 
+| Review new packages | On demand | ~5 min | Quick GitHub check | 
+
+By combining automation and trusted sources, you can keep your Composer-based projects secure without excessive manual effort.
+
+===== Recommended Package Manager Combination =====
+For modern PHP projects:
+
+  * Use **[[home:php:pkg:composer|Composer]]** for all project dependencies.  
+  * Use **Phive** for external CLI tools like PHPUnit or PHPStan.  
+
+This combination ensures a **clean, secure, and reproducible** development environment.
+
+==== Example Project: Combining Composer and Phive====
+
+To demonstrate how **Composer** and **Phive** complement each other, let’s create a small PHP project using both tools in a clean, modern setup.
+
+==== Project Structure ====
+
+<code text>
+myapp/
+├── src/
+│ └── HelloWorld.php
+├── tests/
+│ └── HelloWorldTest.php
+├── composer.json
+├── phive.xml
+├── vendor/
+└── tools/
+</code>
+
+=== Step 1: Initialize Composer ===
+Run the following commands inside your project directory:
+
+<code bash>
+$ cd myapp && composer init
+</code>
+
+Follow the interactive setup (package name, description, license, etc.). Then, require your project dependencies, for example:
+<code bash>
+$ composer require monolog/monolog
+</code>
+
+Composer will:
+  * Create a `composer.lock` file (for reproducible builds)
+  * Download Monolog into `vendor/`
+  * Generate an autoloader in `vendor/autoload.php`
+
+Now you can load dependencies in your PHP code:
+
+<code php>
+<?php
+require __DIR__ . '/vendor/autoload.php';
+
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+$log = new Logger('app');
+$log->pushHandler(new StreamHandler('app.log', Logger::INFO));
+$log->info('Hello World from Composer!');
+</code>
+
+=== Step 2: Add Development Tools with Phive ===
+
+While Composer handles your runtime dependencies, you can use Phive to install developer tools such as PHPUnit or PHPStan.
+
+First, install Phive globally (if not already installed):
+<code bash>
+wget https://phar.io/releases/phive.phar
+chmod +x phive.phar
+sudo mv phive.phar /usr/local/bin/phive
+</code>
+
+Now install the tools:
+<code bash>
+$ phive install phpunit phpstan
+</code>
+
+Phive will:
+
+  * Create a phive.xml file listing your tool dependencies
+  * Download and verify the signed PHAR archives (for security)
+  * Place them into the tools/ directory by default
+
+Run your tools like this:
+<code bash>
+$ ./tools/phpunit --version
+$ ./tools/phpstan analyse src
+</code>
+
+=== Step 3: Version Control ===
+
+Your .gitignore should include build artifacts but keep the lock files for reproducibility:
+<code bash>
+/vendor/
+/tools/
+composer.lock
+phive.xml
+</code>
+
+Commit the following essential files:
+  * composer.json
+  * composer.lock
+  * phive.xml
+All source and test files
+
+=== Result ===
+
+You now have a modern PHP setup that uses:
+  * Composer for application dependencies
+  * Phive for external developer tools
+
+This separation keeps your environment clean, your tools verifiable, and your builds reproducible — an ideal setup for professional or open-source PHP projects.
+
+=== Architecture Diagram (ASCII) ===
+
+<code text>
+  +-----------------------------+            +----------------------+
+  |         Your Code           |            |   Dev Tools (PHAR)   |
+  |  src/, tests/, app code     |            |  phpunit, phpstan    |
+  +---------------+-------------+            +----------+-----------+
+                  |                                     |
+                  | uses vendor autoload                | installed & verified
+                  v                                     v
+          +-------------------+                 +-------------------+
+          |   Composer        |                 |       Phive       |
+          | composer.json     |                 |    phive.xml      |
+          | composer.lock     |                 |  (GPG-verified)   |
+          +-----+-------+-----+                 +-----+-------+-----+
+                |       |                             |       |
+       resolves |       | downloads                    |       | downloads PHARs
+                v       v                             v       v
+        +-----------------------+               +-----------------------+
+        |     Packagist.org     |               |       phar.io         |
+        |  (package registry)   |               |  (tool registry)      |
+        +-----------+-----------+               +-----------+-----------+
+                    |                                       |
+                    v                                       v
+          +-------------------+                     +-------------------+
+          |   vendor/         |<-- autoload -----+  |   tools/          |
+          |  libraries        |                   |  |  phpunit, phpstan|
+          +-------------------+                   |  +-------------------+
+                                                 |
+   git tracks: composer.json, composer.lock, phive.xml, src/, tests/
+   git ignores: vendor/, tools/ (recreated via install steps)
+</code>
+
+=== Optional: PlantUML Diagram ===
+(Requires the DokuWiki PlantUML plugin. Wrap with <uml>…</uml> or use your plugin’s syntax.)
+
+<uml>
+@startuml
+skinparam packageStyle rectangle
+skinparam wrapWidth 200
+
+package "Project" {
+  [Your Code\nsrc/, tests/] as Code
+  [Composer\ncomposer.json\ncomposer.lock] as Composer
+  [Phive\nphive.xml\n(GPG-verified)] as Phive
+  [vendor/ (libraries)] as Vendor
+  [tools/ (phpunit, phpstan)] as Tools
+}
+
+package "Registries" {
+  [Packagist.org\n(package registry)] as Packagist
+  [phar.io\n(tool registry)] as PharIO
+}
+
+Code --> Composer : uses autoload from\nvendor/autoload.php
+Composer --> Packagist : resolves & downloads
+Phive --> PharIO : downloads & verifies (GPG)
+Composer --> Vendor : installs libraries
+Phive --> Tools : installs PHAR tools
+
+note bottom of Project
+git tracks: composer.json, composer.lock, phive.xml, src/, tests/
+git ignores: vendor/, tools/
+end note
+
+@enduml
+</uml>
+
+=== Setup Checklist for New Developers ===
+> **Goal:** Recreate a clean and reproducible development environment  
+> **Tools required:** PHP, Composer, Phive, Git
+
+^ Step ^ Command / Action ^ Description ^
+| **1. Clone the repository** | `git clone https://github.com/your-org/myapp.git && cd myapp` | Fetch the latest project files |
+| **2. Install Composer dependencies** | `composer install` | Restores PHP libraries from *composer.lock* |
+| **3. Install PHAR-based dev tools** | `phive install` | Downloads & verifies tools like PHPUnit and PHPStan |
+| **4. Verify setup** | `./tools/phpunit --version`<br>`./tools/phpstan --version` | Confirm tool installation worked |
+| **5. Run tests** | `./tools/phpunit` | Execute unit tests |
+| **6. Static analysis** | `./tools/phpstan analyse src` | Perform static code checks |
+| **7. (Optional) Update dependencies** | `composer update`<br>`phive update` | Refresh dependencies when needed |
+| **8. (Optional) Add a new dev tool** | `phive install phpcs` | Example: install PHP_CodeSniffer |
+
+**Result:**  
+Within a few commands, any new developer can fully rebuild the project environment —  
+dependencies, tools, and tests — with *no global pollution* and *verified binaries*.
+
+=== Troubleshooting ===
+
+Even in a clean setup, a few issues can occur.  
+Here are common problems and their solutions.
+
+^ Problem ^ Symptom / Message ^ Solution ^
+| **Missing GPG key (Phive)** | `Could not verify GPG signature for phpunit.phar` | Run `phive --trust-gpg-keys <KEYID>` (key is shown in the error). <br> Alternatively, check https://phar.io for the official maintainer’s key. |
+| **Phive not found** | `phive: command not found` | Ensure Phive is installed and in your PATH. <br> Example: `sudo mv phive.phar /usr/local/bin/phive` |
+| **Composer memory exhausted** | `Allowed memory size exhausted` | Increase memory temporarily: <br> `COMPOSER_MEMORY_LIMIT=-1 composer update` |
+| **Composer SSL error** | `SSL: certificate verify failed` | Update CA certificates or run: <br> `composer config -g secure-http false` *(only if necessary)* |
+| **Vendor autoload missing** | `Failed opening required 'vendor/autoload.php'` | Run `composer install` again to recreate the `vendor/` directory. |
+| **Locked dependencies** | `Cannot update because composer.lock is outdated` | Delete `composer.lock` and re-run `composer install` or `composer update`. |
+| **Phive download blocked** | Firewall or proxy restrictions | Configure proxy in `~/.phive/phive.xml` or download PHARs manually with verified signatures. |
+
+**Tip:**: If your setup still fails, remove both the `vendor/` and `tools/` directories and rerun:
+<code bash>
+$ composer install
+$ phive install
+</code>
+
+This often resolves inconsistent environments after branch switches or merges.
+=== Best Practices ===
+
+Keep your Composer + Phive workflow secure, reproducible, and team-friendly.
+
+== Version Pinning & Reproducibility ==
+  * **Commit lockfiles:** Always commit `composer.lock` and `phive.xml`.
+  * **Exact versions for tools:** Pin PHAR tool versions in `phive.xml` to avoid surprises.
+  * **PHP platform lock:** In `composer.json`, set the target PHP version for consistent resolution:
+<code json>
+    {
+      "config": { "platform": { "php": "8.2.0" } }
+    }
+</code>
+  * **Autoload optimization:** For production builds:
+<code bash>
+    composer install --no-dev --prefer-dist --optimize-autoloader
+</code>
+
+== Security & Integrity ==
+  * **GPG verification:** Use Phive’s signature checks; do **not** bypass verification.
+  * **Trusted keys:** Document and share trusted maintainer key IDs in your README/Wiki.
+  * **Audit dependencies:** Run:
+<code bash>
+    composer audit
+</code>
+    and track advisories in CI.
+
+=== Clean Separation of Concerns ===
+  * **Runtime vs. Dev Tools:** App libs via **Composer**; CLI tools via **Phive**.
+  * **No global pollution:** Keep tools in `tools/`, libraries in `vendor/`.
+  * **.gitignore:** Ignore `vendor/` and `tools/`, but commit lockfiles and config.
+
+=== CI/CD Integration ===
+  * **Cache smartly:** Cache Composer `vendor/` and Phive downloads (or `tools/`) keyed by lockfile hash.
+  * **Immutable installs:**
+<code bash>
+$ composer install --no-interaction --no-progress --prefer-dist
+$ phive install --no-progress --trust-gpg-keys <KEYIDS>
+</code>
+  * **Fail fast:** Add CI steps for:
+<code bash>
+$ ./tools/phpunit
+$ ./tools/phpstan analyse src
+$ composer audit
+</code>
+
+== Team Onboarding & Docs ==
+  * **Setup checklist:** Include the “🧭 Setup Checklist” on your project’s README/Wiki.
+  * **Keyring sharing:** Provide a list of GPG key IDs (and links to their fingerprints) for required tools.
+  * **Consistency scripts:** Add Composer scripts so commands stay uniform across machines:
+<code json>
+    {
+      "scripts": {
+        "test": "./tools/phpunit",
+        "analyse": "./tools/phpstan analyse src",
+        "fix": "./tools/phpcbf"
+      }
+    }
+</code>
+
+== Upgrade Strategy ==
+  * **Regular but controlled updates:**
+<code bash>
+$ composer update --with-all-dependencies
+$ phive update
+</code>
+  * **Change review:** Update in feature branches, run tests and static analysis before merging.
+  * **SemVer discipline:** Prefer caret `^` or tilde `~` constraints for libraries; pin exact versions for CI tools.
+
+== Environment Parity =:-)=
+  * **Extensions & INI:** Declare required PHP extensions in `composer.json`:
+<code json>
+    { "require": { "ext-json": "*", "ext-mbstring": "*" } }
+</code>
+  * **Local = CI = Prod:** Document minimum PHP version, extensions, and OS-specific notes (e.g., OpenSSL, intl).
+
+===== Summary & Further Reading =====
+
+Composer and Phive together provide a **robust foundation** for modern PHP projects:
+  * **Composer** manages libraries, frameworks, and autoloading.
+  * **Phive** ensures secure and verifiable installation of developer tools.
+  * Both encourage reproducible environments and cleaner CI/CD workflows.
+
+This approach keeps your repository minimal, your dependencies consistent, and your builds portable — ideal for both open-source and enterprise contexts.
+
+=== Further Reading ===
+  * [[https://getcomposer.org/doc/|Composer Official Documentation]]
+  * [[https://packagist.org|Packagist Repository]]
+  * [[https://phar.io|Phive Official Site]]
+  * [[https://symfony.com/doc/current/setup/flex.html|Symfony Flex Guide]]
+  * [[https://phptherightway.com/#composer_and_packagist|PHP: The Right Way — Composer and Packagist]]
+  * [[https://blog.packagist.com/composer-2-0-is-now-available/|Composer 2.0 release notes (Packagist Blog)]]
+
+**Takeaway:**  
+
+> Composer builds your project.  
+> Phive keeps your tools safe.  
+> Together, they make PHP development reproducible and professional.

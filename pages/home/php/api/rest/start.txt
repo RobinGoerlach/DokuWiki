@@ -1,0 +1,159 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:api:|PHP API]]** -> **PHP Rest API**
+
+====== PHP Rest API ======
+
+
+
+
+REST is not a protocol, it's an idea or a philosophy, a way of building things in a manner that's very consistent and elegant. A REST service tries to make data processing very easy over HTTP. You can do REST without HTTP, but its specially designed as an service to work with data over HTTP. It's ideally suited to situations were we do CRUD.
+
+REST stands for representational State transfer and everything is a recourse (a single object or entity). The aim of REST is not having pretty and hackable URLs, its about meaning of URLs having a unique ways to refer to the resources.
+
+On the web, we use HTTP's features to implement REST. When we use REST with HTTP, we use the building blocks of HTTP to implement our restful service, we use **Verbs** to say which operation should take place when we request a collection or a resource. We use the **Status Codes** to give accurate information with every response about what actually happened and we use header to send metadata about the transaction that has taken place. **Headers** are not part of the data we transfer, they are the envelope format, sender address and the data is in the body. This avoids mixing data that relates to the resource and the transaction.
+
+| Verb | Collection | Resource | Comment |
+| GET | fetch resource | fetch one/all resource | if resource is a collection, all resources will be in the container | 
+| POST | create resource| | create a new resource as a collection |
+| PUT | | update or create resource | **Not atomic**, provide the complete resource to update, create only if you know the GET URL | 
+| PATCH | update a part of a resource | | Specific targeted update like a email |
+|DELETE | delete resource | delete a single resource | |
+
+Collections are containers that have resources inside them, like files in a directory (the directory is the container). 
+
+**Common Status Codes**
+  * **200** OK
+  * **201** Created, accompanied by the location header, telling you where new resource can be found
+  * **204** No Content, if you deleted something and won't give it back to UI 
+  * **304** Not Modified, cached header
+  * **400** Bad Request, anything the server does not understand (bad parameters, unknown endpoint, ...)
+  * **404** Not Found
+
+**HTTP Headers for Metadata** sending extra data, unrelated to the resource but important for the request, e.g. user agent or accept header.
+  * Accept and Content header to negotiate the kind of content, what kinds of content understood as a client, so server responds with content type is json or plain text.
+
+====== Building a RESTful Service in PHP ======
+
+<code php>
+<?php
+
+// Accept header (only simple parsing example) - to respond in correct format
+if(false !== strpos($_Server['HTTP_ACCEPT'], "html")) {
+  $format = "html";
+} else { 
+  $format = "json";
+}  
+
+// Poorman's storage solution - simulating data backend ;-)
+$events = unserialize(file_get_contents("events.txt"));
+
+set_exception_handler(function ($e) use ($format) {
+  http_response_code($e->getCode());
+  send_output($e->getMessage(), $format);
+});
+
+// Verb
+$method = $_SERVER['REQUEST_METHOD'] ?? 'unknown';
+
+// Parse parameters here for testability -resource or collection - pars the URL segments
+$pieces = explore("/", $_SERVER['PATH_INFO']);
+
+// Route the request
+switch($pieces[1]) {
+  case "events":
+    $func_name = "events_" . $method; //whitelist would be better of publicly - available functions
+    if(function_exists($func_name)) {
+      $data = $func_name();
+    } else {
+      throw new Exception("Method not available", 405);
+    }
+    break;
+  default:
+    throw new Exception("Unknown URL", 404);
+    break;
+}
+send_output($data, $format); 
+
+/**
+ * Very primitive html/json output handler
+ */
+function send_output($data, $format) {
+  if($format == "html") {
+    // no header needed, because of PHP default
+    print_r($data); // maybe some niche html wrapper would be nice
+  } else {
+    header("Content-Type: application/json");
+    echo json_encode($data);
+  }
+}
+
+/**
+ * Fetch all events
+ */
+function event_GET() {
+  return $GLOBALS['events'] ?? 'no events';
+} 
+
+/**
+ * Store a new event (accepts an array of incoming params)
+ */
+function event_POST() {
+  global $events;
+  if(isset($_POST['name'])) {
+    $event = array();
+    $event['name']  = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
+    $GLOBALS['events'][] = $event;
+    
+    file_put_contents("events.zxz", serialize($GLOBALS['events']));
+    return $event;
+  }
+}    
+</code>
+**index.php**
+
+<code php>
+<?php
+require "index.php";
+</code>
+**routing.php**
+
+<code bash>
+php -S localhost:8888 routing.php
+curl http://localhost:8888/events
+</code>
+
+
+====== Consuming a RESTful Service in PHP ======
+
+<code php>
+<?php
+
+// create an event
+$event_data = array("name" => "fabulous Event II");
+$post_opts = array("http" => array(
+  "method" => "POST",
+  "header" => array("Accept: application/json",
+                    "Content-Type: application/x-www-form-urlencoded"),
+  "content" => http_build_query($event_data)
+));
+
+$url = "http://localhost:8888/events";
+$context = stream_context_create($post_opts);
+$post_result = file_get_contents($url, false, $context);
+var_dump($post_result, $http_response_header);
+                     
+// get the list
+$get_result = file_get_contents($url);
+var_dump($get_result);
+</code>
+**use-rest.php**
+
+<code bash>
+php -f use-rest.php
+</code>
+
+
+====== PHP REST Tooling ======
+
+  * Postman
+  * curl
+

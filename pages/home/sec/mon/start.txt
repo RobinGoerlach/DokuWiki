@@ -1,0 +1,5 @@
+**[[home:|Start]]** -> **[[home:sec:|Security]]** -> **Monitoring**
+
+====== Monitoring======
+
+  * [[home:sec:mon:nag:|Nagios]]

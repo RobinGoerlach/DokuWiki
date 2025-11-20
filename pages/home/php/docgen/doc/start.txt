@@ -1,0 +1,240 @@
+
+**[[home:|Start]]** → **[[home:php:|PHP]]** → **[[home:php:docgen:|PHP Documentation generator]]** → **PHPDocumentor**
+
+====== PHPDocumentor ======
+
+**PHPDocumentor** is a documentation generator for PHP source code. [[https://phpdoc.org/|phpDocumentor]] is the de-facto documentation application for PHP projects. Your project can benefit too from more than 20 years of experience and setting the standard for documenting PHP Applications.
+
+It parses PHP files, reads PHPDoc-style comments, and generates a static HTML documentation site for your project. The output serves as an **API reference**, similar to JavaDoc or Doxygen.
+
+This page explains how to install, use, and configure PHPDocumentor for both procedural and object-oriented PHP projects.
+
+----
+
+===== Installation & Setup =====
+
+<code bash>
+$ wget https://phpdoc.org/phpDocumentor.phar && chmod +x phpDocumentor.phar && ./phpDocumentor.phar
+</code>
+
+==== Installation via Composer or Phive ====
+PHPDocumentor can be installed either with **Composer** or **Phive**.  
+Both methods work well — the choice depends on how you prefer to manage your development tools.
+
+| **Scenario** | **Use** | **Reason** |
+| Team installs dev tools via Composer and runs them from `vendor/bin` | **Composer** | Keeps everything versioned per project; simple integration with `composer.json` scripts. |
+| You want tools isolated from your app’s dependencies | **Phive** | Installs signed PHARs into `./tools` without touching `composer.json`. |
+| You maintain one tool version across many repositories | **Phive** | Centralized version control and easy updates. |
+| You want reproducible builds inside the repo | **Composer** | Everything stays in your repository; CI runs `composer install`. |
+| You prefer verified PHARs (GPG signatures) | **Phive** | Adds cryptographic verification of tool downloads. |
+
+===== Option A – Composer (per project) =====
+Install PHPDocumentor as a **development dependency**:
+<code bash>
+composer require --dev phpdocumentor/phpdocumentor
+</code>
+
+Run PHPDocumentor:
+<code bash>
+vendor/bin/phpdoc -d src -t docs
+</code>
+
+Optional shortcut via Composer script:
+<code json>
+{
+  "scripts": {
+    "docs": "phpdoc -d src -t docs"
+  }
+}
+</code>
+
+===== Option B – Phive (tool isolation) =====
+If you prefer to manage standalone PHAR tools with signature verification:
+<code bash>
+phive install phpdocumentor
+# or explicitly:
+phive install phpdocumentor/phpdocumentor
+</code>
+
+Run PHPDocumentor:
+<code bash>
+./tools/phpdoc -d src -t docs
+</code>
+
+Commit the generated `.phive/phars.xml` file to ensure reproducible builds:
+<code>
+.phive/
+└── phars.xml
+</code>
+
+===== Recommendation =====
+
+If you aim for a **unified, lightweight toolchain** (PHPUnit, PHPStan, PHPCS, PHPDocumentor),  
+consider using **Phive** for all developer CLI tools — it keeps dependencies separate and provides GPG-verified integrity.
+
+However, if your project already uses **Composer for all dev tools**, it’s perfectly fine to stay with that approach for simplicity.
+
+
+**Tip:** 
+
+> You can also combine both — install via Composer in CI/CD environments,  
+> and use Phive locally for verified global tools.
+
+----
+==== Using Composer (recommended) ====
+<code bash>
+composer require --dev phpdocumentor/phpdocumentor
+</code>
+
+You can then run it with:
+<code bash>
+vendor/bin/phpdoc
+</code>
+
+==== Global Installation (optional) ====
+<code bash>
+sudo apt install phpdocumentor
+</code>
+or download the latest version from the official site:
+  * https://www.phpdoc.org/download/
+
+
+===== Example Project =====
+
+Create a simple project structure:
+<code>
+demo-project/
+├── src/
+│   ├── Calculator.php
+│   └── functions.php
+├── docs/
+└── composer.json
+</code>
+
+Run PHPDocumentor:
+<code bash>
+vendor/bin/phpdoc -d src -t docs
+</code>
+
+**Explanation:**
+  * **-d src** → Source directory to scan  
+  * **-t docs** → Target directory for generated HTML files  
+
+After completion, open:
+<code>
+docs/index.html
+</code>
+
+in your browser to view the documentation.
+
+
+===== PHPDoc Comment Syntax =====
+<code txt>
+PHPDocumentor understands comment blocks that start with `/**` and end with `*/`.  
+They are placed directly above functions, classes, or methods.
+</code>
+
+==== Example: Procedural Function ====
+<code php>
+/**
+ * Adds two numbers.
+ *
+ * @param float $a First number
+ * @param float $b Second number
+ * @return float Sum of both numbers
+ */
+function add($a, $b) {
+    return $a + $b;
+}
+</code>
+
+==== Example: Object-Oriented Class ====
+<code php>
+/**
+ * Represents a simple calculator.
+ *
+ * @package MyProject\Math
+ */
+class Calculator {
+
+    /**
+     * Multiplies two numbers.
+     *
+     * @param float $a
+     * @param float $b
+     * @return float
+     */
+    public function multiply(float $a, float $b): float {
+        return $a * $b;
+    }
+}
+</code>
+
+
+===== Common PHPDoc Tags =====
+| **Tag** | **Description** |
+| @param         | Describes a function parameter |
+| @return        | Describes the return value |
+| @var           | Declares a variable type |
+| @throws        | Lists possible exceptions |
+| @deprecated    | Marks a function as deprecated |
+| @see           | References another element |
+| @since         | Indicates since which version it exists |
+| @package       | Groups classes or functions logically |
+| @author        | Author information |
+| @version       | Version of the element |
+| @link          | Adds a hyperlink to external resources |
+
+===== Configuration & Options =====
+Instead of passing arguments on the command line, you can define a configuration file **phpdoc.xml** in your project root.
+
+<code xml>
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor>
+  <paths>
+    <directory>src</directory>
+  </paths>
+  <output>
+    <target>docs</target>
+  </output>
+  <ignore>
+    <directory>vendor</directory>
+  </ignore>
+</phpdocumentor>
+</code>
+
+Then simply run:
+<code bash>
+vendor/bin/phpdoc
+</code>
+
+==== Useful Options ====
+| **Option** | **Description** |
+| `-d` | Source directory to scan |
+| `-t` | Target directory for documentation |
+| `-f` | Single file to document |
+| `-vvv` | Verbose output (debug mode) |
+| `--config` | Specify custom phpdoc.xml file |
+
+===== Best Practices =====
+  * Document **public APIs** first – they form your public contract.  
+  * Use **Markdown syntax** (lists, bold, etc.) inside PHPDoc comments.  
+  * Add `@package` and `@subpackage` tags for logical grouping.  
+  * Integrate PHPDocumentor into your **CI/CD pipeline** to generate docs automatically.  
+  * Host generated documentation easily on **GitHub Pages**, **Netlify**, or your own web server.  
+  * Use a consistent style of PHPDoc comments across all projects.
+
+===== Further Reading =====
+  * Official Website: [[https://www.phpdoc.org/]]
+  * Documentation: [[https://docs.phpdoc.org/]]
+  * GitHub Repository: [[https://github.com/phpDocumentor/phpDocumentor]]
+  * Alternative: [[https://github.com/code-lts/doctum|Doctum – modern, fast, and Markdown-friendly]]
+
+===== Related Topics =====
+
+  * [[phpunit|PHPUnit – Testing Framework]]
+  * [[phpstan|PHPStan – Static Analysis]]
+  * [[composer-phive|Composer & Phive – Dependency Management]]
+  * [[build-tools|Build Automation]]
+
+  * [[https://www.youtube.com/watch?v=hdDD0SNJ-pk&list=PLr3d3QYzkw2xabQRUpcZ_IBk9W50M9pe-&index=52|PHP DocBlock - Adding Comments to Classes & Methods - Full PHP 8 Tutorial]] @YouTube

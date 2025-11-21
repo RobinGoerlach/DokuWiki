@@ -512,8 +512,252 @@ declare(strict_types = 1);
 namespace core;
 </code>
 You could name the namespace what ever you want as an example you could take your name, a package name or whatever.
-Defining a name space in a script will define this for all classes, constants, interfaces, functions and traits after this point in the PHP script, to avoid conflicts in naming with other PHP files. If you require a class with namespace the location of the file will not change, so the require statement is the same but calling the class will change, otherwise PHP will throw an Uncaught Error: Class not found, because PHP is looking for the class by default in global space. There are two ways to fix this issue, one is we need to **add qualifying class name including the namespace** in here so we would do something like Stripe\Transaction.php or Paddle\Transaction.php. Another way is we could import this class 
-You can 
+Defining a name space in a script will define this for all classes, constants, interfaces, functions and traits after this point in the PHP script, to avoid conflicts in naming with other PHP files. If you require a class with namespace the location of the file will not change, so the require statement is the same but calling the class will change, otherwise PHP will throw an Uncaught Error: Class not found, because PHP is looking for the class by default in global space. There are two ways to fix this issue, one is we need to **add qualifying class name including the namespace** in here so we would do something like Stripe\Transaction.php or Paddle\Transaction.php. Another way is to import the class from the namespace by using the **use** keyword as shown in the second following example.
+Instead of single namespace you could have sub namespaces which makes more sense and you can make your namespaces follow the directory structure this could lead to a code as follows.
+<code php>
+<?php
+declare(strict_types = 1);
+require_once '../PaymentGateway/Stripe/Transaction.php';
+require_once '../PaymentGateway/Paddle/Transaction.php';
+
+var_dump(new PaymentGateway\Stripe\Transaction()); 
+</code>
+So everything is working, just something to note here the namespaces match the folder structure this is why you can think of namespaces as virtual directory structure, this is not a requirement, you can put the file anywhere you want and still namespace it anyway you want but it is recommended and also a standard to match namespace with the folder structure.
+
+Importing the class namespace by using the **use** keyword followed by the namespace and class name.
+<code php>
+<?php
+declare(strict_types = 1);
+require_once '../PaymentGateway/Stripe/Transaction.php';
+require_once '../PaymentGateway/Paddle/Transaction.php';
+
+use PaymentGateway\Stripe\Transaction;
+var_dump(new Transaction()); 
+</code>
+**PaymentGateway/Stripe/Transaction.php**
+<code php>
+<?php
+declare(strict_types = 1);
+namespace PaymentGateway\Stripe;
+
+class Transaction
+{
+
+}
+</code>
+**PaymentGateway/Paddle/Transaction.php**
+<code php>
+<?php
+declare(strict_types = 1);
+namespace PaymentGateway\Paddle;
+
+class Transaction
+{
+
+}
+</code>
+In addition in name spacing and importing classes you can name space constants and functions and import them as well, this is not widely used and shouldn't be used but you could name space your custom functions and constants and then import them using use and then function and specify the function name after your namespace or you could do the same thing for constants using use const. 
+
+Instantiating classes that are within the same namespaces, there you don't need to use the namespace you can use only the class name, because PHP will try to load classes from the current namespace if you are in a name spaced file.
+
+If you were to access PHP's build-in classes you will need to add a backslash to tell PHP to load it from the global space or you will need to import them. 
+<code php>
+<?php
+declare(strict_types = 1);
+namespace PaymentGateway\Paddle;
+use DateTime;
+
+class Transaction
+{
+  public function __construct()
+  {
+    var_dump(new DateTime());
+  }
+}
+</code>
+If you need a **class from another namespace** e.g. Notification\Email PHP would prepend this as a sub name space from the current name space, so it try's to locate the email class under PaymentGateway\Paddle\Notification\Email. To prevent this we, need to use a **full qualified namespace name** and the difference between the qualified and full qualified name is that **full qualified name is prefixed by backslash**, which indicates that this is the full namespace to that class. When you use that qualified name instead of the full qualified name, then what PHP will do this it will try to see if there is an import statement, that resolves to notification namespace and if it does then this would work otherwise it will prepend the namespace as a sub namespace. This will lead to an Uncaught Error Class not found. There are two ways we could fix this one is we could prepend it with the backslash to make it full qualified name in the new statement or we could simply import with use it and then it would work
+<code php>
+<?php
+declare(strict_types = 1);
+namespace PaymentGateway\Paddle;
+
+class Transaction
+{
+  public function __construct()
+  {
+    var_dump(new \Notification\Email());
+  }
+}
+</code>
+The build-in functions will be resolved from the global space, this is because PHP will locate the in global space, but not with classes PHP will try to locate them in the local name space and if it doesn't exist it will throw an error unless you had the use statement where you imported that class. If a function does not exist in the local namespace then it falls back to the global namespace.
+<code php>
+<?php
+declare(strict_types = 1);
+namespace PaymentGateway\Paddle;
+
+class Transaction
+{
+  public function __construct()
+  {
+    var_dump(explode((',', 'hello,world'));
+  }
+}
+
+function explode($seperator, $arg)
+{
+  return 'foo';
+}
+</code>
+This code will return the foo string, without the own explode function we would call the build-in explode function from the global namespace. Sometimes this can be intended but sometimes can cause unexpected bugs so you should want to prefix build-in functions with backslash to ensure that you're using PHP's build-in function from the global space instead of the locally defined function in that namespace. This is why you see some developers use backslash when using PHP's build-in functions in namespace classes. Another reason why they would prefix PHP's build-in functions with backslash is the possible speed improvement because you're telling PHP exactly where to load that function from and PHP does not have to resolve it which could have positive impact on performance but very negligible.
+
+Using multiple classes with the same name can still be a problem, as in the following code example
+<code php>
+<?php
+declare(strict_types = 1);
+require_once '../PaymentGateway/Stripe/Transaction.php';
+require_once '../PaymentGateway/Paddle/Transaction.php'; 
+
+use PaymentGateway\Stripe\Transaction;
+use PaymentGateway\Paddle\Transaction as PaddleTransaction;  // or name already in use error
+
+$stripeTransaction = new Transaction();
+$paddleTransaction = new PaddleTransaction(); // again which is which
+var_dump($stripeTransaction, $paddleTransaction); 
+</code>
+Name spacing is not helping in this style of code, you could use full qualified naming in the new statement and skip the use statements or by aliasing on of the classes. You're able to do that in PHP so in here we can us **as keyword to define an alias** like PaddleTransaction.
+
+Aliasing can also be used to deal with long class names, another use case for aliasing would be that if we were inside the PaymentGateway\paddle\Transaction class and you are using some kind of package or library that also has the transaction class in there and you want to use that transaction class or extend from in your transaction class then you would need to do something like use vendor name transaction and this would not work because the current class name is transaction and you're trying to import another class with the same name, aliasing would work as well, give it a nickname, you could name it want you want but usually the name of the package or the author of the library. 
+<code php>
+<?php
+declare(strict_types = 1);
+namespace PaymentGateway\Paddle;
+require_once './PayPal/Transaction.php';
+use PayPal\Transaction as VendorTransaction;  // without alias already in use error
+
+class Transaction
+{
+  public function __construct()
+  {
+  }
+}
+</code>
+If your importing multiple classes from the same namespace you could actually group them together by combining class names in curly braces in a single use statement. 
+<code php>
+<?php
+declare(strict_types = 1);
+require_once '../PaymentGateway/Paddle/Transaction.php'; 
+require_once '../PaymentGateway/Paddle/CustomerProfile.php'; 
+use PaymentGateway\Paddle\{Transaction,CustomerProfile}; // grouped instead of two use statements
+
+$paddleTransaction = new Transaction(); 
+$paddleCustomerProfile = new CustomerProfile();
+var_dump($paddleTransaction, $paddleCustomerProfile); 
+</code>
+Another way you could do this instead of grouping them into a single line you could simply import the namespace itself. Therefore you import the qualified namespace without a class name and instantiate the class with the last part of the namespace if you have sub name spaces.
+<code php>
+<?php
+declare(strict_types = 1);
+require_once '../PaymentGateway/Paddle/Transaction.php'; 
+require_once '../PaymentGateway/Paddle/CustomerProfile.php'; 
+use PaymentGateway\Paddle; // importing name space
+
+$paddleTransaction = new Paddle\Transaction(); 
+$paddleCustomerProfile = new Paddle\CustomerProfile();
+var_dump($paddleTransaction, $paddleCustomerProfile); 
+</code>
+This will work as well. In some cases this is the preferred way where you're importing a lot of classes from the same namespaces instead of listing all of them with its own use statement or a long list of combined class names. So you can import the namespace and prefix your classes with that namespace. Recommendation is import everything in the use statements because that way you will see what are all the classes that this specific class or file depends on when you open a class file.
+
+Another thing to note about the aliasing is that it could actually alias the entire namespace as well.
+<code php>
+<?php
+declare(strict_types = 1);
+require_once '../PaymentGateway/Paddle/Transaction.php'; 
+require_once '../PaymentGateway/Paddle/CustomerProfile.php'; 
+use PaymentGateway\Paddle as PA; // importing name space with alias
+
+$paddleTransaction = new PA\Transaction(); 
+$paddleCustomerProfile = new PA\CustomerProfile();
+var_dump($paddleTransaction, $paddleCustomerProfile); 
+</code>
+Something you need to know that importing rules are profile based, what that means is that if we include another file later in the script the included file will not inherit the classes that were imported in the parent file so if you want to use these classes in the included file you would need them there as well.
+
+What still needs to be discussed is using multiple name spaces in the same file, but this us nor widely used. 
+**Resources**
+  * [[https://www.php.net/manual/en/language.namespaces.php|Namespaces - Table of Contents]]
+  * [[https://www.php.net/manual/en/language.namespaces.rules.php|Namespaces - Name resolution rules]]
+  * [[https://www.php.net/manual/en/language.namespaces.faq.php#language.namespaces.faq.full|How does a name like \my\name or \name resolve?]]
+  * [[https://www.php.net/manual/en/language.namespaces.faq.php#language.namespaces.faq.shortname2|How does an unqualified function name or unqualified constant name like name resolve]]
+  * [[https://www.php.net/manual/en/language.namespaces.definitionmultiple.php|Defining multiple namespaces in the same file]]
+
+
+
+
+===== PHP Coding Standards, Autoloading (PSR-4) & Composer ===== 
+
+
+
+
+
+===== Autoloader =====
+
+==== Simple Autoloader ====
+
+When PHP encounters a class or interface that has not yet been defined, it triggers the autoload mechanism. Functions registered with spl_autoload_register() are then called in sequence. Each of these functions receives the missing class name as an argument, and it is their responsibility to locate and load the corresponding file (for example by including it). Once the file is loaded and the class is defined, PHP continues execution as if the class had been available from the start. The goal is to **simplify require basePath('...');**, all class files needed do not have to be loaded individually by require
+
+**index.php**
+<code php>
+<?php
+require '../helpers.php';
+
+spl_autoload_register(function($class) {
+   $path = basePath('core/' . $class . 'php';
+   if (file_exists($path)) {
+     require $path;
+   }
+});
+
+//Initiate the router
+$router = new Router();
+</code>
+
+==== PSR-4 Autoloader ====
+
+The PSR-4 standard autoloader is working with the **[[home:php:pkg:composer|Composer]]** package manager for php, like npm in Node.js, with a composer.json file as application manifest. The composer can also specify an PSR-4 autoloader. 
+
+<code json>
+{
+   "name" : "robingoerlach/workopia-php",
+   "description": "Job Portal",
+   "authors": [ 
+      {
+        "name": "Robin Goerlach",
+        "email": "support@sasd.de"
+      }
+    ],
+    "autoload": {
+       "psr-4": {
+          "core\\": "core/",
+          "app\\": "app/"
+     }  
+}
+</code>
+**composer.json**
+
+  * **name**: Github Repo name
+  * **psr-4**: needs namespaces used in the application project
+
+<code bash>
+composer install
+</code>
+
+<code php>
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+require '../helpers.php';
+</code>
+
+The autoloader from composer searches also in subfolders of namespace corresponding folder.
+
 
 **index.php**
 <code php>
@@ -535,6 +779,7 @@ require '../helpers.php';
 
 $router = new core\Router(); // crappy way because this has to be done multiple times
 </code>
+
 ===== Static Members & Methods =====
 
 <code php>
@@ -576,68 +821,6 @@ class Admin extends User {
 $admin1 = new Admin('Tom Sawyer', 'tom@gmail.com', 5);
 var_dump($admin1);
 </code>
-
-===== Abstract Classes =====
-
-Abstract Classes are
-  * incomplete
-  * at least partially incomplete
-  * we cannot instantiate then
-  * if a class has a abstract method, the class must be marked abstract too
-  * common in parent classes
-
-<code php>
-abstract class Shape {
-  protected $name;
-  
-  abstract public function calculate();
-  
-  // Constrictor
-  public function __construct($name) {
-    $this->name = $name;
-  } 
-
-  // Concrete methods
-  public function getName() {
-    return $this->name;
-  }
-}
-
-
-class Circle extends Shape {
-  private $radius;
-
-  public function __construct($name, $radius) {
-    parent::__construct($name);
-    $this->radius= $radius;
-  }
-  public function calculate(){
-    return pi() * pow($this->radius, 2); // r^2
-  }
-}
-
-$circle = new Circle('Circle', 5);
-var_dump($circle); 
-
-
-class Rectangle extends Shape {
-  private $width;
-  private $height;
-
-  public function __construct($name, $width, $height) {
-    parent::__construct($name);
-    $this->width = $width;
-    $this->height= $height;
-  }
-  public function calculate(){
-    return $this->width * $this->height;
-  }
-}
-
-$rectangle = new Rectangle ('Rectangle ', 4, 6);
-var_dump($rectangle); 
-</code>
-
 ===== Interfaces =====
 
 <code php>
@@ -719,8 +902,68 @@ $video = new Video('PHP for Beginners', 'https://www.youtube.com/watch?v=BUCiSSy
         
 </html>
 </code>
+===== Abstract Classes =====
 
-==== Catch Errors ====
+Abstract Classes are
+  * incomplete
+  * at least partially incomplete
+  * we cannot instantiate then
+  * if a class has a abstract method, the class must be marked abstract too
+  * common in parent classes
+
+<code php>
+abstract class Shape {
+  protected $name;
+  
+  abstract public function calculate();
+  
+  // Constrictor
+  public function __construct($name) {
+    $this->name = $name;
+  } 
+
+  // Concrete methods
+  public function getName() {
+    return $this->name;
+  }
+}
+
+
+class Circle extends Shape {
+  private $radius;
+
+  public function __construct($name, $radius) {
+    parent::__construct($name);
+    $this->radius= $radius;
+  }
+  public function calculate(){
+    return pi() * pow($this->radius, 2); // r^2
+  }
+}
+
+$circle = new Circle('Circle', 5);
+var_dump($circle); 
+
+
+class Rectangle extends Shape {
+  private $width;
+  private $height;
+
+  public function __construct($name, $width, $height) {
+    parent::__construct($name);
+    $this->width = $width;
+    $this->height= $height;
+  }
+  public function calculate(){
+    return $this->width * $this->height;
+  }
+}
+
+$rectangle = new Rectangle ('Rectangle ', 4, 6);
+var_dump($rectangle); 
+</code>
+
+===== Catch Errors =====
   * **Exception** Base class for all exceptions
   * **Error** Base class for all internal PHP errors
   * **TypeError** Raised when a function argument or return value has the wrong type
@@ -767,63 +1010,3 @@ try {
 <code php>
 class MyException extends Exception {}
 </code>
-
-===== Autoloader =====
-
-==== Simple Autoloader ====
-
-When PHP encounters a class or interface that has not yet been defined, it triggers the autoload mechanism. Functions registered with spl_autoload_register() are then called in sequence. Each of these functions receives the missing class name as an argument, and it is their responsibility to locate and load the corresponding file (for example by including it). Once the file is loaded and the class is defined, PHP continues execution as if the class had been available from the start. The goal is to **simplify require basePath('...');**, all class files needed do not have to be loaded individually by require
-
-**index.php**
-<code php>
-<?php
-require '../helpers.php';
-
-spl_autoload_register(function($class) {
-   $path = basePath('core/' . $class . 'php';
-   if (file_exists($path)) {
-     require $path;
-   }
-});
-
-//Initiate the router
-$router = new Router();
-</code>
-
-==== PSR-4 Autoloader ====
-
-The PSR-4 standard autoloader is working with the **[[home:php:pkg:composer|Composer]]** package manager for php, like npm in Node.js, with a composer.json file as application manifest. The composer can also specify an PSR-4 autoloader. 
-
-<code json>
-{
-   "name" : "robingoerlach/workopia-php",
-   "description": "Job Portal",
-   "authors": [ 
-      {
-        "name": "Robin Goerlach",
-        "email": "support@sasd.de"
-      }
-    ],
-    "autoload": {
-       "psr-4": {
-          "core\\": "core/",
-          "app\\": "app/"
-     }  
-}
-</code>
-**composer.json**
-
-  * **name**: Github Repo name
-  * **psr-4**: needs namespaces used in the application project
-
-<code bash>
-composer install
-</code>
-
-<code php>
-<?php
-require __DIR__ . '/../vendor/autoload.php';
-require '../helpers.php';
-</code>
-
-The autoloader from composer searches also in subfolders of namespace corresponding folder.

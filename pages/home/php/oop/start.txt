@@ -692,17 +692,29 @@ What still needs to be discussed is using multiple name spaces in the same file,
 
 
 
-===== PHP Coding Standards, Autoloading (PSR-4) & Composer ===== 
 
 
 
+===== Coding standard =====
 
+PHP is very forgiving when it comes to code layout or structure. You can put spaces, tabs or new line into your code, which makes code difficult to read for humans but it will still work fine, just through you  probably would not do that even if you didn't follow any conventions or standards because it would make it harder for you to maintain it so why would you follow any conventions or standards well let's say you work in a team or that you work on an open source project you preferer to structure and write it based on your own style while other developers like to follow their own style and taste like curly braces in a new line or not or camel case vs snake case and so on this will lead to a lot of inconsistencies which makes code harder to read and maintain. Take open source libraries or frameworks as an example an open source project can have hundreds of developers contributing to them if everyone followed their own conventions the code base would be a big pile of inconsistent spaghetti. This is why we have **[[https://php-fig.org/|PSR]]** which stands for **PHP Standard Recommendation** is maintained by PHP framework interoperability group or short **[[https://php-fig.org|php-fig]]**. This group was formed by several PHP framework founders and developers and since then a lot more members has joined the group. 
+
+[[https://php-fig.org/psr|PSR standard table]] with the currently accepted standards sorted by PSR Standard number
+  * **[[https://php-fig.org/psr/psr-1|PSR-1 Basic Coding Standard]]** for example files must only use <?php or <?= or first letter in class name should be capitalized, constants must be declared in all upper case and underscore as separators, methods should be camelCase 
+  * **[[https://php-fig.org/psr/psr-4|PSR-4 Autoloading]]** Notice [[https://www.php.net/manual/en/language.oop5.autoload.php|Autoloading Classes]] should not throw exceptions or return a value 
+  * **[[https://php-fig.org/psr/psr-12|PSR-12 Extended Coding Style]]** replaces [[https://php-fig.org/psr/psr-2|PSR-2 (Coding Style Guide)]] and adds more standards to it and it also requires you to follow [[https://php-fig.org/psr/psr-1|PSR-1]].
+It's not an requirement to follow these standards but it's just a good habit that lets you write consistent code. Many PHP IDE's like [[https://www.jetbrains.com/phpstorm/|PHPStorm]] have plugins supporting coding styles like Laravel or Joomla Guide and there you could press CTRL-L and code will be formatted in PSR-12 formatting or what ever you have selected. You can set soft limits of the lines and so on. If you're not using [[https://www.jetbrains.com/phpstorm/|PHPStorm]] simply google PHP code sniffer or PSR plugin for your code editor  
+
+See also [[https://github.com/php-fig/fig-standards/blob/master/README.md|psr@github]] and remember by following PSR standards there can be also framework specific conventions and standards. The key thing here is the consistency. 
 
 ===== Autoloader =====
 
+As you can imagine requiring and including files can get very ugly, very fast the more classes you have the more require statements you would need. Autoloading solves this problem PHP has a function called **spl_autoload_register()** and it accepts a few arguments and the first one is that we care about which is a call-back function which is our custom auto loading function and this function receives the fully qualified class name as the argument
+
+If a class is already loaded with require PHP will skip classes that are already loaded and therefor it doesn't need to run our autoloader so what autoloading does is that it automatically loads your classes, interfaces and trails that are not already included or in other words are undefined (Uncaught Error: Class not found). So what's happening is that when we try to use or access a class PHP will check if that class exists, if it does not exist before throwing any errors it looks for any registered autoloader functions and runs them one by one when you register auto loaders they go into queue and are executed one by one whenever class is not found we can see this in action.
 ==== Simple Autoloader ====
 
-When PHP encounters a class or interface that has not yet been defined, it triggers the autoload mechanism. Functions registered with spl_autoload_register() are then called in sequence. Each of these functions receives the missing class name as an argument, and it is their responsibility to locate and load the corresponding file (for example by including it). Once the file is loaded and the class is defined, PHP continues execution as if the class had been available from the start. The goal is to **simplify require basePath('...');**, all class files needed do not have to be loaded individually by require
+When PHP encounters a class or interface that has not yet been defined, it triggers the autoload mechanism. Functions registered with spl_autoload_register() are then called in sequence. Each of these functions receives the missing class name as an argument, and it is their responsibility to locate and load the corresponding file (for example by including it). Once the file is loaded and the class is defined, PHP continues execution as if the class had been available from the start. The goal is to **simplify require basePath('...');**, all class files needed do not have to be loaded individually by require.
 
 **index.php**
 <code php>
@@ -719,10 +731,56 @@ spl_autoload_register(function($class) {
 //Initiate the router
 $router = new Router();
 </code>
+You could, if needed, add multiple autoloader functions, these will run one by one. The first registered function will run first and the next registered function runs afterwards. 
+<code php>
+<?php
+spl_autoload_register(function($class) {
+   echo Autoloader 1;
+});
+spl_autoload_register(function($class) {
+   echo Autoloader 2;
+});
+// ...
+</code>
+You can pass the third argument as true to prepend autoloader in the queue instead of appending it to the end, so we could simply use a named argument and the **third argument is the prepend argument**
+<code php>
+<?php
+spl_autoload_register(function($class) {
+   echo Autoloader 1;
+});
+spl_autoload_register(function($class) {
+   echo Autoloader 2;
+}, prepend: true);
+// ...
+</code>
+Now second autoloader runs first.
 
-==== PSR-4 Autoloader ====
 
-The PSR-4 standard autoloader is working with the **[[home:php:pkg:composer|Composer]]** package manager for php, like npm in Node.js, with a composer.json file as application manifest. The composer can also specify an PSR-4 autoloader. 
+So what has to be done by a self customized autoloader to require classes?
+  * transfer name space into file pass
+  * deal with uppercase and lowercase differences in namespace and file path
+  * handle proper pathing ../ or magic DIR or add a path prefix like '../core/'
+<code php>
+<?php
+require '../helpers.php';
+
+spl_autoload_register(function($class) {
+   $path = __DIR__ . '/../' . lcfirst(str_replace('\\', '/',  $class)) . 'php';
+   if (file_exists($path)) {
+     require $path;
+   } else 
+     // %
+   }
+});
+
+//Initiate the router
+$router = new Router();
+</code>
+Check the [[https://www.php-fig.org/psr/psr-4/|PSR-4: Autoloader]] [[https://www.php-fig.org/psr/psr-4/examples/|Example Implementations]]
+
+==== Vendor Autoloader ====
+
+The [[https://www.php-fig.org/psr/psr-4/|PSR-4: Vendor Autoloader]] is working as a package installed with the **[[home:php:pkg:composer|Composer]]** package manager for php, like npm in Node.js, with a composer.json file as application manifest. The composer can also specify an PSR-4 autoloader. 
 
 <code json>
 {

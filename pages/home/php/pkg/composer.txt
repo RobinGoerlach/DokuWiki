@@ -2,6 +2,19 @@
 
 ====== PHP Composer ======
 
+The Composer is a tool for dependency management in PHP. It let's you install various libraries and packages into your project. In addition to managing your dependencies it can also help with autoloading or unit testing.
+
+General behaviour on a new project.
+<code bash>
+composer init       # create composer.json
+composer install    # if needed, install deps & generate vendor/
+git init            # create Git repo
+echo "/vendor/" >> .gitignore   # or accept the ignore file composer suggests
+git add .
+git commit -m "Initial commit"
+
+composer install
+</code>
 ===== Introduction =====
 Modern PHP development relies on reliable dependency and tool management.  
 This page explains the most common **package managers** used in the PHP ecosystem, with a focus on **Composer** and **Phive** — two tools that complement each other perfectly.
@@ -16,6 +29,34 @@ The goal of this documentation is to help developers:
 
 Together, Composer and Phive form a clean, secure, and maintainable workflow for both open-source and enterprise PHP applications.
 
+For development it's okay to have composer in the same Dockerfile and container in production it's better to have composer as a separate container to save on resources.
+<code Dockerfile>
+FROM php:8.0.2-fpm
+RUN apt-get update && apt-get install -y\
+  git \
+  curl \
+  zip \
+  unzip
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+WORKDIR /var/www
+</code>
+  * Run **docker-compose up -d --build** to get things prepared.
+  * Run **docker ps** find the container name 
+  * Run **docker exec -it <container name> bash** open bash in container
+
+Most used composer commands are 
+  * composer require
+  * composer install
+  * composer update
+  * composer remove
+You can find packages on [[https://packagist.org|The PHP Package Repository]], try to [[https://packagist.org/?query=uuid|search uuid on The PHP Package Repository]] and find ramsey/uuid. Before installing a package because it has the  most stars and downloads consider checking the repository and documentation and see what the package is actually about and if it matches with the requirements that your project has.
+<code bash>
+composer require ramsey/uuid
+</code>
+This will download not only the package, it will create a composer.json file and adds the package to the vendor folder.
+==== composer.json ====
+The composer.json file is basically your project configuration file where you put all your dependencies in there are also many other configuration options that you can put in here but you can read about all the available options on the [[https://getcomposer.org/doc/|composer documentation]]
 ===== Installation & Basics =====
 Download the package manager installer from the [[https://getcomposer.org/|Composer Project]] and install it. In the Project folder create the project by running 
 <code bash>

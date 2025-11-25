@@ -129,6 +129,14 @@ echo $user2->getName() . ' is ' . $user2->getSatus();
 PHP 7.4 introduced typed properties, which means that you could set the type of the property in the definition. Type hinting is recommended but not required, it is up to you if you want to use it or not. **Recommendation is type hinting and strict type usage**. Note PHP is not able to determine whether a property that has a type was actually set or you simply forgot to set a value, that's why accessing a object without initialisation will lead to a Uncaugth Error: ... must not be accessed before initialisation. This is why the new state was introduced called uninitialized when type is defined and value is not assigned to a property it is in uninitialized state. If not using strict type, uninitialized properties will have the value NULL. To solve the issue of accessing properties before initialization is to actually assign some kind of value as default value either directly at the definition or in something called constructor or a so called setter. Something to note is that you're only able to assign constant values as the default values you cannot have complex expressions here like function calls and so on. If you need to the nullable property you would add the question mark in front of the type definition and you would set the default value to NULL, in that case it would work, but this kind of assignment doesn't really make sense.
 
 Setting values can alternatively be defined within something called constructor. A method to be called when creating an object out of the class with the new keyword.
+
+==== Magic Getters and Setters ====
+
+<code php>
+<?php
+__get
+__set
+</code>
 ===== Constructors =====
 
 Due to have properties not publicly available with the private access modifier, which could cause some unnecessary bugs where properties are changed from outside the Class we need different ways to access the properties. The constructor is a method to be called when creating an object out of the class with the new keyword. The constructor can be used to initialize class properties. The constructor  method is a special function, also known as a magic function that will be called whenever a new instance of the class is created is named **construct() with double underscore at the beginning**. The constructor has no arguments by default but it accepts arguments, so you could add values to it to initialize the object with it to assign these values to the properties. 
@@ -780,8 +788,7 @@ Check the [[https://www.php-fig.org/psr/psr-4/|PSR-4: Autoloader]] [[https://www
 
 ==== Vendor Autoloader ====
 
-The [[https://www.php-fig.org/psr/psr-4/|PSR-4: Vendor Autoloader]] is working as a package installed with the **[[home:php:pkg:composer|Composer]]** package manager for php, like npm in Node.js, with a composer.json file as application manifest. The composer can also specify an PSR-4 autoloader. 
-
+The [[https://www.php-fig.org/psr/psr-4/|PSR-4: Vendor Autoloader]] is working as a package installed with the **[[home:php:pkg:composer:|Composer]]** package manager for php, like npm in Node.js, with a composer.json file as application manifest. The composer can also specify an PSR-4 autoloader. The autoloader knows how to autoload classes from vendor directory but it does not know how to load our on classes from the app or framework directory. We can fix this by simply telling composer how to autoload our own classes in the composer.json file and add an option to autoload. In the autoload/psr-4 section we map out namespace to the location of that namespace as you see with App and Framework, after editing composer.json composers autoload files need to be regenerated (check files in vendor/composer/autoload*php) especially vendor/composer/autoload_psr4.php that contains the namespaces for our dependencies but it does not contain our own namespaces without regeneration. 
 <code json>
 {
    "name" : "robingoerlach/workopia-php",
@@ -792,20 +799,24 @@ The [[https://www.php-fig.org/psr/psr-4/|PSR-4: Vendor Autoloader]] is working a
         "email": "support@sasd.de"
       }
     ],
+    "require": {
+        "ramsey/uuid": "^4.1"
+    }
     "autoload": {
        "psr-4": {
-          "core\\": "core/",
-          "app\\": "app/"
+          "App\\": "app/",
+          "Framework\\": "core/"
      }  
 }
 </code>
 **composer.json**
 
   * **name**: Github Repo name
-  * **psr-4**: needs namespaces used in the application project
+  * **psr-4**: needs namespaces used in the project
 
 <code bash>
-composer install
+#composer install
+composer dump-autoload
 </code>
 
 <code php>
@@ -813,10 +824,17 @@ composer install
 require __DIR__ . '/../vendor/autoload.php';
 require '../helpers.php';
 </code>
+This code does the job. The autoloader from [[home:php:pkg:composer:|Composer]] searches also in subfolders of namespace corresponding folder. Now we could start
 
-The autoloader from composer searches also in subfolders of namespace corresponding folder.
+**index.php**
+<code php>
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+require '../helpers.php';
 
-
+$router = new core\Router(); // crappy way because this has to be the full qualified namespace
+</code>
+To write clean code we should add use statements for better readable and maintainable code
 **index.php**
 <code php>
 <?php
@@ -826,31 +844,16 @@ require '../helpers.php';
 use core\Router;
 // use PDO;  // if needed
 
-$router = new core\Router(); 
+$router = new Router(); // this together with use makes things easier to read
 </code>
-
-**index.php**
-<code php>
-<?php
-require __DIR__ . '/../vendor/autoload.php';
-require '../helpers.php';
-
-$router = new core\Router(); // crappy way because this has to be done multiple times
+What we should consider is classmap (**vendor/composer/autoload_classmap.php**) currently we are using [[https://www.php-fig.org/psr/psr-4/|PSR-4]] to handle dynamic autoloading for us, whenerver we add a new class under App or Core namespace we don't need to regenerate the autoload file. It will just work because it will just be dynamically loaded for you using psr4 rules and this is the prefered way during development but in production you want things to be as fast as possible, so in the composer directory we see the autoload class map generated file. While [[https://www.php-fig.org/psr/psr-4/|PSR-4]] is already fast using class maps is even faster because dynamic autoloading needs to check file system before resolving a class name with classmade bottle loading will load the classes from the generated array and this is why it's called the class map it maps the classes to their locations in our class map (vendor/composer/autoload_classmap.php) though we only have a single element so we don't really have anything mapped yet other than this we can pass an argument to the composer dump autoload to load this array with the classes. So we can do composer dump-autoload -o as argument, this should generate optimized autoloading 
+<code bash>
+composer dump-autoload -o
 </code>
-
-===== Static Members & Methods =====
+This should retune something like //Generated optimized autoload files containing 154 classes//. If you check **vendor/composer/autoload_classmap.php** now it should populate an array with all the classes that our application needs. If you add new classes then you have to run composer dump-autoload with the optimize option again to add those classes in this array, which is not that ideal for development, you don't want to be running this command every time so that's why using composer dump-autoload for development is just fine but for production you might want to use the composer dump-autoload with the optimize option so that it's a bit faster. Note that if the class is not found in this array then composer will fall back to the psr4 auto loading to load your class. Note that you should not commit vendor directory in your version control system like git for example, instead you should add this to your git ignore file.
+===== PHP Class Constants =====
 
 <code php>
-class MathUtil {
-  public static $pi=3.14; // Readonly?
-  
-  public static function add(...$num) {
-    return array_sum($nums);
-  }
-}
-
-echo MathUtil::$pi;
-echo MathUtil::add(1, 2, 3, 4, 5);
 </code>
 
 ===== Inheritence =====
@@ -1019,6 +1022,21 @@ class Rectangle extends Shape {
 
 $rectangle = new Rectangle ('Rectangle ', 4, 6);
 var_dump($rectangle); 
+</code>
+
+===== Static Members & Methods =====
+
+<code php>
+class MathUtil {
+  public static $pi=3.14; // Readonly?
+  
+  public static function add(...$num) {
+    return array_sum($nums);
+  }
+}
+
+echo MathUtil::$pi;
+echo MathUtil::add(1, 2, 3, 4, 5);
 </code>
 
 ===== Catch Errors =====

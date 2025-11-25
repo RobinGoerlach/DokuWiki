@@ -1,0 +1,13 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:pkg:|PHP Package Manager]]**  -> **[[home:php:pkg:composer:|Composer]]**  -> **UUID**
+
+====== UUID ======
+<code bash>
+composer require remsey/uuid
+</code>
+
+<code php>
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+$id = new \Ramsey\Iuid\UuidFactory();
+echo $id->uuid4();
+</code>

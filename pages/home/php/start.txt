@@ -117,7 +117,7 @@ php -S localhost:8000 -t public
 
 ==== PHP Tools ====
 
-  * Composer / PEAR
+  * [[home:php:pkg:composer:|Composer]] / PEAR
   * PHPUnit
   * PHP Documentor
 

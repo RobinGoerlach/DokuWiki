@@ -853,7 +853,154 @@ composer dump-autoload -o
 This should retune something like //Generated optimized autoload files containing 154 classes//. If you check **vendor/composer/autoload_classmap.php** now it should populate an array with all the classes that our application needs. If you add new classes then you have to run composer dump-autoload with the optimize option again to add those classes in this array, which is not that ideal for development, you don't want to be running this command every time so that's why using composer dump-autoload for development is just fine but for production you might want to use the composer dump-autoload with the optimize option so that it's a bit faster. Note that if the class is not found in this array then composer will fall back to the psr4 auto loading to load your class. Note that you should not commit vendor directory in your version control system like git for example, instead you should add this to your git ignore file.
 ===== PHP Class Constants =====
 
+As in the Basics we defined constants before, you could also define constants per class. Constants are immutable meaning that you cannot change the value once it's defined. **Constants can be defined similar to properties**, there agine we follow standard to keep constant names uppercase and use underscores as the separator 
 <code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{
+    public const STATUS_DECLINED = 'decliened';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_PENDING = 'pending';
+    
+    public function __construct()
+    {
+      
+    }
+}
+</code>
+You could also assign access modifiers or visibility to the class constant if you don't by default they will be set to public but it's recommended to always define the visibility even if it's public. In procedural world non-class constants were in global space we could access them by simply referring or using the constant name but to access the class constants we need to **access them using the class name followed by double columns which is called the scope resolution operator and then the constant name**
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+echo Transaction::STATUS_PAID; // :: Scope resolution operator
+</code>
+**Class constants are allocated once per class** and not per instance of the class which means that we **don't need to have the instance of the class to access the class constants** now. In addition to accessing constants on the class level you could actually access them on the object level as well.
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$transaction = new Transaction();
+echo $transaction::STATUS_PAID; // :: Scope resolution operator
+</code>
+If you set the class constant to private you will no longer be able to access that constant outside of the class the same way you wouldn't be able to access the class properties. However you could access them from within the class and to **access constants within the class** you need to use the class name the scope resolution operator (::) and the name of the constant.
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{
+    public const STATUS_DECLINED = 'decliened';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_PENDING = 'pending';
+    
+    public function __construct()
+    {
+      var_dump(Transaction::STATUS_PAID);
+    }
+}
+</code>
+Another way to access it is by using the self keyword and self refers to the current class, so it's similar to the $this variable which refers to the calling object but self refers to the current class or the class where it's called. 
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{
+    public const STATUS_DECLINED = 'decliened';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_PENDING = 'pending';
+    
+    public function __construct()
+    {
+        var_dump(self::STATUS_PAID);
+    }
+}
+</code>
+A class also has a magic constant called class which resolves at compile time and returns a fully qualified class name
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$transaction = new Transaction();
+echo $transaction::class; // why is it lower case, tell me why  
+</code>
+This can work on objects and you can work on the class itself. 
+<code php>
+<?php
+echo Transaction::class; 
+</code>
+There are many use cases for constants, if you have data or information that does not change and keep referencing all over the code it's better to move it into a class constant so that if it ever changes change it in one place. Another use case is to define constants as sort of enumerations or enums. It allow you not to hard code these value. If you notice that you're hard coding some piece of data that does not change that often, consider replacing them with constants.
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{
+    public const STATUS_DECLINED = 'decliened';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_PENDING = 'pending';
+    
+    private string $status;
+    
+    public function __construct()
+    {
+        $this->status = self::STATUS_PENDING;
+    }
+    
+    public function setStatus(string $status): self
+    {
+      $this->status = $status;
+      return $this;
+    }
+}
+</code>
+The following code is setting status to paid, this is all good and it's working. Imagine you would doing this all over your code. You're code essentially hard coding these and you might make a typo or pass something like this and it will still work right and even through this does not cause any errors you might introduce some bugs somewhere else in your code also you could pass any invalid status and it will still work and again this could introduce bugs in another part of your code.
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$transaction = new Transaction();
+$transaction->setStatus('paid');
+</code>
+This is where constants can hel you. 
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$transaction = new Transaction();
+$transaction->setStatus(Transaction::STATUS_PAID);
+</code>
+Now we have solved on problem. The problem we solved is with the typos, now we are passing the constant so we know that we're not going to make typos. 
+===== Static Members & Methods =====
+
+<code php>
+class MathUtil {
+  public static $pi=3.14; // Readonly?
+  
+  public static function add(...$num) {
+    return array_sum($nums);
+  }
+}
+
+echo MathUtil::$pi;
+echo MathUtil::add(1, 2, 3, 4, 5);
 </code>
 
 ===== Inheritence =====
@@ -1024,20 +1171,6 @@ $rectangle = new Rectangle ('Rectangle ', 4, 6);
 var_dump($rectangle); 
 </code>
 
-===== Static Members & Methods =====
-
-<code php>
-class MathUtil {
-  public static $pi=3.14; // Readonly?
-  
-  public static function add(...$num) {
-    return array_sum($nums);
-  }
-}
-
-echo MathUtil::$pi;
-echo MathUtil::add(1, 2, 3, 4, 5);
-</code>
 
 ===== Catch Errors =====
   * **Exception** Base class for all exceptions

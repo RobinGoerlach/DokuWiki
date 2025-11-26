@@ -862,8 +862,8 @@ namespace App\PaymentGateway\Paddle;
 class Transaction
 {
     public const STATUS_DECLINED = 'decliened';
-    public const STATUS_PAID = 'paid';
-    public const STATUS_PENDING = 'pending';
+    public const STATUS_PAID     = 'paid';
+    public const STATUS_PENDING  = 'pending';
     
     public function __construct()
     {
@@ -878,7 +878,7 @@ declare(strict_types = 1);
 use App\PaymentGateway\Paddle;
 require_once __DIR__ . '/../vendor/autoload.php';
 
-echo Transaction::STATUS_PAID; // :: Scope resolution operator
+echo Transaction::STATUS_PAID; /* :: Scope resolution operator */
 </code>
 **Class constants are allocated once per class** and not per instance of the class which means that we **don't need to have the instance of the class to access the class constants** now. In addition to accessing constants on the class level you could actually access them on the object level as well.
 <code php>
@@ -888,7 +888,7 @@ use App\PaymentGateway\Paddle;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $transaction = new Transaction();
-echo $transaction::STATUS_PAID; // :: Scope resolution operator
+echo $transaction::STATUS_PAID; /* :: Scope resolution operator */
 </code>
 If you set the class constant to private you will no longer be able to access that constant outside of the class the same way you wouldn't be able to access the class properties. However you could access them from within the class and to **access constants within the class** you need to use the class name the scope resolution operator (::) and the name of the constant.
 <code php>
@@ -899,8 +899,8 @@ namespace App\PaymentGateway\Paddle;
 class Transaction
 {
     public const STATUS_DECLINED = 'decliened';
-    public const STATUS_PAID = 'paid';
-    public const STATUS_PENDING = 'pending';
+    public const STATUS_PAID     = 'paid';
+    public const STATUS_PENDING  = 'pending';
     
     public function __construct()
     {
@@ -917,8 +917,8 @@ namespace App\PaymentGateway\Paddle;
 class Transaction
 {
     public const STATUS_DECLINED = 'decliened';
-    public const STATUS_PAID = 'paid';
-    public const STATUS_PENDING = 'pending';
+    public const STATUS_PAID     = 'paid';
+    public const STATUS_PENDING  = 'pending';
     
     public function __construct()
     {
@@ -934,7 +934,7 @@ use App\PaymentGateway\Paddle;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $transaction = new Transaction();
-echo $transaction::class; // why is it lower case, tell me why  
+echo $transaction::class; /* why is it lower case, tell me why */
 </code>
 This can work on objects and you can work on the class itself. 
 <code php>
@@ -949,9 +949,9 @@ namespace App\PaymentGateway\Paddle;
 
 class Transaction
 {
-    public const STATUS_DECLINED = 'decliened';
-    public const STATUS_PAID = 'paid';
-    public const STATUS_PENDING = 'pending';
+    public const STATUS_DECLINED = 'declined';
+    public const STATUS_PAID     = 'paid';
+    public const STATUS_PENDING  = 'pending';
     
     private string $status;
     
@@ -985,23 +985,197 @@ use App\PaymentGateway\Paddle;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $transaction = new Transaction();
-$transaction->setStatus(Transaction::STATUS_PAID);
+$transaction->setStatus(Transaction::STATUS_PAID); /* $transaction->setStatus('Oma Meyer'); is ok */
 </code>
-Now we have solved on problem. The problem we solved is with the typos, now we are passing the constant so we know that we're not going to make typos. 
-===== Static Members & Methods =====
-
+Now we have solved on problem. The problem we solved is with the typos, now we are passing the constant so we know that we're not going to make typos. However we could still pass any invalid status like Oma Meyer as status and the code would work here. To solve this second case we could simply introduce some kind of validation.
 <code php>
-class MathUtil {
-  public static $pi=3.14; // Readonly?
-  
-  public static function add(...$num) {
-    return array_sum($nums);
-  }
-}
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
 
-echo MathUtil::$pi;
-echo MathUtil::add(1, 2, 3, 4, 5);
+class Transaction
+{
+    public const STATUS_DECLINED = 'decliened';
+    public const STATUS_PAID     = 'paid';
+    public const STATUS_PENDING  = 'pending';
+    
+    private string $status;
+    
+    public function __construct()
+    {
+        $this->status = self::STATUS_PENDING;
+    }
+    
+    public function setStatus(string $status): self
+    {
+      if ($status === self::STATUS_PAID || $status === self::STATUS_PENDING || $status === self::STATUS_DECLINED ) 
+      {
+         $this->status = $status;
+      } else {
+        /* throw some kind of exception or error */
+      }
+      return $this;
+    }
+}
+</code> 
+If status is paid or pending or status is declined then everything is good, otherwise maybe throw an exception or throw some kind of error, but this would be bunch of conditionals here and as you would add more constants and more statuses you would need to modify this method instead of this we could simply introduce another constant called all statuses and set this to an array the keys can be the actual statuses.
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{
+    public const STATUS_DECLINED = 'declined';
+    public const STATUS_PAID     = 'paid';
+    public const STATUS_PENDING  = 'pending';
+    
+    /* Lookup table */
+    public const ALL_STATUSES = [  
+        self::STATUS_PAID     => 'Paid',
+        self::STATUS_PENDING  => 'Pending',
+        self::STATUS_DECLINED => 'Decliened'
+    ];
+    
+    private string $status;
+    
+    public function __construct()
+    {
+        $this->status = self::STATUS_PENDING;
+    }
+    
+    public function setStatus(string $status): self
+    {
+    /* if ($status === self::STATUS_PAID || $status === self::STATUS_PENDING || $status === self::STATUS_DECLINED ) */
+      if (! isset(self::ALL_STATUSES[$status]))
+      {
+         throw new \InvalidArgumentException('Invalid status');
+      } 
+      $this->status = $status;
+      return $this;
+    }
+}
+</code> 
+You could actually introduce some kind of friendly name to this status because you already these values available as keys and for the values of this array you could give it a friendly name that you could later use to display to the user. This array can be used as lookup table, the lookup table makes it simple to check if the given status exists in the all statuses array and if it does not exist we can throw some kind of exception or an error. Two problems solved  but there is the one thing bothering, we're kind of coupling these constants within the transaction class. The Transaction class should be responsible for processing and working with transactions and not for storing status constants. It does not make sense to refer to transaction class outside of object to access the constants. Imagine we had to access we this constant somewhere else where transaction wasn't needed maybe for display, referencing a class that has other business logic in it just to get the constant values would not look good in code. 
+
+We could extract all Status constants into its own class, because right now we're prefixing all statuses with the status word. Changing something like self::STATUS_PAID to Status::PAID would look much cleaner and or expressive. 
+<code php>
+<?php
+namespace App\Enums;
+
+class Status
+{
+    public const DECLINED = 'declined';
+    public const PAID     = 'paid';
+    public const PENDING  = 'pending';
+    
+    /* Lookup table */
+    public const ALL_STATUSES = [  
+        self::PAID     => 'Paid',
+        self::PENDING  => 'Pending',
+        self::DECLINED => 'Declined'
+    ];
+}
+</code> 
+Some small changes, switch from self:: to Status:: and everything still works  
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{  
+    private string $status;
+    
+    public function __construct()
+    {
+        $this->status = Status::PENDING;
+    }
+    
+    public function setStatus(string $status): self
+    {
+      if (! isset(Status::ALL_STATUSES[$status]))
+      {
+         throw new \InvalidArgumentException('Invalid status');
+      } 
+      $this->status = $status;
+      return $this;
+    }
+}
+</code> 
+This looks a lot more readable and expressive and we are not coupling our status data with the transaction class. Something to note PHP will be adding native support to enum type so you could create enum classes so you wouldn't need to create a class like the Status class with constants. You would be able to create an enum class, see [[https://wiki.php.net/rfc/enumerations|PHP RFC: Enumerations]]
+===== Static Members & Methods =====
+You can define your properties and methods to be static using the static keyword. You can put the keyword static before or after the access modifier, as you like, if you following standards you should put it after the access modifier. It is up to you as long as you stay consistent. 
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction {
+  public static int $count = 0; /* or read only? */
+  
+  public static function getCount(): int {
+    return self::$count;
+  }
+  
+  
+  public function __construct(
+    public float $amount,
+    public string $description
+  ) {
+    self::count++;
+  }
+  
+  public function process()
+  {
+     echo 'Processing paddle transaction ...';
+  }  
+}
 </code>
+You can access static properties and methods the same way you could access constants using the scope resolution operator (::)
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle\Transaction;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$transaction = new Transaction(25, 'Transaction 1');
+var_dump($transaction::$count); /* access on the object */
+var_dump(Transaction::$count);  /* access on the class */
+</code>
+The thing is you don't actually need the object to access the static methods and properties of the class because they're not created and they're not associated per object they are created and associated o class basis so they belong to the class itself and not to any particular object or an instance and here as you can see this is perfectly valid and it  will work. You can access static properties and methods on the object but you don't have to, you could access them on the class itself the same way you where accessing class constants.
+ 
+As mentioned static properties and functions are not associated per object, what that means is that the regular class properties every time you create an instance these properties get created and get associated to that specific object, so you could have multiple different transaction objects and each one can have different values for those properties. You can think of static properties as global variables in a way their values are shared across the objects because they're not tied to a particular object or an instance they're tied to the class itself.
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle\Transaction;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$transaction = new Transaction(25,  'Transaction A');
+$transaction = new Transaction(50,  'Transaction B');
+$transaction = new Transaction(75,  'Transaction C');
+$transaction = new Transaction(100, 'Transaction D');
+$transaction = new Transaction(125, 'Transaction F');
+var_dump(Transaction::$count);  /* access on the class */
+</code> 
+With each new object $count will add 1 that's why we get 5. As you see the value is shared and it's kind of globally 
+accessible. You don't need an instance of the class. You could simply just access them using the class itself.
+
+If $count would be private we could use getCount() and everything is still working.
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle\Transaction;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$transaction = new Transaction(25,  'Transaction A');
+$transaction = new Transaction(50,  'Transaction B');
+$transaction = new Transaction(75,  'Transaction C');
+$transaction = new Transaction(100, 'Transaction D');
+$transaction = new Transaction(125, 'Transaction F');
+var_dump(Transaction::getCount());  /* access on the class */
+</code> 
 
 ===== Inheritence =====
 

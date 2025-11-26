@@ -1777,7 +1777,6 @@ echo addAll(true, 1, 2, 3, 4, 5);
 </code>
 
 === Named Arguments ===
-
 Named arguments were introduced in PHP 8. Named arguments allows you to pass arguments to the function based on the parameter variable name, which means that it doesn't have to be in the parenthesis order of function declaration. 
 <code php>
 <?php

@@ -101,7 +101,7 @@ php -S localhost:8000 -t public
   * [[home:php:pro:|Intermediate PHP]] (Classes & Methods, Object Oriented PHP, Code Style & PSR, Namespaces & Autoloading, Dependency Management, Super Globals, Cookies & Sessions, Database)
     * __**[[home:php:oop:|PHP Object Oriented Programming]]**__
     * [[home:php:db:|PHP Database Integration]]
-    * [[home:php:pkg:|PHP Package Manager]] ([[home:php:pkg:composer|Composer]])
+    * [[home:php:pkg:|PHP Package Manager]] ([[home:php:pkg:composer:|Composer]])
     * [[home:php:docgen:|PHP Documentation generator]] ([[home:php:docgen:doc:|PHPDocumentor]] a tool like JavaDoc or Doxygen)
   * **Advanced PHP techniques** Testing, phpUnit, TDD, BDD, MVC & Routing, Caching & Security, Frameworks & PHP 8, Hosting and Deployment, Best Practices)
     * [[home:php:test:|PHP Unit testing]] 

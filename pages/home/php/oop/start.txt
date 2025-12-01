@@ -1118,12 +1118,11 @@ class Transaction {
     return self::$count;
   }
   
-  
   public function __construct(
     public float $amount,
     public string $description
   ) {
-    self::count++;
+    self::count++; /* Transaction ::count++; */
   }
   
   public function process()
@@ -1132,7 +1131,7 @@ class Transaction {
   }  
 }
 </code>
-You can access static properties and methods the same way you could access constants using the scope resolution operator (::)
+You can access static properties and methods the same way you could access constants using the scope resolution operator (::). The thing is you don't actually need the object to access the static methods and properties of the class because they're not created and they're not associated per object they are created and associated o class basis so they belong to the class itself and not to any particular object or an instance and here as you can see in the following code, this is perfectly valid and it will work. You can access static properties and methods on the object but you don't have to, you could access them on the class itself, the same way you where accessing class constants. If you need to access a static property or method from within the class you could use either the self keyword or you could use the class name as well.
 <code php>
 <?php
 declare(strict_types = 1);
@@ -1143,8 +1142,6 @@ $transaction = new Transaction(25, 'Transaction 1');
 var_dump($transaction::$count); /* access on the object */
 var_dump(Transaction::$count);  /* access on the class */
 </code>
-The thing is you don't actually need the object to access the static methods and properties of the class because they're not created and they're not associated per object they are created and associated o class basis so they belong to the class itself and not to any particular object or an instance and here as you can see this is perfectly valid and it  will work. You can access static properties and methods on the object but you don't have to, you could access them on the class itself the same way you where accessing class constants.
- 
 As mentioned static properties and functions are not associated per object, what that means is that the regular class properties every time you create an instance these properties get created and get associated to that specific object, so you could have multiple different transaction objects and each one can have different values for those properties. You can think of static properties as global variables in a way their values are shared across the objects because they're not tied to a particular object or an instance they're tied to the class itself.
 <code php>
 <?php
@@ -1159,8 +1156,7 @@ $transaction = new Transaction(100, 'Transaction D');
 $transaction = new Transaction(125, 'Transaction F');
 var_dump(Transaction::$count);  /* access on the class */
 </code> 
-With each new object $count will add 1 that's why we get 5. As you see the value is shared and it's kind of globally 
-accessible. You don't need an instance of the class. You could simply just access them using the class itself.
+With each new object $count will increment by 1 that's why we get 5 at the end. As you see the value is shared and it's kind of globally accessible. You don't need an instance of the class, you could simply just access them using the class itself.
 
 If $count would be private we could use getCount() and everything is still working.
 <code php>
@@ -1176,8 +1172,301 @@ $transaction = new Transaction(100, 'Transaction D');
 $transaction = new Transaction(125, 'Transaction F');
 var_dump(Transaction::getCount());  /* access on the class */
 </code> 
+Because the access of static methods does not require an instance of the class and because they belong to the class itself and not to a particular object
 
-===== Inheritence =====
+As a reminder inside the class is the variable $this is not available within the static method, so you cannot do something like echo $this->count; you're going to get a Uncaught Error: Using $this when not in object context, which makes sense because this variable is referring to the calling object but in the case of statics we don't really have an object so instead of using the $this you would use the self keyword or the class name.
+
+Another thing you should be aware of is that if you try to use the scope resolution operator on a non-static property you will also get an Uncaught Error Access to undeclared static property, because the static property with the selected name does not exist we only have the non-static property and you cannot access non-static properties statically and same applies to methods if you try to access a non-static method statically you would also get an error since PHP 8 and prior to PHP 8 you would get a deprecated message.
+
+==== Use cases for Static Members & Methods ====
+
+There are multiple use cases for static properties and static functions that can come across in a developers life.
+
+=== Cache ===
+The use of static methods and properties is generally considered a bad practice but there are some use cases where the use of statics can come in handy one use case for static properties is to have some sort of counter or cache values so it can often be used to implement a technique called memorization which can speed up expensive operations by caching the results for later access. 
+=== Singleton Pattern ===
+You might also come across a code that makes a use of static properties to implement a singleton pattern. A singleton pattern maintains a single instance of a given class throughout your application. The most simples example of the singleton pattern implementation using the static properties and methods 
+<code php>
+<?php
+namespace App;
+
+class DB
+{
+  public static ?DB $instance = null
+  
+  private function __constant(public array $config)
+  {
+     
+  }
+  
+  public static function getInstance(array $config): DB
+  {
+     if (self::$instance === null) {
+       self::$instance = new DB($config);
+     }
+     return self::$instance;
+  }   
+}
+</code>
+We have a static property instance that is nullable but its type is current DB class and it's set to null by default then in the constructor we are accepting configuration or DB credentials or something like that and that's non-static. Notice that the **constructor access modifier of the constructor is set to private**, this means that we cannot directly instantiate this class **$db = new DB();** will not work and we would get an Uncaught Error Call to private from global scope. Because of that we have this **getInstance method** which is a static method and we can call this to get the instance of the db class this again accepts the same arguments as the constructor and checks if the instance is set to null it will set that property to the new instance of the db class and then simply return that instance so **$db = DB::getInstance([]);** and we passed in some config here no matter how many times  we will call that getInstance([]); we will still get the same instance. You might come across a singleton implemented this way but it does not mean it's the right way. Dependency Injection is the right way and will be discussed later.
+
+This is the most basic of the singleton pattern. This is not exactly fully singleton because it does not contain things like clone and other magic methods and the main reason for that is because we haven't covert those magic methods. 
+=== Utility Methods ===
+Another use case for a static methods would be to create some kind of utility methods that don't really need instance of the class so maybe you had some kind of formatter class that had bunch of methods to format your currency or format the amount or format the percent value and so on and it doesn't really depend on the object. So if those methods are not tied to the object and they don't need the instance of the class and it makes it convenient and makes it convenient for the developer to access then you could use the static methods like **Format::amount(85,43)** and your amount and that would work in that case you don't need the instance of format because is not tied directly to that object. 
+=== Factory Pattern ===
+Another use case that you might see with static methods is with the factory pattern we we'll talk about the factory design pattern later. The factory pattern is basically responsible for creating objects of other classes and often developers implement it using a static methods, often called make or create. 
+<code php>
+<?php
+$transaction = TransactionFactory::make (25, 'Transaction 1'); /* $transaction = new Transaction(25, 'Transaction 1'); */
+</code>
+This static make method would be responsible for creating the transaction object, but this is not the right way either, the better way is to use dependency injection again. 
+
+The main reason why the use of static properties and methods is discouraged is that they represent what's called a global state which means that you can modify the data or call the static function from anywhere in the code which can make things harder to maintain and harder to test. There are some very small niche use cases where the use of status could make sense but a lot of times statics are misused and dependency injection should be used instead also some might argue that the use of statics is faster then creating instances of objects which can be true but it's a micro-optimization that in most cases would not matter.
+
+You could access static methods non-statically, as shown below
+<code php>
+// ...
+$transaction = new Transaction(2, 'Transaction 1');
+var_dump($transaction->getCount()); /* var_dump($transaction::getCount()); */
+</code>
+It's not recommended doing this because it's not clear that this method is static and plus you cannot access this variable within this method so it could cause confusion and problems down the road is another thing. 
+
+Another thing is you could have static call backs or closures.
+<code php>
+// ...
+array_map(static function() {
+  // ...
+}, []);
+</code>
+The main reason why you would see somebody do this is because when you set the function to static you can no longer access $this variable, for not changing class values accidently. This can cause some unexpected bugs and hard to debug issues. If you add static to the call back function you can be sure that this kind of code will throw an error and not let the developer proceed.
+
+Also another reason why somebody would have static closures or call backs is that it can be a micro-optimisation over the regular function but don't use it only for that micro optimization. 
+
+**Use static closures when you want to make sure that $this variable is not available and accessible in that function.**
+===== PHP - object-oriented programming =====
+
+The four principles of object-oriented programming are 
+  * Encapsulation
+  * Abstraction
+  * Inheritance
+  * Polymorphism
+
+==== PHP - Encapsulation & Abstraction ====
+
+Encapsulation simply bundles the data and methods, that operate on that data within one unit like a class. As an example it hides the internal representation or the state of the object which protects the integrity of that object.
+
+Encapsulation ensures that your object manages its own state and nothing can change that unless it's explicitly allowed let's take this transaction class as an example here by using access modifier private hide property data from external access, forcing data access outside of this class by anyone interacting via class methods. Private means that the property and method can only be accessed from the class itself. Protected is pretty much the same thing as the private but it extends to the child or the subclasses. 
+
+Public properties can break the encapsulation principle, because anyone interacting with this object outside of the class can now modify the state of our object which could result in nasty bugs. Especially when working in teams, those bugs easily happen, when you were given an object as an  method argument with someone else creating the object given to you. Overriding public properties bugs can happen intentional as misunderstanding or accidental and something somewhere in your code will blow up, you can prevent those bugs by setting properties to private, which will ensure interaction outside of this class will be restricted and might be protected by smart setter methods. 
+
+If you need to access a property of a class you can introduce a public method which is also called the getter method also known as the accessor to retrieve the value of the property. The getter simply returns the property value. If you wanted to change the amount for whatever reason then you could introduce another public method called set amount which is called the setter, which accepts the new value as argument, to update the property where you also could do some quality of input check.
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{
+  private float amount = 0;
+  
+  public function __construct(float $amount) 
+  {
+    $this->amount = $amount;
+  }
+  
+  public function getAmount(): float
+  {
+     return $this->amount;
+  }
+  
+  public function setAmount(float $amount): float
+  {
+     /* check quality of input here */
+     $this->amount = $amount;
+  }
+  
+  public function process()
+  {
+     echo 'Processing ' . $this->amount . ' transaction';
+  }
+}
+</code>
+We have the getter and setter methods to access the property, but if we are going to expose the getter and setter method for every property that we have, isn't that pretty much the same thing as having this property as public because right now we have the property set to private but we are exposing these two public methods here which get's the property value and another one mutates the property value. Back now to the original problem calling the setter might be also the same problem we've passed that we change the state of our object. Getters and setter might be used to introduce encapsulation to the class but they can actually cause more harm then good by breaking the encapsulation principle and because of this hear a lot about having getters and setters being the best practice. The way about this is that that if you have a property that represent the state of the object, make them private and make sure that you don't have another method that changes that state of the object. Instead accept the value through the constructor or through the method that we call instead of the setter. If you need to change the value without having a setter consider creating a new object, so don't need to mutate this object. If you don't need to get the value of a property consider not to implement a getter only as a default developer behaviour. 
+
+There are cases of course where the getters and setters make sense, in some cases you might have some additional logic that you perform before you set the property or before you get the property like some validation or formatting for example and so on. In those cases then setters and getters do make sense also with setters you can do method chaining where kind of build up your object by calling bunch of methods which gives you this fluent interface and you'll see that as a common practice, in some cases it's also perfectly fine to have public properties and you'll see them be used in popular frameworks so there are definitely some use cases one use case is for **data transfer objects or in short dtos** which we'll cover later. Advice here would be to not define getter and setter methods for every single property unless and until you actually need them. The point is don't just create setters and getters because you have a property. In addition to protecting your properties you might also have some methods that are not meant to be exposed or publicly available they might be internal implementation so you would want to hide those as well so for example within a process method we might be calling some other methods and they should not be set to public. 
+=== PHP - PHP Reflection API ===
+There is still a way to break encapsulation and access private and protected properties and methods through the PHP Reflection API. If you have a private property like $amount in the following code
+<code php>
+<?php
+declare(strict_types = 1);
+namespace App\PaymentGateway\Paddle;
+
+class Transaction
+{
+  private float $amount = 0;
+  
+  // ...
+}
+</code>
+You will get an Fatal Error if you try to access restricted properties and methods. You can actually still get the access to those restricted properties and methods through something called PHP's Reflection API. If you try to access the amount property which is private you would get the Uncaught Error Cannot access private property. 
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle\Transaction;
+require_once __DIR__ . '/../vendor/autoload.php';
+$transaction = new Transaction( 25, 'Transaction 1');
+echo $transaction->amount; 
+</code>
+Now trying to access this private property using the reflection api as a basic preview. The PHP reflection api basically just adds the the ability to introspect your classes so we could do something like 
+$reflectionProperty = new ReflectionProperty(class, property) 
+and the first argument we pass the full qualified class name and the second argument is the property name in the this case below amount. Now we can setAccessible to true, now this does not make this amount property directly accessible on the transaction object we'll still get the fatal error but now we can do something like 
+var_dump($reflectionProperty->getValue()) on the object which we're getting that value and that is $transaction
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle\Transaction;
+require_once __DIR__ . '/../vendor/autoload.php';
+$transaction = new Transaction( 25, 'Transaction 1');
+$reflectionProperty = new ReflectionProperty(Transaction::class, 'amount');
+$reflectionProperty->setAccessible(true);
+var_dump($reflectionProperty->getValue($transaction));
+</code>
+Now we can access the private property can we modify that private property the answer is yes we can. We can do something like this reflection property setValue and we pass the transaction object as the first argument and second argument would be the actual amount.  
+<code php>
+<?php
+declare(strict_types = 1);
+use App\PaymentGateway\Paddle\Transaction;
+require_once __DIR__ . '/../vendor/autoload.php';
+$transaction = new Transaction( 25, 'Transaction 1');
+$reflectionProperty = new ReflectionProperty(Transaction::class, 'amount');
+$reflectionProperty->setAccessible(true);
+$reflectionProperty->setValue($transaction, 125);
+var_dump($reflectionProperty->getValue($transaction));
+</code>
+So as you can see we're not really restricting anything by setting properties and methods to private or protected but the point of private and protected access modifiers is to let the one know interacting with the object that certain properties and methods are meant to be kept private or protected they are internal implantations and they are meant to be used within that class don't worry to much about this because in most cases it would not matter. here it was only about the trick how you could actually access  private and protected properties and methods. You probably wouldn't actually do this in a real application.
+=== PHP - Abstraction ===
+There are different ways to interpret the term abstraction and some refer to abstraction as abstract classes and methods but abstraction principle from the four principles of object-oriented programming refers to a different concept and is not the same as abstract classes and methods.
+
+You could implement abstraction using abstract classes and methods but it's not the same thing. Abstraction is actually closer and goes hand in hand with encapsulation instead of abstract classes and methods we'll cover abstract classes and methods later but abstraction simply means that internal implementation details of an object are hidden from the user you could call a method on the object maybe provide some input and maybe get an output but you don't care how the method is actually implemented and how it works behind the scenes all you care about is that you call it and you expect some kind of output or some kind of result. If we call a method we don't care what goes on behind the scenes, we don't care how it connects to something, we don't care how it's saved in the database, we don't care if it sends an email or not and we don't care how it generates the receipt all we. We care about is that we process the transaction this is what abstraction is in simple terms. You're basically hiding the implementation details from the user. The point is that the place where you call a method that does not and should not care what goes on within that method and any changes to the method should not affect other pards of the code setting properties to public would break the encapsulation it also breaks abstraction because if you change the definition your code blow up on multiple different places or you will have some unexpected results because you're directly accessing this property. If you try to build your classes in a way way that does not break encapsulation and does not break abstraction you will be on track on achieving a good object-oriented design. 
+
+There is a question that you could ask yourself when building your classes, can you make changes to this class without breaking too  many things outside of this class. If the answer is yes then you have a well-designed class and maintaining and extending that code base and that class will be much easier so what's the difference between encapsulation and abstraction because they have some things in common. The encapsulation hides the internal state or the information while the obstruction hides the actual implementation of it.
+
+There are some use cases for public properties and setters and getters just keep encapsulation and abstraction principles in mind when designing and building out your classes. Note that classes of the same type can actually access each other's private and protected properties and methods. 
+<code php>
+  public function copyFrom(Transaction $transaction)
+  {
+     var_dump($transaction->amount);
+  }
+</code>
+
+==== PHP - Inheritance ====
+Inheritance allows you to have a class that is derived from another class which also is referred to as parent child classes where the parent is the base class that you derive from the child class will inherit the public and protected methods and properties which then can be overridden in addition to inheriting these in the child class you could of course also have additional properties bas constants and methods we're going to cover few examples here the first example simulating a toaster
+<code php>
+<?php
+class Toaster
+{
+  public array $slices = [];
+  public int   $size   = 2;
+  
+  public function addSlice(string $slice): void
+  {
+     if (count($this->slice) < $this->size) 
+     {
+        $this->slices[] = $slice;
+     }
+  }
+  
+  public function toast()
+  {
+     foreach($this->slices as $i => $slice)
+     {
+        echo ($i + 1) . ': Toasting ' . $slice . PHP_EOL;
+     }
+  }
+}
+</code>
+
+<code php>
+<?php
+use App\Toaster;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$toaster = new Toaster();
+
+$toaster->addSlice('bread');
+$toaster->addSlice('bread');
+$toaster->addSlice('bread');
+$toater->toast();
+</code>
+Toasting two slices even through we have added three slices, because the maximum slices this toaster can toast is two. The ideal way would be to throw an exception here if we reach the maximum number of slices.
+
+Lets imagine we want to simulate another more advanced toaster that has an bit more functionality and more features, let's say it's the pro version of the original toaster, instead of toasting only two slices of bread at the same time the pro version can toast four slices at the same time and in addition to having the basic toasting abilities it also has the preset to toast it as the bagel  
+<code php>
+<?php
+class ToasterPro
+{
+  public array $slices = [];
+  public int   $size   = 4;
+  
+  public function addSlice(string $slice): void
+  {
+     if (count($this->slice) < $this->size) 
+     {
+        $this->slices[] = $slice;
+     }
+  }
+  
+  public function toast()
+  {
+     foreach($this->slices as $i => $slice)
+     {
+        echo ($i + 1) . ': Toasting ' . $slice . PHP_EOL;
+     }
+  }
+  
+  public function toastBagle()
+  {
+     foreach($this->slices as $i => $slice)
+     {
+        echo ($i + 1) . ': Toasting ' . $slice . ' with bagels option' . PHP_EOL;
+     }
+  }
+}
+</code>
+The addSlice and toast methods are identical in Toaster and ToasterPro that's because TosterPro "is a" Toaster. Notice the relationship Toaster Pro is a Toaster, which means that it can toast bread, with the regular basic settings but it could also toast bread with the bagel option setting and it can toast four slices at the same time instead of two so because of this we can leverage the power of inheritance and **inherit the toaster class in our toaster pro** and we can do that by using the **extends keyword**. and now it extends toaster inherits toaster pro all the public and protected methods properties and constants of the toaster class, so if nothing to change we can remove the duplicate code in ToasterPro class. 
+<code php>
+<?php
+class ToasterPro extends Toaster
+{
+  public int   $size   = 4;
+  
+  public function toastBagle()
+  {
+     foreach($this->slices as $i => $slice)
+     {
+        echo ($i + 1) . ': Toasting ' . $slice . ' with bagels option' . PHP_EOL;
+     }
+  }
+}
+</code>
+As mentioned before we are able to overwrite public and protected properties and methods and that is exactly what we're doing here we're overriding the size property with the value of four because toaster pro can toast four slices at the same time while the toaster can only do two.
+<code php>
+<?php
+use App\Toaster;
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$toaster = new ToasterPro();
+
+$toaster->addSlice('bread');
+$toaster->addSlice('bread');
+$toaster->addSlice('bread');
+$toaster->addSlice('bread');
+$toater->toast();
+</code>
+
+
+
+
 
 <code php>
 <?php

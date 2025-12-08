@@ -1,5 +1,63 @@
-**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[PHP Frameworks|home:php:libs]]** -> **Laravel**
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:libs:|PHP Frameworks]]** -> **Laravel**
 
 ====== Laravel ======
 
 First of all **Laravel is not Laragon**
+  * **[[https://laravel.com/|Laravel]]** is a free, open-source PHP web framework that provides tools and structure for building modern, dynamic web applications efficiently. It follows the Model-View-Controller (MVC) architectural pattern to separate application logic, which streamlines development and makes code more maintainable. Key features include built-in authentication, the Artisan command-line interface, and the Eloquent ORM for database management.
+  * **[[https://laragon.org/|Laragon]]** is a commercial, fast, portable, and powerful local development environment for Windows, making it easy to build web apps with PHP, Node.js, Python, Go, and Ruby by providing a pre-configured stack (Apache/Nginx, MySQL/MariaDB, etc.) that's lightweight, isolated, and simple to manage, featuring one-click setup, auto virtual hosts, and integrated tools like ngrok for instant internet access. 
+
+---
+
+  * [[https://learning.oreilly.com/videos/laravel-foundations-basics/|Laravel Foundations: Basics to Every App]]
+
+Laravel has consistently ranked among the fastest growing web frameworks over the past few years. It has all the features you need to build any type of web application you can imagine, plus a whole bunch more. Laravel is a full-fledged, full stack framework. 
+ 
+===== Installing PHP and the Laravel Installer =====
+
+Before creating your first Laravel application, ensure that your local machine has PHP, Composer, and the Laravel installer installed. Additionally, you should have either Node.js with NPM or Bun installed to compile your application's frontend assets. Find more on [[https://laravel.com/docs/12.x/installation||Laravel Installation Page]]
+
+**Install PHP on Debian**
+Install current PHP, composer and Laravel from PHP new all in one
+<code bash>
+/bin/bash -c "$(curl -fsSL https://php.new/install/linux)"
+</code>
+
+or separate on Debian
+<code bash>
+apt install php libapache2-mod-php php-mbstring php-xmlrpc php-soap php-gd php-xml php-cli php-zip php-bcmath php-tokenizer php-json php-pear
+</code>
+
+If PHP and Composer are not yet installed on your system, you can use the following commands to install PHP, Composer, and the Laravel installer on macOS, Windows, or Linux:
+
+**Linux**
+<code bash>
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar
+chmod +x /usr/local/bin/composer
+</code>
+
+
+**Install Laravel with composer inside your new project**
+<code bash>
+composer --version
+composer create-project laravel/laravel app-name
+laravel --version
+cd app-name
+</code>
+
+===== Building the Foundations for Laravel Projects =====
+The Topics
+  * Create a Laravel project
+  * Laravel structure
+  * MVC structure and mindset
+  * Building Routes
+  * Blade and enhancing pages with Partials
+  * Build a CRUD controller
+
+==== Create a Laravel project ====
+First we create a project folder, taking all the stuff needed. Inside the folder we use the Laravel installer, make sure your in the right folder.
+
+<code bash>
+laravel new project-name
+</code>
+This should install a bunch of stuff like Symfony, PHPDocumentor, PHPunit. Laravel is a collection of all these projects put together.

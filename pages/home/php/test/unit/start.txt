@@ -2,89 +2,189 @@
 
 ====== PHPUnit ======
 
+  * [[https://www.udemy.com/course/php-unit-testing|PHP Unit Testing with PHPUnit]]
   * [[https://www.linkedin.com/learning/php-test-driven-development-with-phpunit/welcome|PHP: Test-Driven Development with PHPUnit]]
 
-[[https://phpunit.de/|PHPUnit]] is the **de-facto standard testing framework for PHP**.
-It provides assertions, mocks, coverage integration, and CLI tooling for reliable, automated unit and integration tests.
+[[https://phpunit.de/|PHPUnit (Project Homepage)]] is the **de-facto standard testing framework for PHP**.
+It provides assertions, mocks, coverage integration, and CLI tooling for reliable, automated unit and integration tests. The Code of PHPUnit is open-Source and available at  [[https://github.com/sebastianbergmann/phpunit/releases|GitHub]], therefore check the [[https://phpunit.de/announcements/index.html|Announcements for PHPUnit]] to get hold of new releases.
 
   * [[home:php:test:pest:|Pest]] — Alternative test runner
 
 **Tip**: PHPUnit tests are written as classes extending PHPUnit\Framework\TestCase.
 Each test method should verify one specific behavior.
 
-===== Installation =====
+<code php>
+<?php
+declare(strict=1);
+use PHPUnit\Framework\TestCase;
 
-Install PHPUnit locally with Composer (recommended):
+final class ExampleTest extends TestCase
+{
+   public function testTwoValuesAreTheSame(): void
+   {
+      require 'function.php';
+      
+      $this->assertEquals(4, add(2, 2);
+   }
+}
+</code>
+To run those tests, you need to install some software, like phpunit-12.1.6.phar. If PHPUnit is installed you can check the version by running the **phpunit** command in the command line application of your operating system (PowerShell or Terminal). You don't need a web server in order to run the tests.
+
+===== Installation =====
+There a multiple ways to install PHPUnit. The first is to download it as a PHP Archive Archive File. This is the recommended way to install and use PHPUnit by the developers from PHPUnit.
+
+Installing Documentation for installing [[https://docs.phpunit.de/en/12.1/installation.html#installing-phpunit|PHPUnit as PHAR]] (PHP Archive Archive File). To do this, go to [[https://phar.phpunit.de/|phar.phpunit.de]] in a browser. Tin the **Latest Release** section, click the file named **PHPUnit followed by a numeric version with the .par suffix**. This will download the file.
+<code bash>
+wget -O phpunit.phar https://phar.phpunit.de/phpunit-12.1.6.phar
+</code>
+It is **common practice to install PHPUnit into each project** instead of installing it globally. This avoids version issues between different projects. To do this from the root of your project folder, create a folder called tools. Then copy the file you just downloaded into that folder and rename it to just phpunit.phar. So now the tools folder contains the PHP executable file. you should now be able to run this directly like this.
+<code bash>
+php tools/phpunit.phar --version
+</code>
+We can make running this a bit simpler. On Windows you can create a script with a command like this, which results in a script called phpunit.cmd in the project root folder. You can then run this with just  the phpunit command
+<code powershell>
+echo @php "%~dp0tools/phpunit.phar" %* > phpunit.cmd
+</code>
+On Mac or Linux you can make the file executable 
+<code bash>
+chmod +x tools/phpunit.phar
+tools/phpunit.phar --version
+</code>
+You can then run this with out having to prefix it with the php command, but you have to include the tools directory or add an alias after make the file executable
+<code bash>
+alias phpunit=tools/phpunit.phar
+phpunit --version
+</code>
+Now you can runit on macOS or Linux with just the phpunit command.
+
+If you prefer, you can install the phar file using Phive, as described in the [[https://docs.phpunit.de/en/12.1/installation.html#installing-phpunit-with-phive|PHPUnit Documentation Section - Installing PHPUnit with Phive]]. 
+
+
+The other way to **install PHPUnit with Composer**. To do this you need to make sure you have Composer installed and working on the command line. You can check this by running the composer command with the uppercase -V flag to output the installed version.
+<code bash>
+composer -V
+</code>
+If you don't have Composer installed, it's simple to install and full instructions are shown on the [[https://getcomposer.org/|officiel Composer website]]. Choose the [[https://getcomposer.org/doc/00-intro.md|instructions]] that match your operating system. On Linux you can use your package manager to install it, with all needed dependencies.
+
+Installing PHPUnit as an development dependency (not needed in production) in our project 
 <code bash>
 $ composer require --dev phpunit/phpunit 
 </code>
-
-You can also install globally using Phive:
-<code bash>
-$ phive install phpunit 
-</code>
-
-Check version:
+Check the composer.json and composer.lock file in the project root folder or check the version:
 <code bash>
 $ vendor/bin/phpunit --version 
 </code>
+To make this easier you can add an optional alias or create a shell script as descripted above. In Windows Powershell you can add with this command
+<code powershell>
+Set-Alias -Name phpunit -Value "./vendor/bin/phpunit"
+</code>
+With the alias, we can now run PHPUnit with just the phpunit command
+<code powershell>
+phpunit --version
+</code>
 
-===== Project Layout =====
+Alternatively you can also **install PHPUnit globally using Phive** (not recommended):
+<code bash>
+$ phive install phpunit 
+</code>
+As long as you can run PHPUnit on the command line it doesn't matter which method you use to install PHPUnit.
+===== Writing a First Test =====
+First let's create a **folder to store the test code**. You can call this folder whatever you like, but it's typical to **call the folder tests**
+
+A test in PHPUnit is just a PHP class. So inside of this folder let's create a new file called Test.php. The test class is final as we're not going to need to extend this class. Make sure that the **class name matches the file name** so autoloading works. Test classes needs to **extend a specific class from the PHPUnit** framework.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class Test extends TestCase
+{
+   public function testTwoValuesAreTheSame(): void
+   {
+      $this->assertSame(1, 1); /* assert that two values are the same */
+   }
+}
+</code>
+In the this class we define **public methods that perform tests**. Inside the test methods we use assert messages. These are used to assert or check that something is as expected.
+<code bash>
+phpunit tests/Test.php
+</code>
+If the output says OK,there was one test and one assertion, we're fine, because this means that the test passed. If we get output that says there was a FAILURE! then the test failed. The output includes the location in the method and the class where the failure occurred. We get a message describing exactly what the failure was.
+
+This example test isn't actually doing  anything useful. It just contains an assertion with literal values. Instead of tests like this, normally we write tests to test application code. This code is typically defined inside function and classes.
+
+===== Testing Application Code =====
+
+==== Project Layout ====
+The normal PHP Project should have the following file and folder structure
 ^ Path ^ Purpose ^
+| **bootstrap.php** | Optional autoloader/environment setup |
+| **composer.json** | |
+| **composer.lock** | |
+| **lib** | Application library's folder |
+| **phpunit.xml.dist** | Default PHPUnit configuration |
+| **public** | **index.php** as application entry point |
 | **src/** | Application code |
 | **tests/** | Test classes (unit/integration) |
-| **phpunit.xml.dist** | Default PHPUnit configuration |
 | **vendor/** | Composer dependencies |
-| **bootstrap.php** | Optional autoloader/environment setup |
 
-> Commit //phpunit.xml.dist// to version control and let developers copy it to //phpunit.xml// for local overrides.
+> Commit the //phpunit.xml.dist// file to version control and let developers copy it to //phpunit.xml// for local overrides.
 
-===== Example =====
-
-Code under test: src/Calculator.php
+==== Application Code Example ====
+The Application Code to test: **src/Calculator.php**
 <code php> 
 <?php 
 declare(strict_types=1);
 
 namespace App;
 
-final class Calculator {
-  public function add(int $a, int $b): int {
+class Calculator {
+  public function addIntegers(int $a, int $b): int {
     return $a + $b;
   }
 }
 </code>
+This code could be part of an application or a library function. This class contains a single function called  addInteger, that takes two integer and returns the sum of those two integers. This is a trivial function  that you wouldn't typically write, but it serves to demonstrate how we would test a function like this. 
 
-Test: tests/unit/CalculatorTest.php
+Without PHPUnit, you might test it by running it from another script, providing it with different values for its arguments, and printing the results. With PHPUnit though, we can test this programmatically.
+ 
+==== Application Test Example ====
+The Unit test code file: **tests/CalculatorTest.php**, in the tests folder, should refer with it's name to the file name to be tested. In the test file we'll start as in other classes. So the PHP opening tag, we'll enable strict type checking, and defining a class called CalculatorTest that extends the PHPUnit test case class. Then we add a test function. Inside this method using the assertSame method to check that the return value from the function is as expected. The first argument to this function is the expected value, and the second argument is the actual value. Before we can test this we need to explicitly load the file where the function is defined, as this isn't done automatically. So before the class definition lets require that file. As this will be relative to this test file use the dirname function with the DIR constant to go up to the parent folder before adding the path
 <code php> 
 <?php 
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use App\Calculator;
+require dirname(__DIR__) . '../src/Calculator.php'; /* use App\Calculator; */
 
 final class CalculatorTest extends TestCase
 {
   /** @test */
-  public function test_add_adds_two_integers(): void {
+  public function testAddIntegers(): void 
+  {
     $calc = new Calculator();
-    $this->assertSame(5, $calc->add(2, 3));
+    $this->assertSame(5, $calc->add(2, 3)); /* 2 + 3 = 5 */
   }
 }
 </code>
+**tests/CalculatorTest.php**
 
-Run the tests:
+On the command line, let's run that test, passing the path of the functions test file to the test
 <code bash> 
-$ vendor/bin/phpunit 
+$ vendor/bin/phpunit tests/CalculatorTest.php
 </code>
+If we get an OK output, we know we passed the test. So ew just wrote a test that executed the addIntegers function, and tested that its return value was as we expected it to be.
 
-<code text>
-/** @test */ the annotation tells PHPUnit this is a test method not a normal method
-public function test_add_adds_two_integers(): void { the test_ tells PHPUnit this is a test method 
+
+
+<code php>
+/** @test */ 
+public function test_AddIntegers(): void 
+{ 
 </code>
-You can choose which way you go to mark a test method.
+The **@test annotation** tells PHPUnit this is a test method not a normal method. The **test_** prefix, with or without underscore, tells PHPUnit this is a **test method** as an alternative naming convention. You can choose which way you will take to mark a test method as a test method, but be consistent.
 
-=== PHPUnit Assertions, Expectations, and Other Test Methods ===
+==== PHPUnit Assertions, Expectations, and Other Test Methods ====
 
 PHPUnit provides several groups of methods to help you write clean, structured, and reliable tests.
 
@@ -348,13 +448,6 @@ steps:
   * Keep test data local and deterministic.
   * Run PHPUnit locally and in CI for fast feedback.
 
-===== Troubleshooting =====
-
-^ Problem ^ Likely Cause ^ Fix ^
-| Tests not running | Autoload missing | Include vendor/autoload.php in config |
-| No coverage output | Xdebug/PCOV disabled | Enable in php.ini or via PECL |
-| Class not found | Namespace mismatch | Check PSR-4 configuration |
-| Flaky tests | Shared state or I/O | Mock external resources |
 
 ==== How to write good tests ====
 
@@ -537,10 +630,17 @@ public function testParseIsoDate_impossibleDate()
   * Enforce completeness with branch coverage + mutation testing.
   * Automate via CI gates so the bar stays high.
 
+===== Troubleshooting =====
+
+^ Problem ^ Likely Cause ^ Fix ^
+| Tests not running | Autoload missing | Include vendor/autoload.php in config |
+| No coverage output | Xdebug/PCOV disabled | Enable in php.ini or via PECL |
+| Class not found | Namespace mismatch | Check PSR-4 configuration |
+| Flaky tests | Shared state or I/O | Mock external resources |
+
 ===== Related Topics =====
 
   * [[home:php:test:pest:|Pest]] – Simpler, expressive syntax on top of PHPUnit
   * [[home:php:test:overview:|PHP Unit tests]] – General concepts and best practices
   * [[home:php:pkg:composer|Composer]] – Dependency management
   * [[home:php:automation:build-tools:|Build Automation]] – CI/CD pipelines
-

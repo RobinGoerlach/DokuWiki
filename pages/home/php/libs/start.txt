@@ -4,6 +4,6 @@
 
   * [[home:php:libs:lara|Laravel]]
   * Synfony
-  * cackephp
-  * <del>Zend Framework</del>
+  * CakePHP
+  * <del>Zend Framework</del> -> Laminas
 

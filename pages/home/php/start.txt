@@ -22,9 +22,8 @@ Some interesting resources might be the [[https://www.php.net/manual/en/|PHP Man
 
 Interested in learning more take [[https://www.youtube.com/playlist?list=PLr3d3QYzkw2xabQRUpcZ_IBk9W50M9pe-|Learn PHP The Right Way - Full PHP Tutorial For Beginners]]
 ===== Installing PHP =====
-
-[[https://www.php.net/manual/en/install.php|Installation and Configuration]] Manual of PHP
-==== Without installation (PHP online)  ====
+For a quick start you could try programming PHP
+==== Without installation online ====
 
   * [[https://onlinephp.io/|PHP Sandbox]] Testing code across PHP versions (from 5.x to 8.x).
   * [[https://www.w3schools.com/php/php_compiler.asp|PHP Online Compiler]] for absolute beginners
@@ -33,8 +32,10 @@ Interested in learning more take [[https://www.youtube.com/playlist?list=PLr3d3Q
 
 If you want you can test your PHP code with this code tester other online PHP Interpreter like[[https://www.onlinegdb.com/online_php_interpreter|Online PHP Interpreter]] [[https://www.jdoodle.com/php-online-editor/|JDoodle PHP]]
 
-==== Manual Installation ====
 
+==== Manual Installation ====
+There are many different options for installing PHP on your computer. If you go to the [[https://www.php.net/|official PHP webwide]], there are [[https://www.php.net/downloads|downloads]] available with detailed instructions for Linux, Mac and Windows or compile the source code on your own, for more details check the 
+[[https://www.php.net/manual/en/install.php|Installation and Configuration]] section of the [[https://www.php.net/manual/en/|PHP Manual]]
 Manual installation and configuration of Database, Web Server, PHP and tools, depending on your OS, but max freedom
 
 === PHP on macOS ===
@@ -42,6 +43,11 @@ Manual installation and configuration of Database, Web Server, PHP and tools, de
 PHP is already installed with an Apache 2.x Webserver. The default Document Root Directory is **"/Library/WebServer/Documents"**
 
 === PHP on Linux ===
+Get PHP 8.5, composer and Laravel, all in one from [[https://php.new/|PHP new - Install PHP the Easy Way]]
+<code bash>
+/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
+</code>
+
 **Install PHP on CentOS**
 <code bash>
 sudo yum install epel-release -y
@@ -58,15 +64,18 @@ echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
 **Install PHP on Debian/Ubuntu**
 <code bash>
 sudo apt update
-sudo apt install php libapache2-mod-php php-mysql -y
+sudo apt install -y php libapache2-mod-php php-mbstring php-xmlrpc php-soap php-gd php-xml php-cli php-zip php-bcmath php-tokenizer php-json php-pear php-mysql
+sudo apt install php-pcov php-xdebug
+</code>
 
+<code bash>
 php -v
 echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
 </code>
 
-==== PHP on Windows ====
 
-  * [[http://laragon.org|Laragon]] Download Laragon full bringt Cmder, MySQL, HeidiSQL und Apache gleich mit 
+
+Alternatively, you might have a package like [[https://www.apachefriends.org/download.html|XAMPP]] installed which includes PHP.
 
 ==== All in One Solution ====
 Contains a preconfigured Web Server, PHP, Databases and some tools
@@ -74,6 +83,7 @@ Contains a preconfigured Web Server, PHP, Databases and some tools
     * The installation of [[https://apachefriends.org/|XAMPP]] & Co is simple but does not support instilling multiple PHP versions at the same time out of the box. Not multiple MySQL Version, Difficult to maintain multiple projects
     * Its not suited for production due to security. 
     * "Works on my machine" with differing configuration between local setup and production. Differences could bin minor if you know what you are doing, or could be major like different versions in PHP or MySQL. Different in installed packages what end in "it works on my local machine but not in production. Using [[https://apachefriends.org/|XAMPP]] & Co is absolutely okay for getting things running fast or hobby projects and playing around with PHP. 
+  * Download [[http://laragon.org|Laragon]] full a all in one solution for Windows only with Cmder, MySQL, HeidiSQL and Apache as a modern light way solution
 
 Try [[http://localhost/dashboard/|XAMPP Dashboard]] to see if installation is working. Delete the content of htdocs or create a directory below htdocs and create a index.php file there.
 
@@ -83,10 +93,14 @@ Try [[http://localhost/dashboard/|XAMPP Dashboard]] to see if installation is wo
 
 
 
+===== Using PHP =====
+You need to run PHP from the command line, if you plan using a semi professional PHP development environment. You can do this using the command line application on your computer. For example PowerShell in Windows or Terminal on Mac and Linux. The simplest way to check, if you can run PHP on the command line is to run this command.
+<code bash>
+php -v 
+</code>
+This will confirm that you can run PHP on the command line and tell you which version you have installed. 
 
-
-===== Run a PHP Script =====
-
+Run a PHP Script
 <code bash>
 php index.php
 php -S localhost:8000 

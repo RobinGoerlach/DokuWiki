@@ -163,7 +163,7 @@ final class CalculatorTest extends TestCase
   public function testAddIntegers(): void 
   {
     $calc = new Calculator();
-    $this->assertSame(5, $calc->add(2, 3)); /* 2 + 3 = 5 */
+    $this->assertSame(5, $calc->addIntegers(2, 3)); /* 2 + 3 = 5 */
   }
 }
 </code>
@@ -174,9 +174,6 @@ On the command line, let's run that test, passing the path of the functions test
 $ vendor/bin/phpunit tests/CalculatorTest.php
 </code>
 If we get an OK output, we know we passed the test. So ew just wrote a test that executed the addIntegers function, and tested that its return value was as we expected it to be.
-
-
-
 <code php>
 /** @test */ 
 public function test_AddIntegers(): void 
@@ -184,7 +181,284 @@ public function test_AddIntegers(): void
 </code>
 The **@test annotation** tells PHPUnit this is a test method not a normal method. The **test_** prefix, with or without underscore, tells PHPUnit this is a **test method** as an alternative naming convention. You can choose which way you will take to mark a test method as a test method, but be consistent.
 
-==== PHPUnit Assertions, Expectations, and Other Test Methods ====
+**To comprehensively test this function, we should test as many aspects of it as we can**. For example, let's test that the function adds two negative number together correctly. To do this, we could add another assertion to the existing test method like this.
+<code php> 
+<?php 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
+require dirname(__DIR__) . '../src/Calculator.php'; /* use App\Calculator; */
+
+final class CalculatorTest extends TestCase
+{
+  /** @test */
+  public function testAddIntegers(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(5, $calc->addIntegers(2, 3)); /* 2 + 3 = 5 */
+    $this->assertSame(-5, $calc->addIntegers(-2, -3)); /* -2 + -3 = -5 */
+  }
+}
+</code>
+The result of phpunit should give us OK (1 test, 2 assertions). However, best practice when it comes to writing tests is for each test method to just assert one condition. This makes the test much clearer and easier to maintain.  We also get better output from the test runner.
+<code php> 
+<?php 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
+require dirname(__DIR__) . '../src/Calculator.php'; /* use App\Calculator; */
+
+final class CalculatorTest extends TestCase
+{
+
+  public function testAddTwoPositivIntegers(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(5, $calc->addIntegers(2, 3)); /* 2 + 3 = 5 */
+  }
+
+  public function testAddTwoNegativeIntegers(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(-5, $calc->addIntegers(-2, -3)); /* -2 + -3 = -5 */
+  }
+}
+</code>
+It's a good idea to make the names of the test methods as verbose as you can, as ultimately this is a form of documentation and tells you exactly what the method is testing. So now we have two test methods, each with one assertion. Each method is testing just one specific aspect of the code. Now when we run this, it's still OK, but now with two tests and two assertions.
+
+To get the full range of test methods add some more like adding positive and negative integers and adding zero to an integer, is addition in this function commutative (2+3=3+2).
+<code php> 
+<?php 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
+require dirname(__DIR__) . '../src/Calculator.php'; /* use App\Calculator; */
+
+final class CalculatorTest extends TestCase
+{
+
+  public function testAddTwoPositivIntegers(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(5, $calc->addIntegers(2, 3)); /* 2 + 3 = 5 */
+  }
+
+  public function testAddTwoNegativeIntegers(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(-5, $calc->addIntegers(-2, -3)); /* -2 + -3 = -5 */
+  }
+
+  public function testAddTwoNegativeIntegers(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(-5, $calc->addIntegers(-2, -3)); /* -2 + -3 = -5 */
+  }
+
+  public function testAddPositivAndNegativeIntegers(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(1, $calc->addIntegers(3, -2)); /* 3 + -2 = 1 */
+  }
+
+  public function testAddZeroToInteger(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame(3, $calc->addIntegers(3, 0)); /* 3 + 0 = 3 */
+  }
+
+  public function testAddingIsCommutative(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame($calc->addIntegers(2, 3), $calc->addIntegers(3, 2)); /* 3 + 2 = 2 + 3 */
+  }
+}
+</code>
+Output, if we run this, should be five teste and five assertions. Note that the output shows one dot for each time a test method passes, so we should have five dots. As his is a simple test, it executed very quickly, but for more complex tests, the appearance of  these dots shows the progress of the tests as they run.
+
+To see what happens when a test fails, change the expected value of a test. If you run this you'll see you get an F instead of a dot for that test and instead of a OK a FAILURES with Tests: 5, Assertions: 5 Failures: 1. Additionally you'll get a message which test failed, why and where it failed. This is the reason why having one assertion per test is the best way to write tests. We can see straight away which test method is failing.
+
+As each test method is responsible for testing a special aspect of the code and as we've been verbose when naming each method, it's much clearer what each test is doing. If you want to test a class, it's common practise to match the name of the test class to the class you're using. 
+===== Configuring the Command-Line Test-Runner =====
+
+As we learned **PHPUnit** is run on the command line. The application that runs is known as the **command line test runner**. So far we've run the test class we want by passing the path to this application.
+<code bash>
+phpunit tests/PersonTest.php
+</code>
+In Addition to this, there are many different options we can pass in when running tests. For example, to get colours in the output, we can specify the colors flag.
+
+==== Controlling the Test Runner Output ====
+to get colours in the output, we can specify the colors flag.
+<code bash>
+phpunit tests/PersonTest.php --colors
+</code>
+Now the output contains colours - specifically for this test in which all the test passed, the summary is highlighted in green.
+
+If you run a test that fails, then you'll get different colours. In the characters that are printed out for each test, in addition to the one that failed being shown as the letter F, this is highlighted in red. Likewise for the summary, which is also highlighted in red. 
+
+If you like, you can get the test runner to **stop running the tests when one fails** by specifying the **stop-on-failure** flag
+<code bash>
+phpunit tests/PersonTest.php --colors --stop-on-failure 
+</code>
+Now only the test passing will run and stop after the first failure. When a test does fail, we get the name of the test method printed out. However, even with the colours option, this isn't highlighted in any way, and we don't get any details at all about the test that passed only a dot for each one. the main advantage of this default output format is that it is concise. So if you have a lot of tests, it gives you a good overview. If you want **more details**, try specifying the **testdox option**.
+<code bash>
+phpunit tests/PersonTest.php --colors --testdox
+</code>
+This gives much more detail in output, converting the test method names into text descriptions of each one. When used along with the colours option, this shows green ticks for the tests that pass, and failed tests are highlighted with a red cross. This format is much more descriptive, and this output can even be used **as a base for documenting your tests**. This is why it's important to give as much details as possible when naming test methods. The testdox output will help you to do this. See a comprehensive list on [[http://docs.phpunit.de/en/12.1/textui.html#command-line-options|Command-Line Options documentation]] at the official [[http://docs.phpunit.de/en|PHPUnit Manual]]. You can also get a list of all options by specifying the help flag on the command line.
+<code bash>
+phpunit tests/PersonTest.php --help
+</code>
+==== Run a Script before Test execution ====
+One of the options available when running PHPUnit is the bootstrap option, which runs a PHP script before any of the tests run. While you could in theory put any PHP code in such a script, this is typically used to just load the files that the test requires.
+
+So, for example, in the case of a function test, in order to run a test we need to require a PHP library in the lib folder. This require can be stored in a separate script instead. So let's create a new file **in the tests folder** called **bootstrap.php**. Note you can name this script anything you like, but bootstrap.php is a typical name. Now move the required statements from the tests file to the bootstrap.php
+<code php>
+<?php
+require dirname(__DIR__) . '/lib/functions.php';
+</code> 
+Running the tests now, will lead to a lot of expected errors due to missing require statement in the tests file. If you specify the bootstrap option followed by the path to the bootstrap.php file, then the test works.
+<code bash>
+phpunit tests/FunctionTests.php --bootstrap tests/bootstrap.php
+</code>
+Now the testrunner will run without any errors, even if you still get a failure in a test.
+==== Add Autoloader to load Classes Automatically ====
+In testing classes the test file will contain a require line that loads the file where that class is defined. We could require this file explicitly in the bootstrap.php, but we can add this with an autoloader. This means any class will be loads automatically, which is useful if we have tests that test lots of different classes.
+
+We can call the spl_autoload_register function in the bootstrap.php, passing in an anonymous callback function as the only argument. 
+<code php>
+<?php
+require dirname(__DIR__) . '/lib/functions.php';
+spl_autoload_register(function($class) {
+  $file = require dirname(__DIR__) . '/src/' . str_replace('\\', '/',$class) . '.php';
+  if (file_exists($file)) {
+    require $file;
+  }
+});
+</code>
+Assuming we're using PSR-4 autoloading we can get the path to the class by converting any namespaces to folder names and str_replace will convert this for us by converting backslash to forward slashes.
+<code bash>
+phpunit tests/PersonTest.php --bootstrap /tests/bootstrap.php
+</code>
+Try running your test again and it should work as before.
+
+==== Using Composer's Autoloader ====
+For simple projects it might be enough to define a simple autoloader in the bootstrap file. However, and especially as we're assuming a PSR-4 autoloader structure, it's much more common to use Composer to autoload classes. First, we need to tell Composer where to autoload the classes from. We do this in the composer.json file.
+<code json>
+{
+  "autolad": {
+    "psr-4": {
+      "": "src/"
+    }
+  }
+}
+</code>
+Use an empty prefix, so any class or namespace will be looked for inside the specified folder as the value of the empty prefix use the src folder as the value.
+<code bash>
+composer dump-autoload
+</code>
+To generate the autoload script, we run the **composer dump-autoload** command on the command line. This will create a vendor folder containing a script called autoload.php, if you already had this file, it will have been updated. If we run the test again, we can use the vendor/autolader.php script as the bootstrap option.
+<code bash>
+phpunit test/PersonTest.php --bootstrap vendor/autoload.php
+</code>
+This is typically how PHPUnit tests are configured -using Composer to autoload the code being tested. Note that if you run a functions test and specify Composer's autoloader, then this no longer works, as we're not requiring the file where the function beeing teste is defined.
+
+We can autoload specific files in Composer by adding a files section to the autoloader section in composer.json
+<code json>
+{
+  "autolad": {
+    "psr-4": {
+      "": "src/"
+    },
+    "files": [
+    "lib/functions.php"
+    ]
+  }
+}
+</code>
+To regenerate the autoload script we need to run composer dump-autoload. Now if we run a function test again, it works.
+<code bash>
+phpunit test/Function.php --bootstrap vendor/autoload.php
+</code>
+==== The PHPUnit Configuration File ====
+
+We can specify various options by passing flags to the PHPUnit test rummer. Instead of having to include these options every time we run a test, we can specify them in a configuration file. 
+<code bash>
+phpunit --generate-configuration
+</code>
+While we could create that file directly, the test runner can generate it with the generate-configuration option. This will ask what some questions
+  * The **bootstrap script** should be with a default of vandor/autload.php, you can press enter to accept the default, or you type the path to the bootstrap script. 
+  * Next question is the **tests directory** location. The default directory is called tests which you can accept by pressing enter
+  * The same for the **source code directory** where the classes are defined.
+  * The **cache directory** is where PHPUnit stores its cache, which speeds up testing when rerunning tests. **Note** to exclude the .phpuni.cache directory from version control. Add it to your .gitignore file
+This are the current question and it has generated a file called phpunit.xml in the root of the project.
+
+In that file, which is XML, we can see that some options are specified as attributes to the root phpunit element, such as the bootstrap.
+<code xml> 
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory=".phpunit.cache"
+         executionOrder="depends,defects"
+         shortenArraysForExportThreshold="10"
+         requireCoverageMetadata="true"
+         beStrictAboutCoverageMetadata="true"
+         beStrictAboutOutputDuringTests="true"
+         displayDetailsOnPhpunitDeprecations="true"
+         failOnPhpunitDeprecation="true"
+         failOnRisky="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <source ignoreIndirectDeprecations="true" restrictNotices="true" restrictWarnings="true">
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+    <coverage includeUncoveredFiles="true"> 
+      <include> 
+        <directory>
+          src
+        </directory> 
+      </include> 
+      <report> 
+        <html outputDirectory="build/coverage"/> 
+        <text outputFile="php://stdout" showUncoveredFiles="false"/> 
+      </report> 
+    </coverage> 
+</phpunit> 
+</code>
+To keep this simple, you can remove all the options from executionOrder to the end of phpunit attributes
+This configuration file is a minimalistic version of a configuration file.
+
+As for the test suites and the source elements, these define where the test classes are and where the classes we're testing are. In your own minimalistic version you could also remove the rest from source to the end, but leave the last line phpunit.
+
+If you don't want to generate a phpunit.xml, you can copy default configuration file **phpunit.xml.dist** into the project root. The hpunit.xml.dist is a minimalistic version of a phpunit.xml configuration 
+<code xml>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php" colors="true">
+  <testsuites>
+    <testsuite name="TabKeeper API">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
+</code>
+
+
+
+Run with coverage:
+<code bash>
+$ vendor/bin/phpunit --coverage-html build/coverage 
+</code>
+
+> Open build/coverage/index.html in your browser for a visual report.
+
+----
+===== PHPUnit Assertions, Expectations, and Other Test Methods =====
 
 PHPUnit provides several groups of methods to help you write clean, structured, and reliable tests.
 
@@ -340,44 +614,6 @@ Example:
 ./vendor/bin/phpunit --filter "DatabaseTest" --colors=always --stop-on-failure
 </code>
 This command runs only tests matching DatabaseTest, uses colored output, and stops on the first failure.
-===== Configuration =====
-
-The phpunit.xml configuration file or phpunit.xml.dist is stored in the project root
-<code xml> 
-<?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit colors="true"
-         bootstrap="vendor/autoload.php"
-         failOnRisky="true"
-         failOnWarning="true"
-         convertDeprecationsToExceptions="true"
-         cacheResultFile=".phpunit.cache/test-results"
-
-  <testsuites> 
-    <testsuite name="Unit"> 
-      <directory>tests/unit</directory> 
-    </testsuite> 
-  </testsuites> 
-  <coverage includeUncoveredFiles="true"> 
-    <include> 
-      <directory>
-        src
-      </directory> 
-    </include> 
-    <report> 
-      <html outputDirectory="build/coverage"/> 
-      <text outputFile="php://stdout" showUncoveredFiles="false"/> 
-    </report> 
-  </coverage> 
-</phpunit> 
-</code>
-
-Run with coverage:
-<code bash>
-$ vendor/bin/phpunit --coverage-html build/coverage 
-</code>
-
-> Open build/coverage/index.html in your browser for a visual report.
 
 ===== Code Coverage =====
 
@@ -450,6 +686,10 @@ steps:
 
 
 ==== How to write good tests ====
+
+  * For each test method to just assert one condition. This makes the test much clearer and easier to maintain.  We also get better output from the test runner.
+  * If you want to test a class, it's common practise to match the name of the test class to the class you're using. 
+  * 
 
 === Strategy: How to cover all methods and cases ===
 

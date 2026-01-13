@@ -33,6 +33,7 @@ To run those tests, you need to install some software, like phpunit-12.1.6.phar.
 ===== Installation =====
 There a multiple ways to install PHPUnit. The first is to download it as a PHP Archive Archive File. This is the recommended way to install and use PHPUnit by the developers from PHPUnit.
 
+==== Installation as a PHP Archive File ====
 Installing Documentation for installing [[https://docs.phpunit.de/en/12.1/installation.html#installing-phpunit|PHPUnit as PHAR]] (PHP Archive Archive File). To do this, go to [[https://phar.phpunit.de/|phar.phpunit.de]] in a browser. Tin the **Latest Release** section, click the file named **PHPUnit followed by a numeric version with the .par suffix**. This will download the file.
 <code bash>
 wget -O phpunit.phar https://phar.phpunit.de/phpunit-12.1.6.phar
@@ -59,7 +60,7 @@ Now you can runit on macOS or Linux with just the phpunit command.
 
 If you prefer, you can install the phar file using Phive, as described in the [[https://docs.phpunit.de/en/12.1/installation.html#installing-phpunit-with-phive|PHPUnit Documentation Section - Installing PHPUnit with Phive]]. 
 
-
+==== Installation with Composer ====
 The other way to **install PHPUnit with Composer**. To do this you need to make sure you have Composer installed and working on the command line. You can check this by running the composer command with the uppercase -V flag to output the installed version.
 <code bash>
 composer -V
@@ -83,12 +84,14 @@ With the alias, we can now run PHPUnit with just the phpunit command
 phpunit --version
 </code>
 
+==== Install PHPUnit globally using Phive ====
 Alternatively you can also **install PHPUnit globally using Phive** (not recommended):
 <code bash>
 $ phive install phpunit 
 </code>
 As long as you can run PHPUnit on the command line it doesn't matter which method you use to install PHPUnit.
-===== Writing a First Test =====
+===== Testing Basics - Getting started =====
+==== Writing a First Test ====
 First let's create a **folder to store the test code**. You can call this folder whatever you like, but it's typical to **call the folder tests**
 
 A test in PHPUnit is just a PHP class. So inside of this folder let's create a new file called Test.php. The test class is final as we're not going to need to extend this class. Make sure that the **class name matches the file name** so autoloading works. Test classes needs to **extend a specific class from the PHPUnit** framework.
@@ -113,9 +116,9 @@ If the output says OK,there was one test and one assertion, we're fine, because 
 
 This example test isn't actually doing  anything useful. It just contains an assertion with literal values. Instead of tests like this, normally we write tests to test application code. This code is typically defined inside function and classes.
 
-===== Testing Application Code =====
+==== Testing Application Code ====
 
-==== Project Layout ====
+=== Project Layout ===
 The normal PHP Project should have the following file and folder structure
 ^ Path ^ Purpose ^
 | **bootstrap.php** | Optional autoloader/environment setup |
@@ -130,7 +133,7 @@ The normal PHP Project should have the following file and folder structure
 
 > Commit the //phpunit.xml.dist// file to version control and let developers copy it to //phpunit.xml// for local overrides.
 
-==== Application Code Example ====
+=== Application Code Example ===
 The Application Code to test: **src/Calculator.php**
 <code php> 
 <?php 
@@ -148,7 +151,7 @@ This code could be part of an application or a library function. This class cont
 
 Without PHPUnit, you might test it by running it from another script, providing it with different values for its arguments, and printing the results. With PHPUnit though, we can test this programmatically.
  
-==== Application Test Example ====
+=== Application Test Example ===
 The Unit test code file: **tests/CalculatorTest.php**, in the tests folder, should refer with it's name to the file name to be tested. In the test file we'll start as in other classes. So the PHP opening tag, we'll enable strict type checking, and defining a class called CalculatorTest that extends the PHPUnit test case class. Then we add a test function. Inside this method using the assertSame method to check that the return value from the function is as expected. The first argument to this function is the expected value, and the second argument is the actual value. Before we can test this we need to explicitly load the file where the function is defined, as this isn't done automatically. So before the class definition lets require that file. As this will be relative to this test file use the dirname function with the DIR constant to go up to the parent folder before adding the path
 <code php> 
 <?php 
@@ -392,6 +395,18 @@ While we could create that file directly, the test runner can generate it with t
   * The **cache directory** is where PHPUnit stores its cache, which speeds up testing when rerunning tests. **Note** to exclude the .phpuni.cache directory from version control. Add it to your .gitignore file
 This are the current question and it has generated a file called phpunit.xml in the root of the project.
 
+If you don't want to generate a phpunit.xml, you can copy default configuration file **phpunit.xml.dist** into the project root. The phpunit.xml.dist is a very minimalistic version of a phpunit.xml configuration. 
+<code xml>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php" colors="true">
+  <testsuites>
+    <testsuite name="TabKeeper API">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
+</code>
+
 In that file, which is XML, we can see that some options are specified as attributes to the root phpunit element, such as the bootstrap.
 <code xml> 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -434,21 +449,31 @@ In that file, which is XML, we can see that some options are specified as attrib
 To keep this simple, you can remove all the options from executionOrder to the end of phpunit attributes
 This configuration file is a minimalistic version of a configuration file.
 
-As for the test suites and the source elements, these define where the test classes are and where the classes we're testing are. In your own minimalistic version you could also remove the rest from source to the end, but leave the last line phpunit.
+As for the test suites and the source elements, these define where the test classes are and where the classes we're testing are. In your own minimalistic version you could also remove the rest from source to the end, but leave the last line with **</phpunit>**. So now PHPUnit will read this file when running tests and apply the specified options.
 
-If you don't want to generate a phpunit.xml, you can copy default configuration file **phpunit.xml.dist** into the project root. The hpunit.xml.dist is a minimalistic version of a phpunit.xml configuration 
-<code xml>
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="tests/bootstrap.php" colors="true">
-  <testsuites>
-    <testsuite name="TabKeeper API">
-      <directory>tests</directory>
-    </testsuite>
-  </testsuites>
-</phpunit>
+Add **colors="true"** to the <phpunit xmlns ... as the last attribute, if you want to automat the color flag. If you run tests the colors option is now included.  There is a [[https://docs.phpunit.de/en/12.5/configuration.html#the-phpunit-element|full list of available configuration attributes]] in the official documentation
+
+As for naming the configuration file, by default, this is named phpunit.xml. Although you can name this whatever you like, and specify the name of the configuration file when you run phpUnit with the configuration option, but it's best practice to name this file phpunit.xml or phpunit.xml.dist. If phpunit.xml exists, then PHPUnit will use that. Otherwise it will use the .dist file, it won't use both. So the best practice is to name th file phpunit.xml.dist. This is the file that you store in source code control. The phpunit.xml should be ignored from source code control, for example in a .gitignore file. This will allow a developer to use a custom configuration file called phpunit.xml without the risk of accidently checking it in to source code control.
+<code bash>
+phpunit -c phpunit.api-server.xml
 </code>
 
-
+**Code coverage** 
+<code php>
+    ...
+    <coverage includeUncoveredFiles="true"> 
+      <include> 
+        <directory>
+          src
+        </directory> 
+      </include> 
+      <report> 
+        <html outputDirectory="build/coverage"/> 
+        <text outputFile="php://stdout" showUncoveredFiles="false"/> 
+      </report> 
+    </coverage> 
+</phpunit> 
+</code>
 
 Run with coverage:
 <code bash>
@@ -458,6 +483,268 @@ $ vendor/bin/phpunit --coverage-html build/coverage
 > Open build/coverage/index.html in your browser for a visual report.
 
 ----
+Check the [[https://docs.phpunit.de/en/12.1/organizing-tests.html#composing-a-test-suite-using-xml-configuration|Composing a Test Suite Using XML Configuration]] section of the [[https://docs.phpunit.de/en/12.1/index.html|PHPUnit Manual]]
+===== Organising Tests and managing Test Methods =====
+==== Running Multiple Tests and Organising Tests in Test Suits ====
+How to organise tests and interpret the different results that we get wen we run then, is one of the main questions in testing. So far, we've been running specific test classes by specifying them on the command line, passing the path to the file to the test runner. We can also pass a wildcard in the path.
+<code bash>
+phpunit tests/*Test.php
+</code>
+For example, this will run all the files with a suffix of Test.php. The output will show the results of all the tests. We can also just pass in the folder where the test classes are, and this will run all tests as well. Even through there are PHP files in the tests folder, the test runner only runs files that end in Test.php. 
+
+Although you can configure PHPUnit to run specific files that aren't named like this. Naming a test class with the Test.php suffix is the best practice. When generating an PHPUnit XML configuration file, it included a test suites element. 
+<code xml>
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</code>
+This part of the configuration file allow us to organise folders containing test files into test suites. We can then run those separately if we need to. The default test suite that has been added defines a test suite called default that points to the tests folder. You can add as many suites as you like here, organising your tests however you like. For example, as shown in the [[https://docs.phpunit.de/en/12.1/organizing-tests.html#composing-a-test-suite-using-xml-configuration|Composing a Test Suite Using XML Configuration]] of the [[https://docs.phpunit.de/en/12.1/|PHPUnit Manual]], this configuration defines one suite containing unit tests and another containing integration tests.
+
+On the command line, we can list the available test suites with the list-suites option.
+<code bash>
+phpunit --list-suites
+</code>
+We can then run a particular suit with the testsuite option, specifying the name of the suite we want to run.
+<code bash>
+phpunit --testsuite default
+</code>
+If we run the default test suite, this runs all the test files in the specified folder that have the suffix Test.php. 
+
+Now that we have a configuration file with the suites defined we can just run PHPUnit with no arguments at all. This will run all the tests in all suites.
+==== Running Individual Tests with Filters ====
+Running a test suite my lead to having a couple of failures. Typical workflow is to run the test suit and fix any failing tests until everything passes. On every test we run the entire test suite through. If the test suite contains a lot of tests, this can take time. If we just want to **run a single test** while we fix it, we can do that. We can list all available teste in the test suite with the **list tests option**.
+<code bash>
+phpunit --list-tests
+</code>
+We can run an individual test with the filter option passing in the class and the test method name.
+<code bash>
+phpunit --filter FunctionTest::testAddTwoPositiveIntegers
+</code>
+Note that you can run this without the test class name if you like, but if there are methods with the same name in different classes, then it will run these as well. 
+==== Two Ways of Marking Methods as Test Methods Tests with Filters ====
+
+You can name your test Methods as you like Snakecase or CamelCase. Although CamelCase is the recommended way to name PHP methods, you will see tests that are named using Snakecase like this. If a method, doesn't start with the word test. For test methods to be run automatically, they need to be **public methods that start with the word test**. However, there is an alternative way **to mark a method as a test method**. The other way we can mark a test as a test method is to use an attribute. To do this, first let's add a us statement to input the test attribute from the PHPUnit Framework. Therefore you need to add a use statement to input the **test attribute from the PHPUnit framework** into the current namespace. Then you can specify that **attribute before the test method**.
+
+<code php>
+<?php
+declare(stricttypes=1);
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+
+#[Test]
+public function ...
+</code>
+So to get a method recognized as a test method, it either needs to start with the word test or have the test attribute.
+
+==== Mark a Test Methods as to implement later ====
+
+A method with no assertions will be marked as a risky test when running the tests. This is because it doesn't perform any assertions. Risky tests are shown with a letter R in the test runner output, and if you have colours enabled, note that the result is orange instead of red or green. 
+
+If you want to **ignore test** like these, you can specify the **don't report useless tests** option.
+<code php>
+phpunit --dont-report-useless-tests
+</code>
+You can also specify this in the configuration file if you like, see [[https://docs.phpunit.de/en/12.1/configuration.html#the-bestrictaboutteststhatdonottestanything-attribute|The be Strict About Tests That Do Not Test Anything Attribute]].
+
+When writing tests, you might add some test methods that you intend to implement later on, just adding them so you don't forget them. You could leave them empty and they would be reported as risky tests. An alternative could be to add a meaningless assertion. For example, the Assert true method just asserts that the first argument is true. If we pass false to this it will defiantly fail. 
+<code php>
+   #[Test]
+   public function fll_name_is_first_name_when_no_surname(): void
+   {
+      $this->assertTrue(false, 'Test not implemented yet');
+   }  
+</code>
+When calling assertion methods, we can include a custom message that will be shown in the Test runner. When we run this, it fails as expected, showing the optional message, //Test not implemented yet//, that we added. however, this isn't generally a good idea as a failure is not the same thing as a test that hasn't been implemented yet.
+
+So instead of doing this, if we don't **want to implement a test yet**, we can call the **mark test incomplete** method providing an optional message.
+<code php>
+   #[Test]
+   public function fll_name_is_first_name_when_no_surname(): void
+   {
+      $this->markTestIncomplete('This test has not been implemented yet');
+   }  
+</code>
+Now if we run this, we get an **I** in the output and the number of incomplete tests is shown in the summary. If you add the **display-incomplete** flag, then we see the details of the incomplete tests, including any custom messages that we added.
+<code php>
+phpunit --display incomplete
+</code>
+==== Fixing a Bug Through Testing ====
+**The Difference Between Errors and Failures**
+
+When you have a test that outputs an **E** and **ERRORS!**, then we get an error, not that this is different to a  failed test. This is an actual error in the code under test, not a failure of an assertion. Getting and fixing errors like this is one of the ways writing unit tests helps us to write better code. If we identify and fix errors while testing when the code is running in production, it's going to be more robust.
+
+The goal of unit testing is to isolate each part of an application and show that each individual unit works as expected. 
+==== Simplifying Tests with Test Method Arguments and Data Providers ====
+
+If you run multiple tests on a single function, many of the test methods are almost the same. The only difference being the values that we're passing to the assert same method. When this occurs, you can refactor this to mark the test simpler. 
+
+Add a generic test method, the name of this method isn't specific to the test it's performing like the other test methods. Test methods can accept any arguments. Add three arguments to this method two that will be used as arguments and one for the expected result. To provide values to this method, we use a data provider. This is a method that returns a traversable value that provides one or more sets of values. This method has to be public and static and returns an array with sets of values. each set of values is itself an array that contains the arguments that will be used when calling the test method we just added. The first array in the result array contains the values for the first test method, the next array contains the values from the next test method. Likewise for the next methods. If a test method doesn't follow the same structure as the other methods, so we can't include a set of values for this method. To specify this method as a data provider to the new test method, use an attribute, therefor you need to add a use statement to input the data provider attribute into the current namespace. Then you can add an attribute to the test, specifying the name of the data provider. We can add names to the array by providing string keys for each element, we can get these from the names of the individual test methods. This text will be shown in the output if we run the test runner with the testdox flag. 
+<code php> 
+<?php 
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+final class CalculatorTest extends TestCase
+{
+
+  public static function additionProvider(): array
+  {
+    return [
+      'two positive integers' => [2, 3, 5],
+      'two negative integers' => [-2, -3, -5],
+      'positive and negative integers' => [3, -2, 1],
+      'adding zero' => [3, 0, 3 
+    ];
+  }
+  
+  #[DataProvider('additionProvider')]
+  public function tesAddIntegers(int $a, int $b, int $expected): void
+  {
+     $this-> assertSame($expected, addIntegers($a, $b));
+  }
+  
+  public function testAddingIsCommutative(): void 
+  {
+    $calc = new Calculator();
+    $this->assertSame($calc->addIntegers(2, 3), $calc->addIntegers(3, 2)); /* 3 + 2 = 2 + 3 */
+  }
+}
+</code>
+Not that the last method doesn't follow the same structure, so we have to leave that un touched. So even we have two test methods, five test and five assertions are run. So this class tests the same as before, only now it's much simpler. If we want to add a new set of values to test, it's much easier to do. So instead of adding a new test method, we can just add new set of values to the data provider.
+==== Multiple Assertions in a single Test Methods and Dependencies ====
+One question in testing is how to reduce repetition in tests. Note the only way we can test a class is through the public methods of the class. We have no way of accessing the private properties of the class. This is particular to the implementation of the code. That's why we typically only test classes via their public interfaces.
+
+An example for mor then on assertion in a test is removing an item from a queue.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Depends;
+
+final class QueueTest extends TestCase
+{
+  #[Depends('testNewQueueIsEmpty')]
+  public function testPopRemovesAndReturnsItem(Queue $queue): void
+  {
+    $queue->push('an item');
+    
+    $this->assertSame('an item', $queue->pop());
+    $this->assertSame(0, $queue->getSize()); /* multiple assertion in one test method */
+  }
+  
+  #[Depends('testNewQueueIsEmpty')]
+  public function testPushAddsItem(Queue $queue): void
+  {
+    $queue->push('an item');
+    
+    $this->assertSame(1, $queue->getSize());
+  }
+  
+  public function testNewQueueIsEmpty(): Queue
+  {
+    $queue = new Queue;
+    
+    $this->assertSame(0, $queue->getSize());
+    return $queue;
+  } 
+  
+  public function testPopEmtyQueue(): void
+  {
+    $this->markTestIncomplete('This test has not been implemented yet');
+  }  
+}
+</code>
+Every test creates a new Queue object, so we could make the test methods depending on it. Therefore we add an attribute to the depending test. The independent test has to return the object the other tests depend on. This may lead to a bit different walk through the tests. The method returning the object is known as the producer. The method that depends on is known as a consumer. With this you can remove some repletion by using test dependencies.
+==== Fixtures ====
+Having dependencies in test can make it difficult to understand where tests data are coming from. It's also generally good practice for each unit test to be independent and not affect any other test. If you are not using dependencies, you need repeating code in each test that **set up data to a known state** before we actually made any assertions, **like creating a needed object**. This known state is **called fixture of the test**.
+
+So instead of making tests dependent on each other, we can add code that sets this state up before each test method. We do this in a **method called setUp**. This function can be public if you like, but to make it protected as it makes the actual methods more obvious. The setUp method will be called before each test method.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+ 
+final class QueueTest extends TestCase
+{
+  private Queue $queue;
+  
+  protected function setUp(): void
+  {
+    $this->queue = new Queue;
+  }
+  
+  protected function tearDown(): void
+  {
+    unset($this->queue); /* destroy object created in setUp */
+  }
+
+  public function testNewQueueIsEmpty(): void
+  {
+    $this->assertSame(0, $this->queue->getSize());
+  } 
+ 
+  public function testPushAddsItem(Queue $queue): void
+  {
+    $this->queue->push('an item');
+ 
+    $this->assertSame(1, $this->queue->getSize());
+  }
+
+  public function testPopRemovesAndReturnsItem(): void
+  {
+    $this->queue->push('an item');
+ 
+    $this->assertSame('an item', $this->queue->pop());
+    $this->assertSame(0, $this->queue->getSize()); /* multiple assertion in one test method */
+  }
+  
+  public function testAnItemIsRemovedFromTheFrontOfTheQueue(): void
+  {
+     $this->queue->push('first');
+     $this->queue->push('second');
+     
+     $this-AssertSame('first', $$this->queue->pop());
+  }
+ 
+  public function testPopEmtyQueue(): void
+  {
+    $this->expectException(\UnderflowException::class);
+    $this-queue-pop();
+  }
+}
+</code>
+Try an run one test to see it's working
+<code bash>
+phpunit --filter testNewQueueIsEmpty
+</code>
+The method without dependency is more independent and arguably much clearer if we do it this way. Now, however, it's easier to see what each method does. In addition to the setUp method, there's also a **tearDown method**, this runs after each test method. In here, you would typically put code to clean up after each test. For examply you might want to destroy objects you created in the setUp method. However, in practice this isn't really necessary. The only time you might need to unset variables like this is if they used a lot of memory, or you were allocating external resources such as files or database connections. Most of the time through, you won't need to use this tearDown method.
+
+==== Testing Exceptions ====
+So far we've been using assertions to test that code works the way we expect it to. Sometimes, through, things can go wrong in your code, and the way PHP signals that something has gone wrong is to throw an exception. In this situations we use **expectException** with the exception we expect to be thrown, instead of an assertion. 
+
+Hint: **The test of the exception has to be called before the line that causes the exception to be thrown.**
+
+In an empty Queue you can't pop an item, because there is none, then an exception will be thrown.
+<code php>
+  // ...
+ 
+  public function testPopThrowsExceptionWhenQueueIsEmpty(): void
+  {
+    $this->expectException(\UnderflowException::class);
+    $this->expectExceptionMessage('Queue is empty');
+    
+    $this-queue-pop();
+  }
+}
+</code>
+There are also methods to check the [[https://docs.phpunit.de/en/12.1/writing-tests-for-phpunit.html#expecting-exceptions|Expecting Exceptions code]] and the message.
+
+Note that the test runner includes the expect exception methods in the number of assertions that were run. They are not counted separately.
+===== Stubbing and Mocking =====
 ===== PHPUnit Assertions, Expectations, and Other Test Methods =====
 
 PHPUnit provides several groups of methods to help you write clean, structured, and reliable tests.

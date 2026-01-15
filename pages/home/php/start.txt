@@ -111,13 +111,13 @@ php -S localhost:8000 -t public
 ===== More on PHP ====
 
   * __**[[home:php:basics:|PHP Basics]]**__ (Syntax & Operators, Variables & Data Types, Control Structures & Functions, Type Casting & Error Handling, php.ini & Web server configs, Working with Arrays and dates)
-    * [[home:php:dbg:|Debugging PHP]] (xdebug, phpdbg)
+    * [[home:php:basics:debug:|Debugging PHP]] ([[home:php:basics:debug:x:|xDebug]], phpdbg)
   * [[home:php:pro:|Intermediate PHP]] (Classes & Methods, Object Oriented PHP, Code Style & PSR, Namespaces & Autoloading, Dependency Management, Super Globals, Cookies & Sessions, Database)
     * __**[[home:php:oop:|PHP Object Oriented Programming]]**__
     * [[home:php:db:|PHP Database Integration]]
     * [[home:php:pkg:|PHP Package Manager]] ([[home:php:pkg:composer:|Composer]])
     * [[home:php:docgen:|PHP Documentation generator]] ([[home:php:docgen:doc:|PHPDocumentor]] a tool like JavaDoc or Doxygen)
-  * **Advanced PHP techniques** Testing, phpUnit, TDD, BDD, MVC & Routing, Caching & Security, Frameworks & PHP 8, Hosting and Deployment, Best Practices)
+  * **Advanced PHP techniques** Testing, [[home:php:test:unit:|PHPUnit]], [[home:php:test:tdd:|TDD]], BDD, MVC & Routing, Caching & Security, Frameworks & PHP 8, Hosting and Deployment, Best Practices)
     * [[home:php:test:|PHP Unit testing]] 
       * [[home:php:test:unit:|PHPUnit]]
     * [[home:php:mvc:|PHP Model-View-Controller]]
@@ -132,6 +132,7 @@ php -S localhost:8000 -t public
 ==== PHP Tools ====
 
   * [[home:php:pkg:composer:|Composer]] / PEAR
-  * PHPUnit
+  * [[home:php:test:unit:|PHPUnit]]
   * PHP Documentor
+  * Doctrine
 

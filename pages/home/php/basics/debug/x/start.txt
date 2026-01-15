@@ -1,0 +1,21 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:basics:debug:|Debugging PHP]]** -> **xDebug**
+
+====== xDebug ======
+===== Installation of xDebug =====
+Installation of [[https://xdebug.org/docs/|Xdebug]] depends on your operating system and development environment. The official documentation contains detailed instructions. Choose those that are the most relevant for your setup. If you do need help, please don't hesitate to ask. Once installed, you can check if it's available on the command line by running PHP with the version flag. Choose those that are the most relevant for your setup or run **pecl install xdebug** to be platform independent.
+<code bash>
+apt update
+apt install php-xdebug
+php -v | grep -i xdebug
+php -m | grep xdebug
+</code>
+
+Add the following code to **composer.json**, this will not install [[https://xdebug.org/docs/|Xdebug]] but will warn you if it's missing.
+<code json>
+"require-dev": {
+  "ext-xdebug": "*"
+}
+</code>
+
+Find more in the [[https://xdebug.org/docs/install|xDebug Install Documntation]]
+===== Configure the Development Environment =====

@@ -117,6 +117,7 @@ Follow the Test Pyramid: many unit tests, some integration tests, few end-to-end
   * [[home:php:docgen:doc:|PHPDocumentor]] – API documentation
   * [[home:php:pkg:composer|Composer]] & [[home:php:pkg:phive|Phive]] – Dependency management
   * [[home:php:automation:build-tools:|Build Automation]] – CI/CD and testing pipelines
+  * [[home:php:test:tdd:|Test-Driven Development (TDD)]] in PHP with PHPUnit
 
 This page provides a general overview of PHP unit testing.
 See the linked framework pages for configuration examples and advanced topics.

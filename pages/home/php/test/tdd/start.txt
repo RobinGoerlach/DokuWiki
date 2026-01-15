@@ -1,0 +1,1231 @@
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:test:|PHP Unit testing]]** -> **TDD with PHP**
+
+====== Test-Driven Development ======
+
+Often source code is developed and the unit test code are created afterwards, so the code we're testing has already been written. Writing test this way is a good way to check that the code is working as expected, and to find and fix bugs. There's another way we can develop code though, and that's to write the tests first and then write code that makes the tests pass. This is known as test driven development or TDD. 
+
+The empty project folder from scratch, needs a source folder to store the code we're going to test and a tests folder to store the test classes for [[home:php:test:unit:|PHPUnit]]. A tools folder could be nice to take the phar files, like [[https://phar.phpunit.de/phpunit-11.phar|PHPUnit 11]] as described earlier, or install [[home:php:test:unit:|PHPUnit]] and autoloader, using composer. Therefor run **composer --init** and **composer require --dev phpunit/phpunit ^11** on the command line or create a composer.json file manually with an autoload section that loads classes in the app namespace from the source folder. To generate the autoload script run the **composer dump-autoload**, this creates the vendor folder and the autoload script inside it. Finally add a phpunit.xml.dist configuration file containing a minimal configuration.
+
+**composer.json**
+<code json>
+{
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    }
+}
+</code>
+You can create this manually, or generate it from composer, or create it from another project. 
+
+**phpunit.xml.dist**
+<code xml>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.1/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true">
+
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+</phpunit>
+</code>
+Now if you run [[home:php:test:unit:|PHPUnit]] on the command line, it works with the specified config file. As expected you'll get a message saying no tests were executed. Now though, we're ready to start test driven development. 
+
+Test driven development is made up of three stages. First, we write and run a single test case of a feature we want to implement. This will obviously fail and the result will be red. So this is known as the red stage. next we write just enough code to make the test pass. This will result in the [[home:php:test:unit:|PHPUnit]] output being green. So this is known as the green stage. Finally, because in the previous stage, we wrote the minimum amount of code. In order to get the test to pass, we typically need to refactor it to improve its design. This is known as the refactor stage. We then repeat this process.
+
+**Note** that rather than try and fix all the potential errors at once, we do this incrementally, just writing enough code to get the test to pass or fix the error that's occurring.
+
+**tests/ToDoManagerTest.php**
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class ToDoManagerTest extends TestCase
+{
+  /**
+   * Create an object that manages a list of tasks
+   * The list is initially empty
+  */
+  public function testTaskListIsInitiallyEmpty(): void
+  {
+    $manager = new App\TodoManager;
+    $tasks = $manager->getTasks();
+    
+    $this->assertCount(0, $tasks);
+  }
+}
+</code>
+
+Starting the **[[home:php:test:unit:|PHPUnit]] Test-runner**
+<code bash>
+#tools/phpunit-11.5.46.phar
+vendor/bin/phpunit
+</code>
+Returns an error, as expected that the **class was not found**.
+<code bash>
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+E                                                                   1 / 1 (100%)
+
+Time: 00:00.420, Memory: 8.00 MB
+
+There was 1 error:
+
+1) ToDoManagerTest::testTaskListIsInitiallyEmpty
+Error: Class "App\TodoManager" not found
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:13
+
+ERRORS!
+Tests: 1, Assertions: 0, Errors: 1.
+</code>
+
+The minimum amount of code we could write to fix this error class not found, is just to create that class.
+
+**src/TodoManager.php**
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   
+}
+</code>
+Starting the [[home:php:test:unit:|PHPUnit]] Testrunner,
+<code bash>
+vendor/bin/phpunit
+</code>
+as expected, leads to another error, that the **getTask Method is undefined**.
+<code bash>
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+E                                                                   1 / 1 (100%)
+
+Time: 00:00.424, Memory: 8.00 MB
+
+There was 1 error:
+
+1) ToDoManagerTest::testTaskListIsInitiallyEmpty
+Error: Call to undefined method App\TodoManager::getTasks()
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:14
+
+ERRORS!
+Tests: 1, Assertions: 0, Errors: 1.
+</code>
+So we fix this by creating the getTask method
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   public function getTasks()
+   {
+   
+   }
+}
+</code>
+Now when we run this,
+<code bash>
+vendor/bin/phpunit
+</code>
+the previous error is fixed, but now we have an error saying that the second argument to the **assert count method is null, when it should be a different type**.
+<code bash>
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+E                                                                   1 / 1 (100%)
+
+Time: 00:00.448, Memory: 8.00 MB
+
+There was 1 error:
+
+1) ToDoManagerTest::testTaskListIsInitiallyEmpty
+TypeError: PHPUnit\Framework\Assert::assertCount(): Argument #2 ($haystack) must be of type Countable|Traversable|array, null given, called in /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php on line 16
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:16
+
+ERRORS!
+Tests: 1, Assertions: 0, Errors: 1.
+</code>
+We are not actually returning anything from this method at the moment, so for nor, let's return an empty array.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   public function getTasks(): array
+   {
+      return [];
+   }
+}
+</code>
+Now when we run this, it passes.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.                                                                   1 / 1 (100%)
+
+Time: 00:00.220, Memory: 8.00 MB
+
+OK (1 test, 1 assertion)
+</code>
+That's all we need to do for this iteration as the test is passing and all is green. We started by writing the test and joust enough code to make the test pass. There isn't really anything to do in the refactor stage here, as so far all we have is this simple class and method.
+
+**Note** that although you might be tempted to start writing the code that stores the list in the object instead of just returning a hard coded value like this empty array. That's not how this process works. Once we've added more tests, we'll refactor this method so it does return the count of the item stored, but we'll do that to make it pass those additional tests. Remember the test's are driving the development. **We write code to make the tests pass. No more.** One more thing to mention about test driven development is we're testing behaviour of code, not how it's implemented. So be careful not to write tests that check a class exists or that certain methods just exist. **The test should assert the outcome of using a class and its methods.**
+
+===== Include Refactoring in TDD =====
+
+Add a test that we can add a task to the list. Inside this method, before we can add a task to the list, we need to create an object of a task class. We won't set any properties on this yet as we're not testing that yet, only that we can add a task to the list. 
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class ToDoManagerTest extends TestCase
+{
+  /**
+   * Create an object that manages a list of tasks
+   * The list is initially empty
+  */
+  public function testTaskListIsInitiallyEmpty(): void
+  {
+    $manager = new App\TodoManager;
+    $tasks = $manager->getTasks();
+    
+    $this->assertCount(0, $tasks);
+  }
+  
+  /**
+   * Add a task to the list
+   */
+   public function testTaskIsAddedToList(): void
+   {
+     $task = new App\Task;
+     $manager = new App\TodoManager;
+     $manager->add($task);
+     $tasks = $manager->getTasks();
+     
+     $this->assertCount(1, $tasks);       // count of the number of tasks is now one
+     $this->assertSame($task, $tasks[0]); // is first task the same as  the task we passed to add method
+   }
+}
+</code>
+Now let's run the test suite and as expected, we get red output because of the error that the **task class wasn't found**.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.E                                                                  2 / 2 (100%)
+
+Time: 00:00.423, Memory: 8.00 MB
+
+There was 1 error:
+
+1) ToDoManagerTest::testTaskIsAddedToList
+Error: Class "App\Task" not found
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:24
+
+ERRORS!
+Tests: 2, Assertions: 1, Errors: 1.
+</code>
+So lets create the class **src/Task.php**
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+
+}
+</code>
+Let's run the tests again and we still get red output, but this time the error is that the **add method is undefined**.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.E                                                                  2 / 2 (100%)
+
+Time: 00:00.437, Memory: 8.00 MB
+
+There was 1 error:
+
+1) ToDoManagerTest::testTaskIsAddedToList
+Error: Call to undefined method App\TodoManager::add()
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:26
+
+ERRORS!
+Tests: 2, Assertions: 1, Errors: 1.
+</code>
+So let's add thet method to the todo manager class with an task as argument.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   public function getTasks(): array
+   {
+      return [];
+   }
+   
+   public function add(Task $task): void
+   {
+   
+   }
+}
+</code> 
+This time an **assertion failure rather than an error**. The expected size of the task list was one, but the actual size is zero. This is happening because the getTask method is returning a hardcoded array. To fix this, we need an array that the add method can add an element to. 
+**TodoManager.php**
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   private array $tasks = [];
+
+   public function getTasks(): array
+   {
+      return $this->tasks;
+   }
+   
+   public function add(Task $task): void
+   {
+      $this->tasks[] = $task;
+   }
+}
+</code>
+Let's run that and now it works, all is green.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+..                                                                  2 / 2 (100%)
+
+Time: 00:00.258, Memory: 8.00 MB
+
+OK (2 tests, 3 assertions)
+</code>
+So the tests are passing and there isn't really anything that we can refactor in the code under test. As for the test class, however, there is some refactoring we can do. First, let's import the to do manager and task classes into the current namespace so we can use the classes on there own. Then we can remove the app namespace from the two test methods where we're using it. As we're starting both test methods by creating a to do manager object, we can put this in the setup method instead.
+
+**ToDoManagerTest.php**
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use App\TodoManager;
+use App\Task;
+
+final class ToDoManagerTest extends TestCase
+{
+  private TodoManager $manager;
+  
+  protected function setUp(): void
+  {
+    $this->manager = new TodoManager();
+  }
+
+  /**
+   * Create an object that manages a list of tasks
+   * The list is initially empty
+  */
+  public function testTaskListIsInitiallyEmpty(): void
+  {
+    $tasks = $this->manager->getTasks();
+    
+    $this->assertCount(0, $tasks);
+  }
+  
+  /**
+   * Add a task to the list
+   */
+   public function testTaskIsAddedToList(): void
+   {
+     $task = new Task;
+     $this->manager->add($task);
+     $tasks = $this->manager->getTasks();
+     
+     $this->assertCount(1, $tasks);       // count of the number of tasks is now one
+     $this->assertSame($task, $tasks[0]); // is first task the same as  the task we passed to add method
+   }
+}
+</code>
+Let's un that and it's still green. 
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+..                                                                  2 / 2 (100%)
+
+Time: 00:00.235, Memory: 8.00 MB
+
+OK (2 tests, 3 assertions
+</code>
+So the refactoring stage can refer to both the code and the test itself.
+
+===== More Test classes =====
+
+As we created a Task Class to pass some tests for and to add functionality to the Task Class we need tests for the Task class. A task should have a title, so let's create a test for that. However this test class is testing the to do manager class. Tests for the task class should go in their own class.
+
+**TaskTest.php**
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use App\Task;
+
+final class TaskTest extends TestCase
+{
+
+  public function testCanCreateATaskWithATitle(): void
+  {  
+    $task = new Task('Buy milk');
+    
+    $this->assertSame('Buy milk',  $task->getTitle());
+  }
+}
+</code>
+Let's run the test suite, which which will run both test classes.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+E..                                                                 3 / 3 (100%)
+
+Time: 00:00.467, Memory: 8.00 MB
+
+There was 1 error:
+
+1) TaskTest::testCanCreateATaskWithATitle
+Error: Call to undefined method App\Task::getTitle()
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/TaskTest.php:13
+
+ERRORS!
+Tests: 3, Assertions: 3, Errors: 1.
+</code>
+As expected we get red because the getTitle method in the Task class is undefined. So let's add that method declaration.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function getTitle(): string
+  {
+  }
+}
+</code>
+Now the error is that **no string was returned**.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+E..                                                                 3 / 3 (100%)
+
+Time: 00:00.363, Memory: 8.00 MB
+
+There was 1 error:
+
+1) TaskTest::testCanCreateATaskWithATitle
+TypeError: App\Task::getTitle(): Return value must be of type string, none returned
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/src/Task.php:9
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/TaskTest.php:13
+
+ERRORS!
+Tests: 3, Assertions: 3, Errors: 1.
+</code>
+So let's add the minimum of code required to get the return of an empty string
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function getTitle(): string
+  {
+    return "";
+  }
+}
+</code>
+Now the error is that the **string doesn't match** what we expected. 
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+F..                                                                 3 / 3 (100%)
+
+Time: 00:02.904, Memory: 8.00 MB
+
+There was 1 failure:
+
+1) TaskTest::testCanCreateATaskWithATitle
+Failed asserting that two strings are identical.
+--- Expected
++++ Actual
+@@ @@
+-'Buy milk'
++''
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/TaskTest.php:13
+
+FAILURES!
+Tests: 3, Assertions: 4, Failures: 1.
+</code>
+In the test, the string we're expecting is the same string we're passing into the constructor when we create the object. So in the task class, let's add the constructor method along with an argument for the title. 
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function __construct(private string $title)
+  {
+  }
+  
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+}
+</code>
+Now when we run this, we get an error that too few arguments passed to the task constructor. This is comming from the to do manager test class.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+..E                                                                 3 / 3 (100%)
+
+Time: 00:00.448, Memory: 8.00 MB
+
+There was 1 error:
+
+1) ToDoManagerTest::testTaskIsAddedToList
+ArgumentCountError: Too few arguments to function App\Task::__construct(), 0 passed in /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php on line 32 and exactly 1 expected
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/src/Task.php:7
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:32
+
+ERRORS!
+Tests: 3, Assertions: 2, Errors: 1.
+</code>
+So let's pass in a title when we create a new task object in the testTaskIsAddedToList in the TodoManagerTest class.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use App\TodoManager;
+use App\Task;
+
+final class ToDoManagerTest extends TestCase
+{
+  private TodoManager $manager;
+  
+  protected function setUp(): void
+  {
+    $this->manager = new TodoManager();
+  }
+
+  /**
+   * Create an object that manages a list of tasks
+   * The list is initially empty
+  */
+  public function testTaskListIsInitiallyEmpty(): void
+  {
+    $tasks = $this->manager->getTasks();
+    
+    $this->assertCount(0, $tasks);
+  }
+  
+  /**
+   * Add a task to the list
+   */
+   public function testTaskIsAddedToList(): void
+   {
+     $task = new Task('Buy Milk');
+     $this->manager->add($task);
+     $tasks = $this->manager->getTasks();
+     
+     $this->assertCount(1, $tasks);       // count of the number of tasks is now one
+     $this->assertSame($task, $tasks[0]); // is first task the same as  the task we passed to add method
+   }
+}
+</code>
+Now we get green, all is passing.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+...                                                                 3 / 3 (100%)
+
+Time: 00:00.249, Memory: 8.00 MB
+
+OK (3 tests, 4 assertions)
+</code>
+So in this case, rather than figure out the exact set of classes and their functionality we needed before started, this emerges naturally out of the test driven development process.
+===== Refactoring again =====
+
+In the task test class, we're testing that we can create a task object specifying a title and this test passes. Because that a task should have a title we also said this shouldn't be empty. So let's create a test method for that called test.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use App\Task;
+
+final class TaskTest extends TestCase
+{
+
+  public function testCanCreateATaskWithATitle(): void
+  {  
+    $task = new Task('Buy milk');
+    
+    $this->assertSame('Buy milk',  $task->getTitle());
+  }
+  
+  public function testCannotCreateATaskWithAnEmptyTitle(): void
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $task = new Task('');
+  }
+}
+</code>
+Let's run the test suit and we get red for a failure of the test we just added. Specifically, **an exception wasn't thrown**.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.F..                                                                4 / 4 (100%)
+
+Time: 00:00.513, Memory: 8.00 MB
+
+There was 1 failure:
+
+1) TaskTest::testCannotCreateATaskWithAnEmptyTitle
+Failed asserting that exception of type "InvalidArgumentException" is thrown.
+
+FAILURES!
+Tests: 4, Assertions: 5, Failures: 1.
+</code>
+So in the task class in the constructor, let's check for the title being empty using the empty function.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function __construct(private string $title)
+  {
+    if (empty($title)) {
+      thwor new \InvalidArgumentException('Title cannot be empty');
+    }
+  }
+  
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+}
+</code>
+Now when we run this, the test passes.
+<code bash>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function __construct(private string $title)
+  {
+    if (empty($title)) {
+      throw new \InvalidArgumentException('Title cannot be empty');
+    }
+  }
+  
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+}
+</code>
+Now when we run this, the test passes.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+....                                                                4 / 4 (100%)
+
+Time: 00:00.277, Memory: 8.00 MB
+
+OK (4 tests, 5 assertions)
+</code>
+Another test class, that occurs could be trying to create a task with just spaces for the title. This is a common tactic to get form validation to pass.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use App\Task;
+
+final class TaskTest extends TestCase
+{
+
+  public function testCanCreateATaskWithATitle(): void
+  {  
+    $task = new Task('Buy milk');
+    
+    $this->assertSame('Buy milk',  $task->getTitle());
+  }
+  
+  public function testCannotCreateATaskWithAnEmptyTitle(): void
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $task = new Task('');
+  }
+  
+  public function testCannotCreateATaskWithJustSpacesAsTitle(): void
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $task = new Task('   ');
+  }
+}
+</code>
+Let's run this and we get a failure in the test we just added, **no Exception was thrown**.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+..F..                                                               5 / 5 (100%)
+
+Time: 00:00.495, Memory: 8.00 MB
+
+There was 1 failure:
+
+1) TaskTest::testCannotCreateATaskWithJustSpacesAsTitle
+Failed asserting that exception of type "InvalidArgumentException" is thrown.
+
+FAILURES!
+Tests: 5, Assertions: 6, Failures: 1.
+</code>
+We're using the empty method to see if the argument is empty. However, this only returns true for an empty string, not for a string that contains spaces. So this worked to avoid truly empty titles. But the second test we added showed  it doesn't work for titles that just contain spaces. So we could use the trim function instead and compare the result of that to an empty string.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function __construct(private string $title)
+  {
+    if (empty(trim($title))) {
+      throw new \InvalidArgumentException('Title cannot be empty');
+    }
+  }
+  
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+}
+</code>
+Now we get green. 
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.....                                                               5 / 5 (100%)
+
+Time: 00:00.304, Memory: 8.00 MB
+
+OK (5 tests, 6 assertions)
+</code>
+So sometimes we have to change the way code works after making it work for one test, so that it works for an additional test as well. 
+===== Add Further Tests to Drive the Development =====
+Next, let's write tests that let us delete a task from the list. In order to do that, first we need to be able to uniquely identify each task in the list.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use App\Task;
+
+final class TaskTest extends TestCase
+{
+
+  public function testCanCreateATaskWithATitle(): void
+  {  
+    $task = new Task('Buy milk');
+    
+    $this->assertSame('Buy milk',  $task->getTitle());
+  }
+  
+  public function testCannotCreateATaskWithAnEmptyTitle(): void
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $task = new Task('');
+  }
+  
+  public function testCannotCreateATaskWithJustSpacesAsTitle(): void
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $task = new Task('   ');
+  }
+  
+  /**
+   * Test that every task is created, has a unique ID
+   * assigned to it.
+   */
+  public function testEachTaskIsAssignedAUniqueId(): void
+  {
+    $task1 = new Task('Clean windows');
+    $task2 = new Task('Make cake');
+    
+    $this->assertNotSame($task1->getID(), $task2->getId());
+  }
+}
+</code>
+For most assertion methods, there exists an inverse method that takes the same arguments but asserts the opposite. So in this case, assert not. Same will assert that two values are not the same. 
+
+Let's run that and we get red because the getId method isn't defined.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+...E..                                                              6 / 6 (100%)
+
+Time: 00:00.473, Memory: 8.00 MB
+
+There was 1 error:
+
+1) TaskTest::testEachTaskIsAssignedAUniqueId
+Error: Call to undefined method App\Task::getID()
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/TaskTest.php:37
+
+ERRORS!
+Tests: 6, Assertions: 6, Errors: 1.
+</code>
+So in the task class, let's add that method.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function __construct(private string $title)
+  {
+    if (empty(trim($title))) {
+      throw new \InvalidArgumentException('Title cannot be empty');
+    }
+  }
+  
+  public function getId(): int
+  {
+  }
+  
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+}
+</code>
+Let's run that and the previous error is gone. But now we get an error saying that **an integer isn't returned**.
+<code php>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+...E..                                                              6 / 6 (100%)
+
+Time: 00:00.505, Memory: 8.00 MB
+
+There was 1 error:
+
+1) TaskTest::testEachTaskIsAssignedAUniqueId
+TypeError: App\Task::getId(): Return value must be of type int, none returned
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/src/Task.php:16
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/TaskTest.php:37
+
+ERRORS!
+Tests: 6, Assertions: 6, Errors: 1.
+</code>
+To fix that, let's just try return zero.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  public function __construct(private string $title)
+  {
+    if (empty(trim($title))) {
+      throw new \InvalidArgumentException('Title cannot be empty');
+    }
+  }
+  
+  public function getId(): int
+  {
+    return 0;
+  }
+  
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+}
+</code>
+When we run this now, we get a failure of the assertion that the **two IDs are not the same**.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+...F..                                                              6 / 6 (100%)
+
+Time: 00:00.770, Memory: 8.00 MB
+
+There was 1 failure:
+
+1) TaskTest::testEachTaskIsAssignedAUniqueId
+Failed asserting that 0 is not identical to 0.
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/TaskTest.php:37
+
+FAILURES!
+Tests: 6, Assertions: 7, Failures: 1.
+</code>
+So we need to return a different value for the getId for each object.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class Task
+{
+  private static int $next = 0;  
+  private int $id;
+    
+  public function __construct(private string $title)
+  {
+    if (empty(trim($title))) {
+      throw new \InvalidArgumentException('Title cannot be empty');
+    }
+    $this->id = self::$next++;
+  }
+  
+  public function getId(): int
+  {
+    return $this->id;
+  }
+  
+  public function getTitle(): string
+  {
+    return $this->title;
+  }
+}
+</code>
+Now when we run this we get green. Now we can uniquely identify each task. 
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+......                                                              6 / 6 (100%)
+
+Time: 00:00.306, Memory: 8.00 MB
+
+OK (6 tests, 7 assertions)
+</code>
+We can identify which task we want to delete in the to do manager test class. Let's add a modern called testTaskTaskIsRemovedFromList in the TodoManagerTest.php file.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use App\Manager;
+use App\Task;
+
+final class TaskTest extends TestCase
+{
+
+  public function testCanCreateATaskWithATitle(): void
+  {  
+    $task = new Task('Buy milk');
+    
+    $this->assertSame('Buy milk',  $task->getTitle());
+  }
+  
+  public function testCannotCreateATaskWithAnEmptyTitle(): void
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $task = new Task('');
+  }
+  
+  public function testCannotCreateATaskWithJustSpacesAsTitle(): void
+  {
+    $this->expectException(\InvalidArgumentException::class);
+    $task = new Task('   ');
+  }
+  
+  /**
+   * Test that every task is created, has a unique ID
+   * assigned to it.
+   */
+  public function testEachTaskIsAssignedAUniqueId(): void
+  {
+    $task1 = new Task('Clean windows');
+    $task2 = new Task('Make cake');
+    
+    $this->assertNotSame($task1->getID(), $task2->getId());
+  }
+  
+  public function testTaskTaskIsRemovedFromList(): void
+  {
+    $task1 = new Task('Clean windows');
+    $task2 = new Task('Make cake');
+    
+    $this->manager->add($task1);
+    $this->manager->add($task2);
+    $id = $task1->getID();
+    $this->manager->delete($id);
+    $tasks = $this->manager->getTasks();
+    
+    $this->assertCount(1, $tasks);
+    $this->assertSame($task2, $tasks[0]);
+  }
+}
+</code>
+Let's run this and we get red, with the error being that the delete method doesn't exist.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+......E                                                             7 / 7 (100%)
+
+Time: 00:00.501, Memory: 8.00 MB
+
+There was 1 error:
+
+1) ToDoManagerTest::testTaskTaskIsRemovedFromList
+Error: Call to undefined method App\TodoManager::delete()
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:48
+
+ERRORS!
+Tests: 7, Assertions: 7, Errors: 1.
+<code>
+So in the TodoManager class, let's add that method with an integer for the id.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   private array $tasks = [];
+
+   public function getTasks(): array
+   {
+      return $this->tasks;
+   }
+   
+   public function add(Task $task): void
+   {
+      $this->tasks[] = $task;
+   }
+   
+   public function delete(int $id): void
+   {
+     
+   }
+}
+</code>
+Now if we run the test, that error has gone, but the assertion fails because the size of the list doesn't match what we expect. So inside this method, we want to remove the task that has the specified ID.
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   private array $tasks = [];
+
+   public function getTasks(): array
+   {
+      return $this->tasks;
+   }
+   
+   public function add(Task $task): void
+   {
+      $this->tasks[] = $task;
+   }
+   
+   public function delete(int $id): void
+   {
+     $this->tasks = array_filter(
+            $this->tasks, function (Task $task) use ($id) { 
+               return $task->getId() !== $id;
+            });   
+   }
+}
+</code>
+Let's run the tests and the previous failure is now fixed, but now the failure is with the second assertion. 
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+......F                                                             7 / 7 (100%)
+
+Time: 00:00.543, Memory: 8.00 MB
+
+There was 1 failure:
+
+1) ToDoManagerTest::testTaskTaskIsRemovedFromList
+Failed asserting that null is identical to an object of class "App\Task".
+
+/mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/tests/ToDoManagerTest.php:52
+
+FAILURES!
+Tests: 7, Assertions: 9, Failures: 1, Warnings: 1.
+</code>
+In the test method, we're assuming that the task that remains on the list has an index of zero. However, the array filter preserves existing array keys, so the index might not be zero. To fix this, we can reindex the array by using the array values function
+<code php>
+<?php
+declare(strict_types=1);
+namespace App;
+
+class TodoManager
+{
+   private array $tasks = [];
+
+   public function getTasks(): array
+   {
+      return $this->tasks;
+   }
+   
+   public function add(Task $task): void
+   {
+      $this->tasks[] = $task;
+   }
+   
+   public function delete(int $id): void
+   {
+     $this->tasks = array_filter(
+            $this->tasks, function (Task $task) use ($id) { 
+               return $task->getId() !== $id;
+            }); 
+     // Re-index array
+     $this->tasks = array_values($this->tasks);
+   }
+}
+</code>
+Let's run that and now all is green.
+<code bash>
+vendor/bin/phpunit
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.......                                                             7 / 7 (100%)
+
+Time: 00:00.311, Memory: 8.00 MB
+
+OK (7 tests, 9 assertions)
+</code>
+So we've generated the minimal functionality to make tests pass driving the development with the tests and not the other way around.

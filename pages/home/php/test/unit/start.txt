@@ -1,4 +1,4 @@
-**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:test:|PHP Unit testing]]** -> **PHP Unit**
+**[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:test:|PHP Unit testing]]** -> **PHPUnit**
 
 ====== PHPUnit ======
 
@@ -30,6 +30,7 @@ final class ExampleTest extends TestCase
 </code>
 To run those tests, you need to install some software, like phpunit-12.1.6.phar. If PHPUnit is installed you can check the version by running the **phpunit** command in the command line application of your operating system (PowerShell or Terminal). You don't need a web server in order to run the tests.
 
+Here you'll find a list of all [[https://docs.phpunit.de/en/12.1/assertions.html|PHPUnit Assertions methods]]
 ===== Installation =====
 There a multiple ways to install PHPUnit. The first is to download it as a PHP Archive Archive File. This is the recommended way to install and use PHPUnit by the developers from PHPUnit.
 
@@ -485,6 +486,8 @@ $ vendor/bin/phpunit --coverage-html build/coverage
 ----
 Check the [[https://docs.phpunit.de/en/12.1/organizing-tests.html#composing-a-test-suite-using-xml-configuration|Composing a Test Suite Using XML Configuration]] section of the [[https://docs.phpunit.de/en/12.1/index.html|PHPUnit Manual]]
 ===== Organising Tests and managing Test Methods =====
+
+Unit tests need to run quickly, as a bigger project is likely to have hundreds or thousands of tests.
 ==== Running Multiple Tests and Organising Tests in Test Suits ====
 How to organise tests and interpret the different results that we get wen we run then, is one of the main questions in testing. So far, we've been running specific test classes by specifying them on the command line, passing the path to the file to the test runner. We can also pass a wildcard in the path.
 <code bash>
@@ -745,6 +748,193 @@ There are also methods to check the [[https://docs.phpunit.de/en/12.1/writing-te
 
 Note that the test runner includes the expect exception methods in the number of assertions that were run. They are not counted separately.
 ===== Stubbing and Mocking =====
+
+It is very common to need to test classes that have dependencies on other classes. For example, a user repository class might use a database object that communicates with a database, or a Notifier class might use a mailer object that sends an email by communicating with a mail server.
+
+When we test a class, we want to test it in isolation, any dependent class will have their own tests. So ideally, we don't want to use these dependent classes at all, as their methods could take some time to execute. They could even be unavailable, for example, if they're connection to an external server. 
+
+Using them could also have unintended consequences, like sending an email or debiting a bank account. Instead, we just want to test the class in question using objects called test doubles.
+
+If we want to test this Notification Service without calling a Mailer Object at all. So the class we're testing depends on an external object, which we're replacing with a stub object. We have full control over this test double. So we can test the class in isolation without worrying about these external dependencies.
+
+Tests for a Notification Service, calling a Mailer Object to do the job. 
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class NotificationServiceTest extends TestCase
+{
+   public function testNotificationIsSent(): void
+   {
+     $mailer = $this->createStub(Mailer::class); // new Mailer;
+     $mailer->method('sendEmail')->willReturn(true);
+     $service = new NotificationService($mailer);    
+     
+     $this->assertTrue($service->sendNotification('robin.goerlach@example.com','Hello'));
+   }
+   
+   public function testSendThrowsException(): void
+   {
+      $mailer = $this->createStub(Mailer::class); // new Mailer;
+      $mailer->method('sendEmail')->willThrowException(new RuntimeException('SMTP server down')); // low level tech exception
+      $service = new NotificationService($mailer);
+      
+      $this->expectException(NotificationException::class); // business logic exception not (RuntimeException::class); low level tech exception  
+      $this->expectExceptionMessage('Could not send notification');    // ('SMTP server down'); 
+      $service->sendNotification('robin.goerlach@example.com','Hello');
+   }
+}
+</code>
+**Note** there are two test methods, but three assertions as the test method we just wrote contains two assertions.
+
+This is not the same Mailer object and it doesn't have to behave exactly like the like the object we're replacing. It just have to provide the same public interface as the real one, so that the class using it thinks that it is the real one. 
+
+**Replacing an object with a test double is known as stubbing**, and the object is referred to as a test stub. Therefore we create a stub from it's class constants, this returns the same class type as a real object. Any class that use it doesn't know the difference. As for its methods, these are all replaced with methods that return values that satisfy the method's return type declaration. So this stub will be created with a method called sendemail that returns a Boolean value. Methods like this are referred to as doubled methods. We can [[https://docs.phpunit.de/en/12.1/test-doubles.html#configuring-test-stubs|configure Test Stubs]] behaviour of double methods, by calling the method method on the stub object, with willReturn method with the value we want to return (like true in the example above).
+
+This successfully tests that when the send notification method is called, if the mailer class throws a runtime exception, then this bubbles up to the send notification call. In practice, however, you wouldn't typically let errors like this be passed up to a higher layer. An SMTP error wouldn't make any sense to an end user for example.
+Btw.: The stub doesn't care if the method is called or not, just if it is, return true. Doing this allows us to test the notification service method without actually sending any emails. This test isn't checking if the send email method is called or not, as all we're interested in this test is that the sendNotification method returns true. If the mailer was successful, however, we might want to check how the sendMail method is called. For example that it is definitely called, make sure it's only called once, and what arguments it's called with.
+
+==== Use Mocking to Assert Test Double Behaviour ====
+If the mailer was successful, however, we might want to check how the sendMail method is called. For example that it is definitely called, make sure it's only called once, and what arguments it's called with. The first thing we need to do in here is to create a test double for the mailer object. If we want to configure expected behaviour instead of a stub object, we use a mock object to create a mock object we call create mock method, passing in the class name. 
+
+**Use a mock object as a stub**
+<code php>
+// ...
+
+  public function testMailerIsCalledCorrectly(): void
+  {
+    $mailer = $this->createMock(Mailer::class);
+    $mailer->method('sendEmail')->willReturn(true);
+    
+    $service = new NotificationService($mailer);
+    $this->assertTrue($service->sendNotification('robin.goerlach@example.com', 'Hello'));
+  }
+</code>
+
+Mock objects can b configured by adding expectations, we do this by calling the expects method passing in a constraint, as an example a once method. Node that this needs to go before the call to method.
+<code php>
+// ...
+
+  public function testMailerIsCalledCorrectly(): void
+  {
+    $mailer = $this->createMock(Mailer::class);
+    $mailer->expects($this->once())
+           ->method('sendEmail')
+           ->with('robin.goerlach@example.com', New Notification', 'Hello')
+           ->willReturn(true);
+    
+    $service = new NotificationService($mailer);
+    $this->assertTrue($service->sendNotification('robin.goerlach@example.com', 'Hello'));
+  }
+</code>
+**Note** the **expects method call is counted as an assertion** in the results. So this test confirms that the send email method was called once.
+
+There are several constraints we can use for [[https://docs.phpunit.de/en/12.1/test-doubles.html#configuring-mock-objects|configuring Mock Objects]] and to **check how many times a method is called** (once, never, atLeastOnce or atMost).
+
+We can also add an exception that the method is called with specific arguments. We do this using the **with method** passing in the argument values, after the method call.
+
+**Note** the **expects method call is counted as an assertion** in the total. So this particular test method counts five assertions, one for the number of times it's expected to be called, one for each of the expected arguments.
+
+**So stubs are use when we don't care how the method is called. or even if it's called at all. If we want to check how a method is called then we use mocks.**
+==== Customize the Test Double with getMockBuilder ====
+
+The following code is a **Partial mock**, only charge() is a mock, so no actual payment process may take place, but logTransaction is real code. **Partial mockups are almost always a sign of poor design** because of SRP (Single Responsibility Principle) is violated. You're mocking charge() just to test something else, because if you mock everything, you're not testing anything. To test the logTransaction() method we need a charge() mock.
+
+The first statement is building a mock for charge(), transferring 100€ being called exactly once. The second statement is a unit test of the mocked charge() method. the third statement specifies the exact standard output (STDOUT) `expectOutputString()` that a PHPUnit test expects. If the code being tested outputs text during execution (e.g., via `echo` or `print`), PHPUnit compares the actual output after the test with the expected string. If the output deviates even slightly (e.g., due to extra spaces or line breaks), the test fails. The last statement is the real test
+
+
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class PaymentProcessorTest extends TestCase
+{
+   public function testChargeIsMockedButLogTransactionIsReal(): void
+   {
+     $processor = $this->getMockBuilder(PaymentProcessor::class)
+                       ->onlyMethods([charge])
+                       ->disableOriginalConstructor()  // setConstructorArgs(['fake-api-key']) // remove comment
+                       ->getMock();
+     
+     $processor->expects($this->once())
+               ->method('charge')
+               -->with(100)
+               -->willReturn('Mocked charge 100');
+      //$this->assertSame('Mocked charge 100', $processor->charge(100));
+    
+     $this->expectOutputString('Transaction for 100 logged');
+     $processor->logTransaction(100);
+   }
+}
+</code>
+In this PHPUnit test, the `charge()` method is mocked. At runtime, PHPUnit creates a special subclass of the tested class in which only this method is overridden, while all other methods remain unchanged. The object used in the test is therefore a mock version of the original object, not a true instance of the class. If a real method like `logTransaction()` internally calls `$this->charge()`, PHP decides at runtime, based on the actual object type, which implementation is executed and automatically uses the mocked version of the method. In this way, the original `charge()` logic is not executed, even though the rest of the class's code remains real.
+
+===== Code Coverage =====
+When writing tests, you try to think of test methods that test as much of the code as possible. However, especially with a complex code base, you could easily miss out on testing part of the code. To help avoid this, Phpunit can generate a code coverage report. This measures how much of your code is executed when the automated tests are run. This helps you to identify untested parts of your code base.
+
+To enable code coverage report generation, first you need to install a code coverage driver. The simplest way to check if you have this installed or not is to run the test suite and pass in a flag that generates a code coverage report.
+<code bash>
+vendor/bin/phpunit --coverage-text
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.......                                                             7 / 7 (100%)
+
+Time: 00:00.311, Memory: 8.00 MB
+
+There was 1 PHPUnit test runner warning:
+
+1) No code coverage driver available
+
+OK, but there were issues!
+Tests: 7, Assertions: 9, PHPUnit Warnings: 1.
+</code>
+If you don't have a driver installed, you'll get this response **No code coverage driver available.** PHPUnit supports two code coverage drivers [[https://github.com/krakjoe/pcov|PCOV]] and [[https://xdebug.org/docs/|Xdebug]]. While you can use either, **using [[https://xdebug.org/docs/|Xdebug]] is recommended** as it's under active development and provides better data than PCOV. 
+
+Installation of [[https://xdebug.org/docs/|Xdebug]] depends on your operating system and development environment. The official documentation contains detailed instructions. Choose those that are the most relevant for your setup. If you do need help, please don't hesitate to ask. Once installed, you can check if it's available on the command line by running PHP with the version flag. Choose those that are the most relevant for your setup or run **pecl install xdebug** to be platform independent.
+<code bash>
+apt update
+apt install php-xdebug
+php -v | grep -i xdebug
+php -m | grep xdebug
+</code>
+
+Add the following code to **composer.json**, this will not install [[https://xdebug.org/docs/|Xdebug]] but will warn you if it's missing
+<code json>
+"require-dev": {
+  "ext-xdebug": "*"
+}
+</code>
+Once installed, you can check if it's available on the command line by running PHP with the version flag. This will include the version of [[https://xdebug.org/docs/|Xdebug]] that's installed.
+==== configure the Development Environment ====
+Now Xdebug is installed. Let's try running the tests again with the coverage text flag. 
+<code bash>
+vendor/bin/phpunit --coverage-text
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.......                                                             7 / 7 (100%)
+
+Time: 00:00.304, Memory: 8.00 MB
+
+There was 1 PHPUnit test runner warning:
+
+1) XDEBUG_MODE=coverage (environment variable) or xdebug.mode=coverage (PHP configuration setting) has to be set
+
+OK, but there were issues!
+Tests: 7, Assertions: 9, PHPUnit Warnings: 1.
+</code>
+Now there's a different error, which is a **warning that tells us we either need to set the __XDEBUG_MODE=coverage__ environment variable or this PHP configuration setting**. You can set this PHP configuration setting in the php.ini configuration file. Permanently setting environment variables will differ depending on your operating system and development environment. Permanently setting environment variables will differ depending on your operating system and development environment.
+
+However, it's possible to set an environment variable for just one command on Mac and Linux. You can do this by prefixing the command with the name of the variable, an equal sign, and its value. Doing it this way means you don't have to change your system configuration at all. 
+
+
 ===== PHPUnit Assertions, Expectations, and Other Test Methods =====
 
 PHPUnit provides several groups of methods to help you write clean, structured, and reliable tests.

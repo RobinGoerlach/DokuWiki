@@ -1,0 +1,259 @@
+**[[home:|Start]]** -> **[[home:meet:|Tagungen]]** -> **Januar**
+
+====== Januar ======
+
+===== IT-Veranstaltungen Januar 2026 (DACH & Online) =====
+
+Diese Seite fasst die wichtigsten Ergebnisse zur Recherche von IT-Tagungen, Konferenzen und ergänzenden Nicht-IT-Messen im Januar 2026 zusammen. Der Fokus liegt auf Deutschland und der DACH-Region sowie auf der Frage, welche Inhalte online oder später kostenlos (z. B. auf YouTube) verfügbar sind.
+
+Die Übersicht dient als Entscheidungshilfe für die SASD-GmbH, insbesondere unter den Gesichtspunkten:
+
+Wissenstransfer
+
+strategische Marktbeobachtung
+
+Aufbau neuer Geschäftsfelder
+
+effiziente Nutzung von Zeit und Budget
+
+===== 1. IT-Veranstaltungen (DACH) im Januar 2026 =====
+
+==== Case Conference (Berlin) ==== 
+
+Art: Präsenz-Konferenz (Softwareentwicklung)
+
+Themenschwerpunkte:
+
+Software Engineering
+
+Architektur & Best Practices
+
+moderne Technologien
+
+Einschätzung für SASD:
+
+hoher fachlicher Nutzen
+
+entwickler- und praxisnah
+
+gute Networking-Möglichkeiten
+
+Online-Verfügbarkeit:
+
+❌ keine durchgängig freien YouTube-Aufzeichnungen
+
+⚠️ teilweise Slides oder Mitschnitte nur für Teilnehmende
+
+Weblinks:
+
+https://case-conf.com/
+
+https://www.youtube.com/results?search_query=case+conference+berlin
+
+==== GenAI Conference / Online-KI-Konferenzen ==== 
+
+Art: Online / Hybrid
+
+Themenschwerpunkte:
+
+Generative KI
+
+Large Language Models (LLMs)
+
+KI-gestützte Softwareentwicklung
+
+Einschätzung für SASD:
+
+sehr relevant als Querschnittstechnologie
+
+niedrige Einstiegshürde (remote)
+
+gut zur Einordnung von Trends jenseits des Hypes
+
+Online-Verfügbarkeit:
+
+✅ Livestreams häufig vorhanden
+
+✅ hohe Wahrscheinlichkeit für kostenlose Aufzeichnungen
+
+✅ oft auf YouTube oder Event-Plattformen abrufbar
+
+Weblinks:
+
+https://www.it-visions.de/
+
+https://www.youtube.com/results?search_query=genai+conference+germany
+
+==== Dagstuhl-Seminare (Deutschland) ==== 
+Art: Wissenschaftliches Präsenzseminar
+
+Themenschwerpunkte:
+
+Informatik-Forschung
+
+KI, Software Engineering, IT-Ethik
+
+Einschätzung für SASD:
+
+sehr hoher wissenschaftlicher Anspruch
+
+wertvoll für Reputation & Forschung
+
+geringer Vertriebs- oder Business-Fokus
+
+Online-Verfügbarkeit:
+
+❌ keine Livestreams
+
+❌ keine öffentlichen Videoaufzeichnungen
+
+Weblinks:
+
+https://www.dagstuhl.de/
+
+https://www.dagstuhl.de/en/seminars
+
+==== Channel Excellence Awards (München) ==== 
+Art: Award- & Networking-Event
+
+Themenschwerpunkte:
+
+IT-Dienstleister
+
+Systemhäuser
+
+Partnernetzwerke
+
+Einschätzung für SASD:
+
+gut für Kooperationen
+
+geringer technischer Tiefgang
+
+Online-Verfügbarkeit:
+
+❌ keine klassischen Vorträge
+
+❌ keine vollständigen Videoaufzeichnungen
+
+Weblinks:
+
+https://event.foundryco.com/channel-excellence-awards/
+
+===== 2. Nicht-IT-Messen mit strategischem Mehrwert =====
+
+==== Internationale Grüne Woche (Berlin) ==== 
+Art: Leitmesse für Ernährung, Landwirtschaft, Nachhaltigkeit
+
+Warum relevant für SASD:
+
+hoher Digitalisierungsbedarf außerhalb der IT-Bubble
+
+typische Themen:
+
+Datenanalyse
+
+IoT / Sensorik
+
+Lieferketten-Software
+
+Nachhaltigkeits- & CO₂-Monitoring
+
+gute Chancen für neue Kundensegmente
+
+Online-Verfügbarkeit:
+
+⚠️ einzelne Vorträge / Panels gelegentlich online
+
+❌ kein vollständiges Konferenz-Archiv
+
+Weblinks:
+
+https://www.gruenewoche.de/
+
+https://www.youtube.com/results?search_query=internationale+gr%C3%BCne+woche+berlin+vortrag
+
+==== BAU (München, meist Januar) ==== 
+Art: Weltleitmesse für Bau & Gebäude
+
+IT-Bezug:
+
+Smart Building
+
+Energiemanagement
+
+Simulation & Monitoring
+
+Digitale Zwillinge
+
+Online-Verfügbarkeit:
+
+⚠️ einzelne Keynotes / Fachbeiträge
+
+❌ keine vollständigen freien Mitschnitte
+
+Weblinks:
+
+https://bau-muenchen.com/
+
+===== 3. Kostenlose IT-Vorträge & YouTube-Kanäle =====
+
+Diese Quellen sind besonders geeignet, um ohne Reisekosten aktuelles IT-Wissen aufzubauen.
+
+==== Konferenzen & Formate ====
+
+Heise Events / Heise Developer
+
+https://www.youtube.com/@heiseonline
+
+IT-Visions / Entwicklerkonferenzen
+
+https://www.youtube.com/results?search_query=it+visions+conference
+
+Chaos Computer Club (CCC) – Vorträge vom Chaos Communication Congress
+
+https://media.ccc.de/
+
+https://www.youtube.com/@mediaccc
+
+==== Spezialisierte Themen ====
+
+KI & Data Science
+
+https://www.youtube.com/results?search_query=ai+conference+germany
+
+Linux & Open Source
+
+https://www.youtube.com/results?search_query=linux+conference+dach
+
+Security / Privacy
+
+https://www.youtube.com/results?search_query=it+security+conference+germany
+
+===== 4. Zusammenfassung: Online-Verfügbarkeit =====
+
+^ Veranstaltung ^ Kostenlos online / YouTube ^ | GenAI / Online-Konferenzen | ✅ sehr wahrscheinlich | | Case Conference | ⚠️ eingeschränkt | | Dagstuhl-Seminare | ❌ nein | | Channel Excellence Awards | ❌ nein | | Grüne Woche | ⚠️ vereinzelt | | BAU München | ⚠️ vereinzelt |
+
+===== 5. Strategische Empfehlung für die SASD-GmbH =====
+
+Empfohlene Kombination:
+
+1–2 Online- oder Hybrid-IT-Konferenzen für Know-how-Aufbau
+
+1 branchenfremde Leitmesse zur Erschließung neuer Märkte
+
+Leitgedanke:
+
+Nicht nur dorthin gehen, wo IT stattfindet – sondern dorthin, wo IT gebraucht wird.
+
+===== 6. Mögliche Erweiterungen =====
+
+12-Monats-DACH-Event-Roadmap
+
+Entscheidungshilfe: Besuch vs. eigener Messestand
+
+Zuordnung der Events zu SASD-Geschäftsfeldern (Training, Beratung, Forschung)
+
+Eigene Sammlung empfohlener YouTube-Kanäle
+
+//Stand: Januar 2026 – interne Dokumentation SASD-GmbH//

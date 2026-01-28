@@ -2,8 +2,9 @@
 
 ====== Debugging PHP ======
 
-  * [[home:php:basics:debug:x:|xDebug]]
+  * [[home:php:basics:debug:x:|xDebug]] 
   * phpdbg
+  * Zend Debugger (Zend Studio)
 
 [[https://tideways.com/the-6-best-php-profilers|The 6 Best PHP Profilers]], [[https://php.libhunt.com/xdebug-alternatives|xDebug alternatives]] or [[https://www.browserstack.com/guide/php-debug-tool|Best PHP Debugging Tools]]
 ====== Debugging HTTP ======

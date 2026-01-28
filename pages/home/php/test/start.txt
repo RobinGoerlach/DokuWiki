@@ -27,18 +27,20 @@ A unit is the smallest piece of code worth testing — typically a single functi
 
 ^ Area ^ Tools (examples) ^ Notes ^
 | Test Runner / Framework | [[home:php:test:unit:|PHPUnit]], [[home:php:test:pest:|Pest]], Codeception | PHPUnit is the de-facto standard; Pest offers expressive syntax; Codeception adds functional & acceptance testing. |
-| Test Doubles | Built-in (PHPUnit), Mockery | Create mocks/stubs/spies to isolate collaborators. |
-| Coverage Engines | Xdebug, PCOV | Generate text or HTML coverage reports. |
+| Test Doubles | Built-in ([[home:php:test:unit:|PHPUnit]]), Mockery | Create mocks/stubs/spies to isolate collaborators. |
+| Coverage Engines | [[https://xdebug.org/docs/|Xdebug]], [[https://github.com/krakjoe/pcov|PCOV]] | Generate text or HTML coverage reports. |
 | Quality Gates | PHPStan, Psalm, PHPCS | Static analysis and coding style enforcement. |
 | Build & CI | Composer, Phive, GitHub Actions, Make | Automate installation, linting, testing, and coverage. |
 
 ===== Project Layout (Suggested) =====
 
 ^ Path ^ Purpose ^
+| public/index.php | Router/User Gateway |
 | src/ | Application code |
 | tests/ | Unit and integration tests |
 | bootstrap.php | Optional test bootstrap (autoload, env setup) |
 | composer.json | Dependency definitions (dev + runtime) |
+| phpunit.xml.dist | PHPUnit test definitions (dev + runtime) |
 
 > Keep framework-specific configs (e.g. phpunit.xml.dist, pest.php) on their respective tool pages.
 

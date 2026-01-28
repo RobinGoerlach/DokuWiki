@@ -2,8 +2,9 @@
 
 ====== PHPUnit ======
 
-  * [[https://www.udemy.com/course/php-unit-testing|PHP Unit Testing with PHPUnit]]
-  * [[https://www.linkedin.com/learning/php-test-driven-development-with-phpunit/welcome|PHP: Test-Driven Development with PHPUnit]]
+  * [[https://www.udemy.com/course/php-unit-testing|PHP Unit Testing with PHPUnit]] by Udemy
+  * [[https://www.linkedin.com/learning/php-test-driven-development-with-phpunit/welcome|PHP: Test-Driven Development with PHPUnit]] by LinkedIn
+  * [[https://github.com/sebastianbergmann/raytracer|sebastianbergmann/raytracer]] This repository contains some well written examples of PHP unit tests by the author of PHPUnit
 
 [[https://phpunit.de/|PHPUnit (Project Homepage)]] is the **de-facto standard testing framework for PHP**.
 It provides assertions, mocks, coverage integration, and CLI tooling for reliable, automated unit and integration tests. The Code of PHPUnit is open-Source and available at  [[https://github.com/sebastianbergmann/phpunit/releases|GitHub]], therefore check the [[https://phpunit.de/announcements/index.html|Announcements for PHPUnit]] to get hold of new releases.
@@ -283,7 +284,7 @@ Output, if we run this, should be five teste and five assertions. Note that the 
 To see what happens when a test fails, change the expected value of a test. If you run this you'll see you get an F instead of a dot for that test and instead of a OK a FAILURES with Tests: 5, Assertions: 5 Failures: 1. Additionally you'll get a message which test failed, why and where it failed. This is the reason why having one assertion per test is the best way to write tests. We can see straight away which test method is failing.
 
 As each test method is responsible for testing a special aspect of the code and as we've been verbose when naming each method, it's much clearer what each test is doing. If you want to test a class, it's common practise to match the name of the test class to the class you're using. 
-===== Configuring the Command-Line Test-Runner =====
+===== Configuring the Test-Runner in the Command-Line =====
 
 As we learned **PHPUnit** is run on the command line. The application that runs is known as the **command line test runner**. So far we've run the test class we want by passing the path to this application.
 <code bash>
@@ -747,7 +748,21 @@ In an empty Queue you can't pop an item, because there is none, then an exceptio
 There are also methods to check the [[https://docs.phpunit.de/en/12.1/writing-tests-for-phpunit.html#expecting-exceptions|Expecting Exceptions code]] and the message.
 
 Note that the test runner includes the expect exception methods in the number of assertions that were run. They are not counted separately.
-===== Stubbing and Mocking =====
+==== Stubbing and Mocking ====
+
+Use PHPUnit’s built-in mocking API to isolate dependencies:
+
+<code php> 
+$repo = $this->createMock(UserRepository::class); 
+$repo->method('find')->willReturn($user); 
+</code>
+
+Or set expectations:
+<code php> 
+$service = $this->createMock(MailService::class); 
+$service->expects($this->once())->method('send')->with('test@example.com'); 
+</code>
+For more complex scenarios, external libraries like **[[https://docs.mockery.io/en/latest/|Mockery]]** may be used.
 
 It is very common to need to test classes that have dependencies on other classes. For example, a user repository class might use a database object that communicates with a database, or a Notifier class might use a mailer object that sends an email by communicating with a mail server.
 
@@ -795,7 +810,7 @@ This is not the same Mailer object and it doesn't have to behave exactly like th
 This successfully tests that when the send notification method is called, if the mailer class throws a runtime exception, then this bubbles up to the send notification call. In practice, however, you wouldn't typically let errors like this be passed up to a higher layer. An SMTP error wouldn't make any sense to an end user for example.
 Btw.: The stub doesn't care if the method is called or not, just if it is, return true. Doing this allows us to test the notification service method without actually sending any emails. This test isn't checking if the send email method is called or not, as all we're interested in this test is that the sendNotification method returns true. If the mailer was successful, however, we might want to check how the sendMail method is called. For example that it is definitely called, make sure it's only called once, and what arguments it's called with.
 
-==== Use Mocking to Assert Test Double Behaviour ====
+=== Use Mocking to Assert Test Double Behaviour ===
 If the mailer was successful, however, we might want to check how the sendMail method is called. For example that it is definitely called, make sure it's only called once, and what arguments it's called with. The first thing we need to do in here is to create a test double for the mailer object. If we want to configure expected behaviour instead of a stub object, we use a mock object to create a mock object we call create mock method, passing in the class name. 
 
 **Use a mock object as a stub**
@@ -837,7 +852,7 @@ We can also add an exception that the method is called with specific arguments. 
 **Note** the **expects method call is counted as an assertion** in the total. So this particular test method counts five assertions, one for the number of times it's expected to be called, one for each of the expected arguments.
 
 **So stubs are use when we don't care how the method is called. or even if it's called at all. If we want to check how a method is called then we use mocks.**
-==== Customize the Test Double with getMockBuilder ====
+=== Customize the Test Double with getMockBuilder ===
 
 The following code is a **Partial mock**, only charge() is a mock, so no actual payment process may take place, but logTransaction is real code. **Partial mockups are almost always a sign of poor design** because of SRP (Single Responsibility Principle) is violated. You're mocking charge() just to test something else, because if you mock everything, you're not testing anything. To test the logTransaction() method we need a charge() mock.
 
@@ -871,7 +886,1014 @@ final class PaymentProcessorTest extends TestCase
 </code>
 In this PHPUnit test, the `charge()` method is mocked. At runtime, PHPUnit creates a special subclass of the tested class in which only this method is overridden, while all other methods remain unchanged. The object used in the test is therefore a mock version of the original object, not a true instance of the class. If a real method like `logTransaction()` internally calls `$this->charge()`, PHP decides at runtime, based on the actual object type, which implementation is executed and automatically uses the mocked version of the method. In this way, the original `charge()` logic is not executed, even though the rest of the class's code remains real.
 
+==== Testing Non-Public Members and Abstract Classes ====
+
+So far, when testing classes, we've been testing the public interface of the class. So the public properties methods and so on. Let's look at how to test non-public members of a class along with how to test abstract classes.
+
+For example, a simple user class has a constructor method which has username and password arguments. The username property is set to the value of the username argument, and the password hash property is set to the result of passing the password argument to the hash password method below. The username property is set to the value of the username argument, and the password hash property is set to the result of passing the password argument to the hash password method below. That method has protected visibility and uses the hash function to generate a hash of the password argument. There's also a private method called verify password that compares the password hash property to the hash of the password argument. This method is used in the public authenticate method to verify the supplied password. In here, you might carry out some additional checks on the user before verifying the password, but we're keeping this example simple.
+<code php>
+<?php
+
+declare(strict_types=1);
+
+class User
+{
+    private string $username;
+    private string $password_hash;
+
+    public function __construct(string $username, string $password)
+    {
+        $this->username = $username;
+        $this->password_hash = $this->hashPassword($password);
+    }
+
+    public function authenticate(string $password): bool
+    {
+        // Additional user checks, e.g. is active
+        // ...
+
+        return $this->verifyPassword($password);
+    }
+
+    protected function hashPassword(string $password): string
+    {
+        return hash('sha256', $password);
+    }
+
+    private function verifyPassword(string $password): bool
+    {
+        return $this->password_hash === $this->hashPassword($password);
+    }
+}
+</code>
+That method has protected visibility and uses the hash function to generate a hash of the password argument. There's also a private method called verify password that compares the password hash property to the hash of the password argument. This method is used in the public authenticate method to verify the supplied password. In here, you might carry out some additional checks on the user before verifying the password, but we're keeping this example simple. 
+Note that **in practice, when dealing with passwords in PHP, you would typically use the password hash and password verify functions instead of hashing values directly.** [[https://www.php.net/manual/en/function.password-hash.php|Create a password hash]]
+
+So this class has methods with public, protected and private visibility.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class UserTest extends TestCase
+{
+  public function testCorrectPasswordAuthenticatesSuccessfully(): void
+  {
+    $user = new User('robin', 'password');
+    
+    $this->assertTrue($user_>authenticate('password'));
+  }
+  
+  public function testInCorrectPasswordAuthenticatesFails(): void
+  {
+    $user = new User('robin', 'password');
+    
+    $this->assertFalse($user_>authenticate('secret'));  // assertNotTrue
+  }
+
+  public function testPasswordHashIsMinimalLength(): void
+  {
+    $user = new User('robin', 'secret');
+    $hash = $user->hashPassword('secret');  
+    
+    $this->assertGratherThanOrEqual(60, strlen($hash));
+  }
+}
+</code>
+The **hash password method is protected**, so we can't access it like this. And when we run the tests, we do indeed get an error that we're calling the protected hash password method from the user test class. **So how do we test protected methods?**
+
+Some people argue that you shouldn't, that all you should be testing are the public properties and methods of a class. In other words, its public API or public interface. Any functions that are protected and private are internal to the class, and are only to be used by other methods in the class. However, when you extend a class, any protected methods are inherited by the child class. So unless the class is declared as final, there's an argument that protected methods should be tested as they do technically form part of the public interface of a class.
+
+=== Using a Interface ===
+One way to test protected methods is to create a child class of the class being tested, and change the visibility of that method in the child class.
+
+**src/UserChild.php**
+<code php>
+<?php
+declare(strict_types=1);
+
+class UserChild extends User
+{
+   public function hashPassword(string $password): string
+   {
+      return parent::hashPassword($password);
+   } 
+}
+</code>
+This class will extend the user class in the user class. The protected hash password method will be inherited by the user child class. We can change the visibility of this method by declaring this method in the child class. We need to match the methods, name arguments and return type declaration. Then **we can change the visibility from protected to public**. Inside this method, let's just call the same method from the parent class, passing in the same argument and returning its return value.
+<code php>
+// ...
+
+  public function testPasswordHashIsMinimalLength(): void
+  {
+    $user = new UserChild('robin', 'secret'); // new User('robin', 'secret');
+    $hash = $user->hashPassword('secret');  
+    
+    $this->assertGratherThanOrEqual(60, strlen($hash));
+  }
+}
+</code>
+Then, in the test class in the test method that was failing, instead of creating an object of the user class, we create an object of the user child class. In adding this user child class. **We're not adding any functionality, we're just using it to change the visibility** of the hash password method to public. This lets us run it from outside the class so that we can test it.
+
+However, **this isn't ideal as this class exists for the sole purpose of being able to test** a protected method **so it does pollute the code base** somewhat. If for some reason you do need to test protected methods, though, this is one way of doing it.
+
+=== Using Reflection ===
+The other way to test protected methods is to use reflection. The [[https://www.php.net/manual/en/book.reflection.php|reflection API in PHP]] allows us to access classes and their methods programmatically, basically letting us alter the code at runtime. 
+
+So let's test the protected hash password method using reflection. In the test class, let's add a test method called test password. Hash is minimum length using reflection. Inside this method, let's create a new reflection class object passing in the user class's fully qualified class name.
+<code php>
+// ...
+
+  public function testPasswordHashIsMinimalLength(): void
+  {
+    $user = new UserChild('robin', 'secret'); // new User('robin', 'secret');
+    $hash = $user->hashPassword('secret');  
+    
+    $this->assertGratherThanOrEqual(60, strlen($hash));
+  }
+    
+  public function testPasswordHashIsMinimalLengthUsingReflection(): void
+  {
+    $reflector = new ReflectionClass(User::class);
+    $method = $reflector->getMethod('hashPassword');
+    $user =  new User('robin', 'secret');
+    $hash = $method->invoke($user, 'secret');
+    
+    $this->assertGratherThanOrEqual(60, strlen($hash));
+  }  
+}
+</code>
+Then we can use get method to get an object that represents the hash password method. Then let's create a user object as before. To execute the hash password method, we call invoke on the method object passing in the user object followed by any arguments to the hash password method. This returns whatever the hash password method returns. Then we can use these same assertion as above. So even though the hash password method isn't public using reflection like this.
+
+Unlike the using Interface technique though, we did this without changing any code in the original class or by creating the child class. Note that although you could **use reflection to test private methods, this isn't recommended** as **these are not inherited** and can definitely not be considered part of the public interface of the class. Testing protected methods should only be considered if you're expecting this class to be extended.
+
+=== Testing Protected Properties ===
+We can also use reflection to test protected properties. Here in the user class, let's add a protected string property called algorithm that will initialize to the value Sha 256. Then, in the hash password method, instead of the hardcoded string, we can use that property.
+<code php>
+<?php
+
+declare(strict_types=1);
+
+class User
+{
+    private string $username;
+    private string $password_hash;
+    protected string $algorithm = 'sha256';
+
+    public function __construct(string $username, string $password)
+    {
+        $this->username = $username;
+        $this->password_hash = $this->hashPassword($password);
+    }
+
+    public function authenticate(string $password): bool
+    {
+        // Additional user checks, e.g. is active
+        // ...
+
+        return $this->verifyPassword($password);
+    }
+
+    protected function hashPassword(string $password): string
+    {
+        return hash($this->algortithm, $password);
+    }
+
+    private function verifyPassword(string $password): bool
+    {
+        return $this->password_hash === $this->hashPassword($password);
+    }
+}
+</code>
+Here in the user class, let's add a protected string property called algorithm that will initialize 
+to the value Sha 256. Then, in the hash password method, instead of the hardcoded string, we can use that property. Let's run the tests to make sure we haven't broken anything and it still works as before. Now let's add a test to the user test class for this called test algorithm has a default value in here.
+<code php>
+// ...
+
+   public function testAlgorithmHasADefaultValue(): void 
+   {
+     $user = new User('Robin', 'secret'):
+     $reflector = new ReflectionClass(User::class);
+     $property = $reflection->getProperty('algorithm');
+     $value = $property->getValue($user);
+     
+     $this->assertNotNull($user->algorithm);
+   }
+}
+</code>
+As before, if we use the **assertnotnull** method to assert that the algorithm property isn't null, then when we run the tests, we'll get an error saying we can't access the protected property. So instead, let's create a new reflection class object for the user class. Then we can get an object that represents the algorithm property with the Getproperty method. We can then get the value of this with the Getvalue method passing in the user object. Then we can use that value in the assertion. So we can also use reflection to test values of protected properties if we need to. 
+
+=== Testing Abstract Classes ===
+**Abstract classes can contain concrete methods, so there is a need to be able to test these**. For example, here we have an abstract class called abstract person that sets a string surname property from the constructor. There's an abstract method called gettitle which isn't implemented here. Instead, this will be implemented in any classes that extend this class. Finally, there's a concrete method called Get personal name which uses the gettitle method. So we want to test this concrete method.
+<code php>
+<?php
+declare(strict_type=1);
+
+abstract class AbstartPerson
+{
+  public function __construct(private string $surnaame)
+  {
+  }
+  
+  abstract protection function getTitle(): string;
+  
+  public function getPersonalName(): string
+  
+  public function getPersonalName(): string
+  {
+    return $this->getTitle() . ' ' . $this->surname;
+  }
+}
+</code>
+So we want to test this concrete method. Let's add a test method to this called test personal name is title and surname In here. What we would do if this were a normal class is first, create an instance of it so we can then run assertions on its properties and methods. However, as this is an **abstract class**, we can't do this. If we try and run this now, we get the **error that we can't instantiate this abstract class** as expected. One way to test this **would be to create a concrete class, in the source folder**, that extends the abstract one, and run tests on that. This technique is okay. But again we're **creating code just to run tests**. Also, as this test method is testing the child-class, it should really go in a fitting test class, not in AbstractPersonTest class.
+
+We have another option for testing abstract classes, and that's to **use a mock**.
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class AbstractPersonTest extends TestCase
+{
+  public function testPersonalNameIsTitleAndSurname(): void
+  {
+    // $person = new AbstractPerson('Robin');
+    $mock = $this->getMockBuilder(AbstractPerson::class)
+                 ->setConstructorArgs(['McCoy'])
+                 ->onlyMethods(['getTitle'])
+                 ->getMock();
+    $mock->method('getTitle')
+         ->willReturn('Dr.'); 
+         
+     $this->assertSame('Dr. McCoy', $mock->getPersonalName());                
+  }
+}
+</code>
+So let's add another test method to do the same thing, but with a mock object. In this method, let's call the get mock builder method passing in the abstract person class name. We'll set the constructor argument and use the only methods method to replace just the Gettitle method. We don't want to replace the get personal name method, as that's what we want to test. Then we can tell the mock that the Gettitle method will return this string. What this is essentially doing is implementing the Gettitle method as it isn't implemented in the abstract class. Then we can add an assertion by calling the method on the mock object.
+
+So when testing an abstract class, we can create a mock object of that class, replace any abstract methods, and configure those methods with the behaviour that we need.
+
+==== Testing Static Methods ====
+Here we've a validator class that contains a single static method called is valid email. This method has one string arguments for an email address and returns true if the email is valid and false otherwise.
+<code php>
+<?php
+declare(strict_types=1);
+
+class Validator
+{
+  public static function isValidEmail(string $email): bool
+  {
+    return filter_var($email, FILTER_VALIDATE_EMAIL !== false;
+  } 
+}
+</code>
+To test this method, we want to pass various different values to it and assert that they're valid or not. This would be a good fit for a single test method with a data provider. Include a string argument for an email address, and a boolean argument for the expected return value from the is valid email method. Inside this method, let's assert that the expected argument is the same as the result of calling the is valid email method with the email argument as the method we're testing is static. We don't need to create an object of the validator class. We can just call the method statically on the class.
+<code php>
+<?php
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+class ValidatorTest extends TestCase
+{
+  public static function emailProvider(): array
+  {
+    return [
+      'valid email'    => ['user@example.com', true];
+      'no @'           => ['user_example.com', false];
+      'invalid domain' => ['user@example', false];
+      'empty email'    => ['', false];
+    ];
+  }
+
+  #[DataProvider('emailProvider')]
+  public function testEmailValidation(string $email, bool $expected): void
+  {
+     $this->assertSame($expected, Validator::isValidEmail($email)); 
+  }
+}
+</code>
+Add the data provider method as a public static method called email Provider that will return an array. Inside this method, let's return an array of arrays containing pairs of values, the email address we want to validate, and the expected return value from the validation method. Then we can specify this method as the data provider for the test method. Before we do that, let's import the data provider attribute into the current namespace. Then we can add that attribute to the test method specifying the email provider method.
+<code bash>
+phpunit tests/ValidatorTest.php --testdox
+</code>
+Let's run just that test class, also adding the test docs flag. So we get detailed outputs for each dataset
+
+So testing a static method is just as simple as testing an instance method. You just call the method statically instead of creating an object first. There's no problem with unit testing this static method. __**However, there is a problem when we call a static method in one class from another class.**__
+
+For example, here we have a class called User Registration service. This has one public method called register, that has an argument for an email address and returns a string. Inside this method we're using the is valid email method of the validator class to validate the email address.
+<code php>
+<?php
+declare(strict_types=1);
+
+class UserRegistrationService
+{
+  public function register(string $email): string
+  {
+    if(!Validator::isValidEmail($email)) {
+      throw new InvalidArgumentException('Invalid email address provided');
+    }
+    return "User with email $email register successfully";
+  }
+}
+</code>
+Let's write some tests for this user registration service class starting in this empty test class. Let's add a method called test register with valid email in here. Let's initialize a variable containing an email address and create a new user registration service object. Then let's call the register method on the object passing in the email. 
+<code php>
+<?php
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+class UserRegistrationServiceTest extends TestCase
+{
+  public function testRegisterWithValidEmail(): void
+  {
+     $email = 'player1@oasis.com';
+     $validator = $this->createMock(Validator::class);
+     $validator->expects($this->once())
+               ->method('isValidEmail')
+               ->with($email)
+               ->willReturn(true);
+     $service = new UserRegistrationService();
+     $result = $service->register($email);
+     
+     $this->assertSame("User with email $email registerd successfully", $result); 
+  }
+}
+</code>
+However, the class we're testing is using the validator class. Specifically, the static is valid email method. Let's add a mark object for this class to the test, then configure some expectations on it that it should be called once with the specified email address, and that it will return true.
+<code bash>
+phpunit tests/UserRegistrationServiceTest.php
+</code>
+Let's run that. And now we get a failure that the method was expected to be called once, but wasn't called at all. This is because we're creating a mock validator object in the test, but we're not telling the user registration service class to use this mock object. That class is using the validator class, but not an object of that class. Rather, it's calling a static method. So we can't create a mock object and replace a static method like this for testing, as the class doesn't know to use the mock object instead of the original class. 
+
+Let's try injecting an object of this validator class into the User Registration Service class to see if we can do it that way. So let's add the constructor method with an argument of a validator object promoted to a private property. 
+<code php>
+<?php
+declare(strict_types=1);
+
+class UserRegistrationService
+{
+  public function __construct(private Validator $validator)
+  {
+  }
+
+  public function register(string $email): string
+  {
+    if(!$this->validator::isValidEmail($email)) {
+      throw new InvalidArgumentException('Invalid email address provided');
+    }
+    return "User with emeil $email register successfully";
+  }
+}
+</code>
+Then in the register method, instead of calling the is valid email method statically, let's call it on the validator property. **Even though this is a static method, PHP does allow you to make static method calls on objects like this.** This will call the static method of the object's class. Then in the test when we create a new user registration service object, let's pass in the mock validator object. 
+<code php>
+<code php>
+<?php
+use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+
+class UserRegistrationServiceTest extends TestCase
+{
+  public function testRegisterWithValidEmail(): void
+  {
+     $email = 'player1@oasis.com';
+     $validator = $this->createMock(Validator::class);
+     $validator->expects($this->once())
+               ->method('isValidEmail')
+               ->with($email)
+               ->willReturn(true);
+     $service = new UserRegistrationService($validator);
+     $result = $service->register($email);
+     
+     $this->assertSame("User with email $email registerd successfully", $result); 
+  }
+}
+</code>
+Now when we run this we get an error. This is actually a bad method call exception coming from PHP unit itself, telling us that a **static method cannot be invoked on a mock object**. __**You can only replace instance methods, not static ones**__. If you have code that relies on a static method call like this. You can't mock it for testing like we do with objects. The easiest way to overcome this problem is to simply change the static method into an instance one. You can of course, only do this if you control the class that contains the static method. If you're using a class that you have no control over, for example, in a third party package, then this won't be possible. We do have control over this code though, so let's make that change. Rather than change, this is valid email method into an instance method, which we would do by simply removing the static keyword. Let's add an instance method that calls this one. 
+<code php>
+<?php
+declare(strict_types=1);
+
+class UserRegistrationService
+{
+  public function __construct(private Validator $validator)
+  {
+  }
+
+  public function register(string $email): string
+  {
+    if(!$this->validator->::isValidEmailInstance($email)) {
+      throw new InvalidArgumentException('Invalid email address provided');
+    }
+    return "User with emeil $email register successfully";
+  }
+  
+  public function isValidEmailInstance($string $email): bool
+  {
+    return static::isValidEmail($email);
+  }
+}
+</code>
+This is adding some duplication, but leaving the static method in this class will allow us to look at other options to test this later on. So this instance method will call. The static is valid email method, passing in the same argument and returning its return value. Note the name of this method is just an example. It doesn't have to include the word instance. 
+The static is valid email method, passing in the same argument and returning its return value. **Note** the name of this method is just an example. It doesn't have to include the word instance. Then, in the User Registration service class that uses the validator class, let's call the instance method on the validator object instead. Then in the test class, when we configure the mock behaviour, we can expect the is valid email instance method to be called instead. Now when we run the test, it passes. So if you have a static method that you want to call from another class, **the best thing to do from a testing perspective is to replace the static method call with an instance one**.
+<code php>
+// ...
+  public function testRegisterWithValidEmail(): void
+  {
+     $email = 'player1@oasis.com';
+     $validator = $this->createMock(Validator::class);
+     $validator->expects($this->once())
+               ->method('isValidEmailInstance')
+               ->with($email)
+               ->willReturn(true);
+     $service = new UserRegistrationService($validator);
+     $result = $service->register($email);
+     
+     $this->assertSame("User with email $email registerd successfully", $result); 
+  }
+}
+</code>
+
+=== Inject Static Methods as Dependency ===
+When calling a static method in another class, the preferred option for testing is to refactor the static method in the other class, as we just did. An object of that class can then be injected, which we can then mock. However, this might not be possible. For example, if the class that contains the static method is part of a third party package. One alternative for this is to change the way the static method is called. First, here in the User Registration Service class, change the method call back to using the static method on the validator class. 
+
+An alternative way to call a static method is to use the **forward static call function** (call a static function dynamically). The first argument to this function is the static method we want to call, which we can specify as a string. The second argument is the argument we want to pass to that method when it's called. In this case the email address. So this works in the same way as the static method call. Now the static method call is identified using this callback. We can make this into a dependency. So in the constructor let's change the argument to a closure object instead and change the name to validator callback. Then in the register method, instead of this literal string, we can pass in the callback property. Then in the test class, we can pass a closure object in when we create a user registration service object.
+<code php>
+<?php
+declare(strict_types=1);
+
+class UserRegistrationService
+{
+  public function __construct(private Closure $validatorCallback)
+  {
+  }
+
+  public function register(string $email): string
+  {
+    //if(!$this->Validator::isValidEmail($email)) {
+    //if(!forward_static_call('Validator::isValidEmail',$email) {
+    if(!forward_static_call($this->validatorCallback, $email) {    
+      throw new InvalidArgumentException('Invalid email address provided');
+    }
+    return "User with emeil $email register successfully";
+  }
+  
+  public function isValidEmailInstance($string $email): bool
+  {
+    return static::isValidEmail($email);
+  }
+}
+</code>
+Then in the test class, we can pass a closure object in when we create a user registration service object. 
+<code php>
+declare(strict_type=1);
+use PHPUnit\Framework\TestCase;
+
+final class UserRegistrationServiceTest extends TestCase
+{
+  public function testRegisterWithValidEmail(): void
+  {
+    $email = 'playeron@oasisi.com'
+/*  $validator = $this->createMock(Validator::class);
+    $validator->expects($this->once())
+              ->method('isValidEmail#)
+              ->with($email)
+              ->willReturn(true);
+*/
+    $service = new UserRegistrationService(Closure::fromCallable('Validator::isValidEmail'));   
+    $result = $service->register($email);
+    
+    $this->assertSame("User with email $email registered successfully", $result); 
+  }
+}
+</code>
+Let's start by passing in a closure object that represents the real static method call on the validator class.
+We can represent a callable with a string containing the class and the method name. However, as we need to pass in a closure object, we can create one with the from callable method on the closure class.
+
+**Note** that we haven't replaced the static method call yet. This is still calling the is valid email method in the validator class.
+
+
+Create a variable containing an anonymous function that has a string email argument and just returns true. This variable will contain an object of the closure class. So instead of passing in this closure that calls the real method, we can pass in this stub variable. So now the user registration service class is calling this stub method.
+<code php>
+declare(strict_type=1);
+use PHPUnit\Framework\TestCase;
+
+final class UserRegistrationServiceTest extends TestCase
+{
+  public function testRegisterWithValidEmail(): void
+  {
+    $email = 'playeron@oasisi.com'
+    
+    $stub = function(string $email) {
+      echo "$email is true";
+      return true;
+    }
+    $service = new UserRegistrationService($stub);
+    $this->assertOutputString("$email is valid");
+        
+    $result = $service->register($email);    
+    $this->assertSame("User with email $email registered successfully", $result); 
+  }
+}
+</code>
+Now that we have this set up, let's add another test, but this time to test what happens if the email is invalid. So this time we'll create a stub method that returns false. Then we can create a user registration service object passing in this method as this method returns false. This should throw an exception. When we can call the register method passing in an invalid email address. 
+
+**Note** that the value for this email address doesn't matter, as we're not using it in the stub function. You could include this in an echo statement as we did above if you like, but I'll leave that out just to keep it simple.
+<code php>
+declare(strict_type=1);
+use PHPUnit\Framework\TestCase;
+
+final class UserRegistrationServiceTest extends TestCase
+{
+  public function testRegisterWithValidEmail(): void
+  {
+    $email = 'player1@oasisi.com'
+    
+    $stub = function(string $email) {
+      echo "$email is true";
+      return true;
+    }
+    
+    $service = new UserRegistrationService($stub);
+    $this->assertOutputString("$email is valid");
+        
+    $result = $service->register($email);    
+    $this->assertSame("User with email $email registered successfully", $result); 
+  }
+
+  public function testRegisterWithInValidEmail(): void
+  {
+    //$email = 'player1@oasisi.com'
+    $stub = function(string $email) {
+      echo "$email is false";
+      return false;
+    }
+    
+    $service = new UserRegistrationService($stub);
+    $this->expectException(InvalidArgumentException::class);
+    $service->register('invalid email'); 
+  }
+}
+</code>
+So by changing the way we call the static method from the User Registration service class, we can now replace this method call with a call of our own and test the class in isolation. It's not ideal as we're not using a mark from the testing framework, so we can't check for expectations. But it's one solution to testing a class that has a dependency on a static method. In the upcoming section on the third party mockery package, we'll see how to mock static methods using that package.
+
+One final thing we should do is to remove the temporary echo statements from the validator class, as when we run the entire test suite. Now we get that message printed out multiple times from the validator class test.
+
+===== Using Mockery with PHPUnit =====
+[[https://docs.mockery.io/en/latest/|Mockery]] is a mock object framework that offers an alternative to the Phpunit mock objects. This has a different way of defining and working with mock objects, plus some additional functionality that Phpunit doesn't provide. Mockery integrates well and easily into Phpunit and can even work alongside PHP unit's Mock objects.
+
+==== Installing Mockery ====
+Installing mockery, can be done by using **composer** on the command line. **Make sure to specify the dev flag** so it's only installed for development. 
+<code bash>
+composer require --dev mockery/mockery
+</code>
+This installs the mockery package and its dependencies into the vendor folder. To load mockery, you can require the included auto loader files specified here in the [[https://docs.mockery.io/en/latest/reference/phpunit_integration.html|official documentation]]. Alternatively, if you're using composer's auto loader, mockery will be loaded automatically. We've got Composer's Auto Loader specified in the PHPUnit XML configuration file, so we don't need to do anything else to load it.
+
+=== Integrating Mockery ===
+This contains the standard PHP unit test definition with nothing specific to mockery yet. F**or mockery to work at the end of each test, we need to call the static close method on the mockery class**. As we're using a PHP unit test class, we can do this in the **teardown method**. 
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class WeatherServiceTest extends TestCase
+{
+   public function tearDown(): void
+   {
+      Mockery::close();
+   }
+}
+</code>
+An alternative to this is to use a supplied trait. First, let's import that into the current namespace. Then we can use it in the class. Doing this means we **don't need to call the close method after each test**. 
+<code php>
+<?php
+declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+use Mockery\Adapter\PHPunit\MockeryPHPUnitIntegration;
+
+final class WeatherServiceTest extends TestCase
+{
+   use MockeryPHPUnitIntegration;
+   
+}
+</code>
+An alternative to this is to use a supplied trait. First, let's import that into the current namespace. Then we can use it in the class. Doing this means we don't need to call the close method after each test. I'll comment out the teardown method as opposed to deleting it so that the example is in the source code. Another alternative is to extend the mockery test case class instead of the phpunit one. This still means we can use Phpunit, but this also enables all the mockery features too. 
+<code php>
+<?php
+declare(strict_types=1);
+
+//use PHPUnit\Framework\TestCase;
+use Mockery\Adapter\PHPunit\MockeryPHPUnitIntegration;
+use Mockery\Adapter\PHPunit\MockeryTestCase;
+
+final public class WeatherServiceTest extends MockeryTestCase
+{
+   use MockeryPHPUnitIntegration;
+   
+}
+</code>
+Import that class into the current namespace, then extend that class instead of the Phpunit TestCase. Doing this means we don't need to import the Phpunit test case class, and we don't need to use the trait. Indeed, you should only use either the trait or **extend the mockery test case class, not both at the same time**.
+
+Using the trait or the parent class are the officially recommended ways to use mockery. So now this test class is ready to use mockery.
+
+=== PHPUnit vs Mockery ===
+In the Notifications service test class we wrote earlier, we're using PHP unit mock objects to test a notification service class. Now make this in mockery. Just to check that this doesn't affect PHP unit's functionality at all, run that test class and it still passes, without any addition al changes , just switching from PHPUnit test case to Mockery test case. To compare PHP units mock objects with mockery, let's make a copy of the third method and call the copy test. Mailer is called correctly with mockery. Then to create a mock object using mockery instead of the create mock method on the current object.
+<code php>
+<?php
+declare(strict_types=1);
+
+use Mockery\Adapter\PHPunit\MockeryTestCase;
+
+final public class NotificationServiceTest extends MockeryTestCase
+{
+  public function testNotificationIsSet(): void
+  {
+    $mailer = $this->createStub(Mailer::class);
+    $mailer->method('sendEmail')
+           ->willReturn(true);
+     
+    $service = new NotificationService($mailer);
+    $this->assertTrue($service->sendNotification('playerone@oasis.com'; 'Hello'));    
+  }
+  
+  public function testSendThrowsException(): void
+  {
+    $mailer = $this->createStub(Mailer::class);
+    $mailer->method('sendEmail')
+           ->willThrowException(new RunTimeException('SMTP server down'));
+    $service = new NotificationService($mailer);
+    
+    $this->expectException(NotificationException::class);
+    $this->expectExceptionMessage('Could not send notification');
+    $service->sendNotification('playerone@oasis.com');
+  }
+  
+  public function testMailerIsCalledCorrectly(): viod
+  {
+     $mailer = $this->createMock(Mailer::class);
+     $mailer->expects($this->once())
+            ->method('sendEmail')
+            ->with('playerone@oasisi.com', 'New Notification', 'Hi')
+            ->andReturn(true);
+     
+     $service = new NotificationService($mailer);
+     $this->assertTrue($service->$endNotification('playerone@oasis.com', 'hi');
+  }  
+}
+</code>
+To compare PHP units mock objects with mockery, let's make a copy of the third method and call the copy test. Mailer is called correctly with mockery. Then to create a mock object using mockery instead of the create mock method on the current object. We call the static method on the mockery class passing in the class name. Configuring expectations is done in a similar but different way to configure a method and how many times it's called. We call the should receive with the method name. Then a call count expectation like once. The argument expectation in this case is the same, but instead of will return, mockery uses and return. Let's try that and it passes with the additional test and assertions. So for basic mock objects, mockery is similar to phpunit, although you might prefer the mockery syntax as it's arguably more readable. There's a full list of the available [[https://docs.mockery.io/en/latest/reference/expectations.html#expectation-declarations|expectation declarations]] in the official documentation.
+<code php>
+<?php
+
+// ...
+
+  public function testMailerIsCalledCorrectlyWithMockery(): viod
+  {
+     $mailer = Mockery::mock(Mailer::class);
+     $mailer->shouldReceive('sendEmail')
+            ->once()
+            ->with('playerone@oasisi.com', 'New Notification', 'Hi')
+            ->willReturn(true);
+     
+     $service = new NotificationService($mailer);
+     $this->assertTrue($service->$endNotification('playerone@oasis.com', 'hi');
+  }  
+}
+</code>
+
+=== Mockery create non existing dependency ===
+Let's see an example of functionality it provides that PHP unit doesn't. I've added this class called Weather Service in the constructor. We're injecting an object of a weather API client class. There's one public method called Get Temperature for city, which uses the API client object to get some data which it returns. 
+
+**Note** that I haven't added the weather API client class, so this class is using a class that doesn't exist in this project in PHP unit.
+<code php>
+<?php
+declare(strict_types=1);
+
+class WeatherService
+{
+  public function __construct(private WeatherApiClient)
+  {
+  }
+  
+  public function getTemperatureForCity(string $city): string
+  {
+    $date = $this->api_client->fetchCurrentWeather($city);
+    return $data['temperature'] . '°C';
+  }
+}
+</code>
+To create a mock object, in PHPUnit that class or interface has to already exist. Mockery, however, can create mock objects of classes or interfaces that don't exist. 
+
+In the weather service test class we created at the start of this section. Let's add a test method called test get temperature for city. In here, let's create a mock object for the weather API client class. This class doesn't exist yet, so we can't identify it with its class constant. Instead, we just specify the class name as a literal string. We can then configure expectations on the mock. This should receive the fetch current weather method. Call once with an argument of Berlin, and return an associative array with one element with an index of temperature and a value of 18. 
+
+Then let's create a new weather service object, injecting the mock object using the constructor. Then let's assert that the expected response from the get temperature for city method call is what we configured the mock with.
+<code php>
+<?php
+declare(strict_types=1);
+
+use Mockery\Adapter\PHPunit\MockeryTestCase;
+
+final public class WeatherServiceTest extends MockeryTestCase
+{
+   public function testGetTemperatureForCity(): void
+   {
+      $mock_api_client = Mockery::mock('WeatherApiClient');
+      $mock_api_client->shouldReceive('fetchCurrentWeather')
+                      ->once()
+                      ->with('berlin')
+                      ->andReturn(['temperature' => 18]);
+      
+      $service = new WeatherService($mock_api_client);
+      $this->assertSame('18°C', $service->getTemperatureForCity('Berlin'));
+   }
+}
+</code>
+So if you need to mock an object that doesn't exist yet, you can do this with mockery. This is particularly useful if you're using test driven development, and you don't want to create classes that a class depends on just in order to run the tests.
+
+=== Multiple Method Calls ===
+A another difference between phpunit and mockery is a new test method to the weather service test class called test subsequent method calls. In here, let's create a phpunit mark of the Weather Service class. Then let's configure the mocked method to return different values for different arguments. Then let's assert that these values are returned when the method is called with each argument. So adding three calls to the assert. Same method with different expected values and arguments to the method under test.
+<code php>
+<?php
+declare(strict_types=1);
+
+use Mockery\Adapter\PHPunit\MockeryTestCase;
+
+final public class WeatherServiceTest extends MockeryTestCase
+{
+   public function testGetTemperatureForCity(): void
+   {
+      $mock_api_client = Mockery::mock('WeatherApiClient');
+      $mock_api_client->shouldReceive('fetchCurrentWeather')
+                      ->once()
+                      ->with('berlin')
+                      ->andReturn(['temperature' => 18]);
+      
+      $service = new WeatherService($mock_api_client);
+      $this->assertSame('18°C', $service->getTemperatureForCity('Berlin'));
+   }
+   
+   
+   public function testSubsequentMethodCalls(): void
+   {
+      $mock = $this->createMock(WeatherService::class);
+      $mock->method('getTemperatureForCity')->with('Madrid')->willReturn('26°C');
+      $mock->method('getTemperatureForCity')->with('Paris')->willReturn('21°C');
+      $mock->method('getTemperatureForCity')->with('London')->willReturn('17°C');
+      
+      $this->assertSame('26°C'$mock->getTemperatureForCity('Madrid'));)
+      $this->assertSame('17°C'$mock->getTemperatureForCity('Londoe'));
+      $this->assertSame('21°C'$mock->getTemperatureForCity('Paris'));
+   }
+}
+</code>
+If you run that and you'll get a failure with the actual argument not matching the expected one. This is because you can't write subsequent mock expectations like this in phpunit. 
+
+There is a way to do this in PHP unit. However, first let's comment these mock configuration lines out so we can still see them far later on. Then after we create the mock object, let's create an array called map that contains a list of arguments and return values. Then we can configure the **mock with this map by calling the will return map method** passing in the variable. This will configure the mock object to expect each argument and return value in the map.
+<code php>
+<?php
+declare(strict_types=1);
+
+use Mockery\Adapter\PHPunit\MockeryTestCase;
+
+final public class WeatherServiceTest extends MockeryTestCase
+{
+   public function testGetTemperatureForCity(): void
+   {
+      $mock_api_client = Mockery::mock('WeatherApiClient');
+      $mock_api_client->shouldReceive('fetchCurrentWeather')
+                      ->once()
+                      ->with('berlin')
+                      ->andReturn(['temperature' => 18]);
+      
+      $service = new WeatherService($mock_api_client);
+      $this->assertSame('18°C', $service->getTemperatureForCity('Berlin'));
+   }
+   
+   
+   public function testSubsequentMethodCalls(): void
+   {
+      $map = [
+        ['Madrid', '26°C'],
+        ['Paris', '21°C'],
+        ['London', '17°C']
+      ];  
+      
+      $mock = $this->createMock(WeatherService::class);
+      // $mock->method('getTemperatureForCity')->with('Madrid')->willReturn('26°C');
+      // $mock->method('getTemperatureForCity')->with('Paris')->willReturn('21°C');
+      // $mock->method('getTemperatureForCity')->with('London')->willReturn('17°C');
+      $mock->method('getTemperaturForCity'->willReturnMap($map);
+      
+      $this->assertSame('26°C'$mock->getTemperatureForCity('Madrid'));)
+      $this->assertSame('17°C'$mock->getTemperatureForCity('London'));
+      $this->assertSame('21°C'$mock->getTemperatureForCity('Paris'));
+   }
+}
+</code>
+Note that the method calls in. The assertions don't need to be in the same order as they are in the map.
+
+Now let's see how we would do this in mockery. Let's add a new test method called test. Subsequent method calls with mockery in here. Let's start by creating a mock of the same class using mockery. Then let's configure an expectation on this mark for each argument and expected return value. This is the mockery equivalent of what didn't work above in Phpunit. In mockery, you can simply repeat the expectations with different arguments and the previous ones aren't overwritten. Then we can copy these same assertions from above.
+<code php>
+<?php
+declare(strict_types=1);
+
+use Mockery\Adapter\PHPunit\MockeryTestCase;
+
+final public class WeatherServiceTest extends MockeryTestCase
+{
+   public function testGetTemperatureForCity(): void
+   {
+      $mock_api_client = Mockery::mock('WeatherApiClient');
+      $mock_api_client->shouldReceive('fetchCurrentWeather')
+                      ->once()
+                      ->with('berlin')
+                      ->andReturn(['temperature' => 18]);
+      
+      $service = new WeatherService($mock_api_client);
+      $this->assertSame('18°C', $service->getTemperatureForCity('Berlin'));
+   }
+   
+   
+   public function testSubsequentMethodCalls(): void
+   {
+      $map = [
+        ['Madrid', '26°C'],
+        ['Paris', '21°C'],
+        ['London', '17°C']
+      ];  
+      
+      $mock = $this->createMock(WeatherService::class);
+      // $mock->method('getTemperatureForCity')->with('Madrid')->willReturn('26°C');
+      // $mock->method('getTemperatureForCity')->with('Paris')->willReturn('21°C');
+      // $mock->method('getTemperatureForCity')->with('London')->willReturn('17°C');
+      $mock->method('getTemperaturForCity'->willReturnMap($map);
+      
+      $this->assertSame('26°C'$mock->getTemperatureForCity('Madrid'));)
+      $this->assertSame('17°C'$mock->getTemperatureForCity('London'));
+      $this->assertSame('21°C'$mock->getTemperatureForCity('Paris'));
+   }
+   
+   public function testSubsequentMethodCallsWithMockery(): void
+   {
+      $mock = $this->createMock(WeatherService::class);
+      $mock->shouldReceive('getTemperatureForCity')->with('Madrid')->andReturn('26°C');
+      $mock->shouldReceive('getTemperatureForCity')->with('Paris')->andReturn('21°C');
+      $mock->shouldReceive('getTemperatureForCity')->with('London')->andReturn('17°C');
+      
+      $this->assertSame('26°C'$mock->getTemperatureForCity('Madrid'));)
+      $this->assertSame('17°C'$mock->getTemperatureForCity('London'));
+      $this->assertSame('21°C'$mock->getTemperatureForCity('Paris'));
+   }
+}
+</code>
+Note as with the Phpunit mock, the method calls on the mockery. Mock don't need to be in order either. So in mockery, you can configure multiple method calls with different arguments and return values by simply repeating the expectations like this.
+
+The equivalent in Phpunit is using a map of arguments and return values.
+
+=== Alias Mocks to Stub Static Method Calls ===
+Earlier on, we saw how to unit test classes that contain static method calls to other classes. We learned that **Phpunit can't create mock objects for static method calls**, so we had to employ various workarounds. **Mockery can create a mock object that will intercept static method calls** using what [[https://docs.mockery.io/en/latest/reference/creating_test_doubles.html#aliasing|mockery refers to as aliasing]].
+ 
+**Note that even though mockery supports this, they don't recommend it.** However, let's look at how this works just in case you need it. I've added this customer class that uses the static is valid email method from the validator class in the constructor when creating an object of this class. If the is valid email method returns false, then an exception is thrown. Otherwise the object is created successfully. Let's add some mockery tests for this class starting in this customer test class. 
+
+**Note** that this extends the mockery test case class so that we can safely use mockery inside it. Let's add a test method to test that we can create a customer object if we have a valid email address in here. Let's start by creating a mockery alias mock for the validator class. We do this by prefixing the name of the class with the word alias, followed by a single colon. Then let's create a variable containing an email address. We can then set expectations on the mock object. Let's say that it should receive the is valid email method. Call once with the email address in the variable and return true. Then we can create a new customer object passing in the email address. 
+
+**Note** that we do this after creating and configuring the mock object. As the static method call takes place inside the customer class's constructor method. 
+<code php>
+<?php
+declare(strict_types=1);
+
+use Mockery\Adapter\PHPUnit\MockeryTestCase;
+
+final class CustomerTest extends MockeryTestCase
+{
+  $email = 'playerone@oasisi.com';
+  $mock = Mockery::mock('alias:Validator');
+  $mock->shouldReceive('isValidEmail')
+       ->once()
+       ->with($email)
+       ->andReturn(true);
+  $customer = new Customer($email);
+}
+</code>
+Let's add another method that tests. We can't create a customer object with an invalid email address. Again, let's create an alias mock for the validator class and a variable that contains an email address. This time, let's configure the mock validator object to return false. If the is valid email method does return false, we expect an exception to be thrown of the invalid argument exception class. Finally, let's create a customer object.
+<code php>
+<?php
+declare(strict_types=1);
+
+use Mockery\Adapter\PHPUnit\MockeryTestCase;
+
+final class CustomerTest extends MockeryTestCase
+{
+  public function testCanCreateCustomerWithValidEmail(): void
+  {
+    $email = 'playerone@oasisi.com';
+    $mock = Mockery::mock('alias:Validator');
+    $mock->shouldReceive('isValidEmail')
+         ->once()
+         ->with($email)
+         ->andReturn(true);
+    $customer = new Customer($email);
+  }
+  
+  public function testCanNotCreateCustomerWithInvalidEmail(): void
+  {
+    $email = 'playerone-oasisi.com';
+    
+    $mock = Mockery::mock('alias:Validator');
+    $mock->shouldReceive('isValidEmail')
+         ->once()
+         ->with($email)
+         ->ansReturn(false);
+    
+    $this->expectExpectation(InvalidArgumentException::class);
+    $customer = new Customer($email);
+  }
+}
+</code>
+So if you really do need to mock a static method call, you can do it using a mockery alias mock. However, there can be a problem with this in that it can affect other tests. Instead of just running the test class we just wrote, let's run the entire suite. Now we get several errors, all coming from the validator test class. If I just run that test class, though, then we don't get any errors. These errors only occur if the whole test suite is run, and they are coming from the mockery alias Mark on the validator class. This is due to the fact that mockery creates the alias Mark globally by using the PHP standard class. To fix this, we can tell PHP unit to run the tests in separate processes. 
+
+That way, any changes made by mockery don't affect other tests. To do that, first let's import the attribute that we need into the current namespace. Then let's specify that attribute before the class definition. 
+This tells PHP unit to run each test in a separate process.
+<code php>
+<?php
+declare(strict_types=1);
+
+use PHPUnit\Framework\Attributes\RunTestsInSeperateProcesses;
+use Mockery\Adapter\PHPUnit\MockeryTestCase;
+
+#[RunTestsInSeperateProcesses]
+final class CustomerTest extends MockeryTestCase
+{
+  public function testCanCreateCustomerWithValidEmail(): void
+  {
+    $email = 'playerone@oasisi.com';
+    $mock = Mockery::mock('alias:Validator');
+    $mock->shouldReceive('isValidEmail')
+         ->once()
+         ->with($email)
+         ->andReturn(true);
+    $customer = new Customer($email);
+  }
+  
+  public function testCanNotCreateCustomerWithInvalidEmail(): void
+  {
+    $email = 'playerone-oasisi.com';
+    
+    $mock = Mockery::mock('alias:Validator');
+    $mock->shouldReceive('isValidEmail')
+         ->once()
+         ->with($email)
+         ->ansReturn(false);
+    
+    $this->expectExpectation(InvalidArgumentException::class);
+    $customer = new Customer($email);
+  }
+}
+</code>
+
+=== Verify Test Double Method Calls ===
+Another feature that mockery provides that Phpunit doesn't is [[https://docs.mockery.io/en/latest/reference/creating_test_doubles.html#spies|Spies]]. [[https://docs.mockery.io/en/latest/reference/creating_test_doubles.html#spies|Spies]] are like mocks. But instead of setting up expectations before we run the code under test, a spy allows us to **make assertions on code being tested after we've run it**.
+
+Here in the Notifications Service test class earlier in this section, we added a test method that uses a mockery mock for the mailer class. Add an equivalent test method that uses a spy. We create a spy object with the static spy method on the mockery class, passing in the class name that we want to create the test double for. 
+
+Unlike in the test above, though, that uses the mock object, we **don't set expectations on what is going to happen in the spy object**. First, we call the method we want to test. So let's create a new notification service object. Injecting the spy test double. Then we can call the send notification method, which should use the spy object. Then we can specify the behaviour that we expect the Spy should have experienced. So instead of the should receive method, we use the should have received method. We expect this to have been called once with the same arguments as above. 
+
+**One downside to spies is that you can't specify a return value for a stubbed method call**, as the method call happens before you configure the behaviour. **All method calls on spy objects return null. If you want to configure the return value, then you need to use a mock.**
+<code php>
+<?php
+declare(strict_types=1);
+
+// ...
+
+
+  public function testMailerIsCalledCorrectlyWith MockerySpy(): void
+  {
+     $mailer = Mockery::spy(Mailer::class);
+     $service = new NotificationService($mailer);
+     $service->sendNotification('playerone@oasisi.com', 'Hello');
+     
+     $mailer->shouldHaveReceived('sendEmail')
+            ->once()
+            ->with('playerone@oasisi.com', 'New Notification', 'Hello');
+     
+  
+  }
+</code>
+So using spies is similar to mocks, but you test for what happened after the code under test is called and not before. In some cases this can be clearer and require less code than a mock.
 ===== Code Coverage =====
+Enable [[https://xdebug.org/docs/|Xdebug]] or [[https://github.com/krakjoe/pcov|PCOV]] for coverage reporting:
+<code bash> 
+php -m | grep xdebug 
+</code>
+
+Common options:
+<code bash>
+vendor/bin/phpunit --coverage-text
+vendor/bin/phpunit --coverage-html build/coverage
+</code>
+
+> Coverage helps identify untested code paths — aim for meaningful tests, not 100 %.
+
 When writing tests, you try to think of test methods that test as much of the code as possible. However, especially with a complex code base, you could easily miss out on testing part of the code. To help avoid this, Phpunit can generate a code coverage report. This measures how much of your code is executed when the automated tests are run. This helps you to identify untested parts of your code base.
 
 To enable code coverage report generation, first you need to install a code coverage driver. The simplest way to check if you have this installed or not is to run the test suite and pass in a flag that generates a code coverage report.
@@ -893,6 +1915,7 @@ There was 1 PHPUnit test runner warning:
 OK, but there were issues!
 Tests: 7, Assertions: 9, PHPUnit Warnings: 1.
 </code>
+=== Installing Xdebug ===
 If you don't have a driver installed, you'll get this response **No code coverage driver available.** PHPUnit supports two code coverage drivers [[https://github.com/krakjoe/pcov|PCOV]] and [[https://xdebug.org/docs/|Xdebug]]. While you can use either, **using [[https://xdebug.org/docs/|Xdebug]] is recommended** as it's under active development and provides better data than PCOV. 
 
 Installation of [[https://xdebug.org/docs/|Xdebug]] depends on your operating system and development environment. The official documentation contains detailed instructions. Choose those that are the most relevant for your setup. If you do need help, please don't hesitate to ask. Once installed, you can check if it's available on the command line by running PHP with the version flag. Choose those that are the most relevant for your setup or run **pecl install xdebug** to be platform independent.
@@ -910,7 +1933,7 @@ Add the following code to **composer.json**, this will not install [[https://xde
 }
 </code>
 Once installed, you can check if it's available on the command line by running PHP with the version flag. This will include the version of [[https://xdebug.org/docs/|Xdebug]] that's installed.
-==== configure the Development Environment ====
+==== Configure the Development Environment ====
 Now Xdebug is installed. Let's try running the tests again with the coverage text flag. 
 <code bash>
 vendor/bin/phpunit --coverage-text
@@ -934,6 +1957,128 @@ Now there's a different error, which is a **warning that tells us we either need
 
 However, it's possible to set an environment variable for just one command on Mac and Linux. You can do this by prefixing the command with the name of the variable, an equal sign, and its value. Doing it this way means you don't have to change your system configuration at all. 
 
+Let's set the required Xdebug mode variable to coverage, then run the same PHP unit command again.
+<code bash>
+XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text
+</code>
+Now the previous warning has gone and we get a different warning, but we'll fix that next. If you're using windows PowerShell then this would be the equivalent command.
+<code powershell>
+$env:XDEBUG_MODE = 'coverage'; vendor/bin/phpunit --coverage-text
+</code>
+**Note** that you have to do this every time you want to generate a code coverage report, as specifying an environment variable like this is for one command only.
+=== Configure PHPUnit ===
+When we try and generate a code coverage report with this command, we get a **warning saying that no filter is configured and that code coverage will not be processed**. 
+<code bash>
+XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.......                                                             7 / 7 (100%)
+
+Time: 00:00.816, Memory: 8.00 MB
+
+There was 1 PHPUnit test runner warning:
+
+1) No filter is configured, code coverage will not be processed
+
+OK, but there were issues!
+Tests: 7, Assertions: 9, PHPUnit Warnings: 1.
+</code>
+Generating a code coverage report requires us to tell Phpunit where the project's source code files are. Generating a code coverage report requires us to tell Phpunit where the project's source code files are. We'll do this here in the XML configuration file. Let's add a source element to this containing an include element that in turn contains a directory element. The contents of the directory element specify the directory where the source code files are.
+
+**phpunit.xml.dist**
+<code xml>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.1/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true">
+ 
+    <testsuites>
+        <testsuite name="default">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    
+    <source>
+      <include>
+        <directory>src</directory>
+      </include>
+    </source>
+ 
+</phpunit>
+</code>
+  * **Note** this **refers to the code being tested**, not the test classes. In our case, there in the source folder.
+  * **Note** that this will include the specified directory and its subdirectories.
+Let's run that again. And now the warning has gone and we get a code coverage report printed out. **This is the minimum source element you need for code coverage reports to work**.
+<code bash>
+XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29 with Xdebug 3.2.0
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.......                                                             7 / 7 (100%)
+
+Time: 00:04.343, Memory: 12.00 MB
+
+OK (7 tests, 9 assertions)
+
+
+Code Coverage Report:
+  2026-01-15 11:14:04
+
+ Summary:
+  Classes: 100.00% (2/2)
+  Methods: 100.00% (6/6)
+  Lines:   100.00% (12/12)
+
+App\Task
+  Methods: 100.00% ( 3/ 3)   Lines: 100.00% (  5/  5)
+App\TodoManager
+  Methods: 100.00% ( 3/ 3)   Lines: 100.00% (  7/  7)
+</code>
+Note there are other options available here, such as excluding directories, including or excluding specific files, and whether to ignore specific types of errors. Have a look at the official [[https://docs.phpunit.de/en/12.1/configuration.html#the-source-element|Configuring Source Code in PHPUnit]] documentation for more details.
+Now we have everything configured correctly and Phpunit generates the code coverage report successfully using the coverage text flag.
+
+===== Generating Code Coverage Reports =====
+We get the report in standard output on the command line. The report details which parts of the code have been executed by the tests. Below the summary, two metrics are shown for each class.
+  * First is a percentage of the number of methods that were executed. Showing the count of how many methods were executed by the tests, along with the total number of methods in the class.
+  * Second is a percentage of the number of lines of code that were executed, followed by the exact number of lines and the total.
+<code bash>
+XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text
+</code>
+The coverage text option on its own like this outputs the report to the terminal as we just saw. If we add an equals sign and a file name to the end of this, then when we run it, the output we get is just the output from running the tests.
+<code bash>
+XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text=report.txt
+PHPUnit 11.5.46 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.2.29 with Xdebug 3.2.0
+Configuration: /mnt/c/Data/Users/Documents/Source/repositories/SASD/web/php/TodoManager/phpunit.xml.dist
+
+.......                                                             7 / 7 (100%)
+
+Time: 00:00.543, Memory: 8.00 MB
+
+OK (7 tests, 9 assertions)
+</code>
+The coverage report is instead saved in the file name we specified. If we open that file, then we get the same reports that we saw on the command line, although it does include some escape characters that don't display very well in an editor.
+
+Phpunit can generate reports in several other formats listed here in the official [[https://docs.phpunit.de/en/12.1/textui.html#code-coverage|Generating Code Coverage Reports in PHPUnit]] documentation. For example, to generate an HTML format report, we specify the coverage HTML option, passing in a 
+directory name in which the report files will be generated.
+
+For example, to generate an HTML format report, we specify the coverage HTML option, passing in a directory name in which the report files will be generated.
+<code bash>
+XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html report
+</code>
+Specifying an HTML format code coverage report in the reports directory. The output includes the progress of generating the coverage report. Note that the folder does not have to exist beforehand. It will be created if it doesn't already exist. Inside the reports directory, there are several HTML files along with static resources such as CSS and JavaScript. You can open the index.html in the report folder with your browser. When we do that, we get a much more detailed report, which gives us more granular information about how much code is covered by the tests. We can also click one of these links to get a report about an individual class, which even includes the code itself, showing which lines were executed and which ones weren't. So this report is much more comprehensive than the summary text report we regenerating earlier.
+
+In the HTML report we just generated. If we click on the dashboard link at the top, then we get various different graphs showing the coverage, distribution, and details of the classes that have insufficient coverage. If you click on one of the classes on the left you'll get a detailed view what should be done with the test classes for tests that classes don't cover the constructor or a change in a method, as you can see from the highlighted code. This is because when we introduce tests with test doubles, we might use a mock object that replaces the charge method and disables the constructor. Now that we've used the code coverage report to identify code that isn't covered by the tests, you might add a test to try and remedy that.
+
+Now sometimes a class has 100% coverage in the tests. So do you need to get to 100% for each class? Well, in PHP unit 75 to 90% coverage is typically considered good. 80% is a common and acceptable goal. Sufficient coverage like this means that a substantial portion of your code is executed by your tests, increasing the likelihood of catching bugs and ensuring your code functions as intended.
 
 ===== PHPUnit Assertions, Expectations, and Other Test Methods =====
 
@@ -1092,32 +2237,8 @@ Example:
 </code>
 This command runs only tests matching DatabaseTest, uses colored output, and stops on the first failure.
 
-===== Code Coverage =====
 
-Enable Xdebug or PCOV for coverage reporting:
-<code bash> 
-php -m | grep xdebug 
-</code>
 
-Common options:
-<code bash>
-vendor/bin/phpunit --coverage-text
-vendor/bin/phpunit --coverage-html build/coverage
-</code>
-
-> Coverage helps identify untested code paths — aim for meaningful tests, not 100 %.
-
-===== Test Doubles (Mocks & Stubs) =====
-
-Use PHPUnit’s built-in mocking API to isolate dependencies:
-
-<code php> $repo = $this->createMock(UserRepository::class); $repo->method('find')->willReturn($user); </code>
-
-Or set expectations:
-
-<code php> $service = $this->createMock(MailService::class); $service->expects($this->once())->method('send')->with('test@example.com'); </code>
-
-For more complex scenarios, external libraries like **Mockery** may be used.
 
 ===== Continuous Integration (GitHub Actions) =====
 

@@ -1,0 +1,139 @@
+**[[home:|Start]]** -> **[[home:meet:|Tagungen]]** -> **Februar**
+
+====== Februar ======
+
+====== Relevante IT-Tagungen & Messen – Februar 2026 ======
+
+===== Zielsetzung =====
+Diese Übersicht dient der strategischen Auswahl geeigneter Fachveranstaltungen
+für die SASD-GmbH (Scientific & Software Development).
+Der Fokus liegt auf:
+  * Open Source & Linux
+  * Softwarearchitektur & Infrastruktur
+  * Wissenschafts- und Forschungsnähe
+  * Nachhaltigkeit & langfristiger Kompetenzaufbau
+
+===== Wichtige IT-Veranstaltungen im Februar =====
+
+==== FOSDEM ====
+  * **Ort:** Brüssel (BE)
+  * **Zeit:** Anfang Februar (typisch erstes Wochenende)
+  * **Typ:** Open-Source-Konferenz (kostenlos)
+
+**Beschreibung:**
+Die **:contentReference[oaicite:0]{index=0}** ist eine der wichtigsten
+Open-Source-Veranstaltungen Europas.
+
+**Warum relevant für SASD:**
+  * Tiefe technische Vorträge (Linux, Compiler, Security, DevOps, Data)
+  * Kein Marketing-Event, sondern Community & Forschung
+  * Hervorragend für Wissensaufbau & OSS-Positionierung
+
+**Empfehlung:** ★★★★★ (Pflichttermin)
+
+----
+
+==== State of Open Con ====
+  * **Ort:** EU-Standort (wechselnd, teils UK/EU)
+  * **Zeit:** meist Februar
+  * **Typ:** Open-Source-Strategie & Governance
+
+**Beschreibung:**
+Die **:contentReference[oaicite:1]{index=1}**
+verbindet Technik, Recht, Governance und Unternehmen.
+
+**Warum relevant für SASD:**
+  * Open-Source-Compliance
+  * Nachhaltige OSS-Geschäftsmodelle
+  * Ideal für Firmenpositionierung & Strategie
+
+**Empfehlung:** ★★★★☆
+
+----
+
+==== Embedded World (eingeschränkt relevant) ====
+  * **Ort:** Nürnberg
+  * **Zeit:** Februar
+  * **Typ:** Embedded & industrielle IT
+
+**Beschreibung:**
+Die **:contentReference[oaicite:2]{index=2}**
+fokussiert sich stark auf Hardware & Industrie.
+
+**Relevanz für SASD:**
+  * Nur interessant bei Embedded-, IoT- oder C/C++-Fokus
+  * Weniger relevant für Web, Forschung, Softwarearchitektur
+
+**Empfehlung:** ★★☆☆☆ (nur bei konkretem Projektbezug)
+
+-----
+
+===== Weitere sinnvolle Veranstaltungen (nicht strikt IT-Messen) =====
+
+==== Chaos Communication Congress (CCC – Nachbereitung & Kontakte) ====
+  * **Ort:** DE (jährlich wechselnd)
+  * **Zeit:** Jahreswechsel, aber relevant für Follow-ups
+
+**Warum erwähnenswert:**
+  * Security, Gesellschaft, Technikethik
+  * Kontakte & Denkimpulse, weniger Business
+
+**Empfehlung:** ★★★★☆
+
+----
+
+==== Open Science / Research Software Engineering Events ====
+  * **Typ:** Workshops, Tagungen, Universitätsnähe
+
+**Warum relevant:**
+  * Perfekt passend zur „Scientific“-Komponente von SASD
+  * Hohe Anschlussfähigkeit an Förderprojekte & Forschung
+
+**Empfehlung:** ★★★★☆
+
+-----
+
+===== Warum bestimmte IT-Messen NICHT empfohlen werden =====
+
+==== Reine Sales- & Vendor-Messen ====
+**Beispiele:**
+  * Großflächige Cloud-Expos
+  * Hersteller-Roadshows
+  * Hyperscaler-Marketing-Events
+
+**Warum nicht:**
+  * Geringer Wissensgewinn
+  * Starker Verkaufsdruck
+  * Wenig nachhaltige Kontakte
+  * Fokus auf proprietäre Lock-ins
+
+**Bewertung:** ✘ Nicht empfehlenswert für SASD
+
+----
+
+==== Recruiting- & Startup-Pitch-Events ====
+**Warum nicht:**
+  * Fokus auf HR, nicht auf Technik
+  * Kaum fachliche Tiefe
+  * Für SASD aktuell kein Mehrwert
+
+**Bewertung:** ✘ Nicht priorisieren
+
+-----
+
+===== Fazit & Empfehlung =====
+Für Februar 2026 sollte die SASD-GmbH den Fokus klar auf:
+
+  * **FOSDEM**
+  * **State of Open Con**
+  * ausgewählte **Open-Science-Formate**
+
+legen.
+
+Diese Veranstaltungen stärken:
+  * Fachkompetenz
+  * Reputation
+  * Open-Source-Profil
+  * Langfristige Netzwerke
+
+statt kurzfristiger Marketing-Effekte.

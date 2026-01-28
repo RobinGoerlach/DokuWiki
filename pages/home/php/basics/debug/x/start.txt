@@ -1,21 +1,167 @@
 **[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:basics:debug:|Debugging PHP]]** -> **xDebug**
 
-====== xDebug ======
-===== Installation of xDebug =====
-Installation of [[https://xdebug.org/docs/|Xdebug]] depends on your operating system and development environment. The official documentation contains detailed instructions. Choose those that are the most relevant for your setup. If you do need help, please don't hesitate to ask. Once installed, you can check if it's available on the command line by running PHP with the version flag. Choose those that are the most relevant for your setup or run **pecl install xdebug** to be platform independent.
+====== Xdebug ======
+Xdebug works as a client server communication with [[https://xdebug.org/docs/|Xdebug]]. 
+  - IDE starts to listen on a specific Port, which is 9000 or 9003, for communication with XDebug and waits for incoming calls from XDebug. 
+  - Xdebug itself starts to call back on Your IDE on a specified port and transfers information about the application runtime. At some point, XDebug communicates with IDE on the specific port which Your IDE started to listen on in the first step.
+  - Once the debugging session starts, then XDebug starts to communicate and send information about application runtime to IDE. The IDE and Xdebug transfer data through DBGP protocol which is created specifically for debugging process between Debugging engines like Xdebug and IDE.
+Imagine you have a web server that exists in your PHP installation and a web server such as NGINX or Apache if you use one or both of them. This web server may exist in your host, if you want to debug your development host, in a docker, or even in a remote server. The first step to take is to install XDebug extension inside your PHP in your web server. And imagine here you have your IDE and browser. An IDE like Visual Studio Code or PHPstorm And a browser like Firefox or Chrome or any other browser
+
+The first thing that happens is that your IDE starts to listen on port number 9000 or 9003, depending on your own configurations. And for sure You can change the port if you have 9000 or 9003 ports used in another service. Then you connect your IDE or browser with the web server. As we said, xdebug is now installed on the web server with php
+
+So, when you send a request, you send an XDebug session id, this session id allows xdebug to know that this request contains debugging. This means that you want to debug not only to send a request or execute a script After that, the web server starts to call back your IDE on 9000 or 9003 port and sends it an Init Packet. This Init Packet starts the communication via DBGP Protocol.
+
+So, as we said, the first step is that your IDE sends a request to the web server, for example, to send a request on the login route. Then Xdebug sends a Communication start to 9000 or 9003 port which the IDE listens on. After that, the IDE connects back with Xdebug and sends it information about the breakpoints or the things you want to debug.
+
+Afterward, the web server and the IDE start to communicate via DBGP Protocol. And so, debugging process starts. Here in this part Break points start to send information about the debugging process and so on All these details you don't need to know but you just need to know an overview about it. 
+
+After the debugging session finishes, the web server sends all the rest data to the browser to execute the code and view the login page. let's recap what we just said Firstly, the process of listening on port number 9000 or 9003 happens Secondly, you start to call xdebug from the browser by sending a request, such as sending a request on the login page. Thirdly, xdebug starts to call your IDE to initialize the debugging session. Fourthly, the IDE calls xdebug and sends it the breakpoints, for example, to inform it to make a breakpoint in this part or to debug this script and so on. Fifthly, the IDE and Xdebug initialize the protocol to start communicating with each other. And the final step is that the web server starts to execute the rest of the script after the end of the debugging session. And then sends the response to the browser to display the login page or the home page or any other page or any execution of the PHP response. Now we know how Xdebug works and deals with PHP installation. So, we're now ready to use xdebug.
+
+Check [[https://www.youtube.com/@ramyhakam/playlists|Ramy Hakam @ YouTube]]
+
+===== Installation of Xdebug =====
+Installation of [[https://xdebug.org/docs/|Xdebug]] depends on your operating system and development environment. The official documentation contains detailed instructions. Choose those that are the most relevant for your setup. If you do need help, please don't hesitate to ask. Once installed, you can check if it's available on the command line by running PHP with the version flag. Choose those that are the most relevant for your setup or run 
 <code bash>
 apt update
+apt -y install php-dev 
 apt install php-xdebug
 php -v | grep -i xdebug
 php -m | grep xdebug
 </code>
 
-Add the following code to **composer.json**, this will not install [[https://xdebug.org/docs/|Xdebug]] but will warn you if it's missing.
+Alternatively run **PECL** (PHP C Extension Manager) and compiling Xdebug
+<code bash>
+apt -y install php-dev
+pecl install xdebug
+</code>
+to be platform independent. A **Installation Guide Wizard** is available at **[[https://xdebug.org/wizard]]** for Linux and Unix, add the output of **php -i ** into the wizard webside. This will generate a fitting xdebug.tgz for download and a list of steps what to do for, compiling Xdebug.
+
+Making sure xdebug is already working you will see your version of Xdebug through a terminal running **php -v**. Is there some output with xdebug, then your good to go and to at that time, you downloaded xdebug and the xdebug extension.
+
+Find more in the [[https://xdebug.org/docs/install|xDebug Install Documntation]]
+
+Add the following code to **composer.json**, this will not install [[https://xdebug.org/docs/|Xdebug]] but composer will warn you if it's missing.
 <code json>
 "require-dev": {
   "ext-xdebug": "*"
 }
 </code>
 
-Find more in the [[https://xdebug.org/docs/install|xDebug Install Documntation]]
-===== Configure the Development Environment =====
+Check your php.ini in case of problems
+<code bash>
+[xdebug]
+xdebug.mode=debug
+xdebug.client_host=127.0.0.1
+</code>
+
+===== Configuring IDE =====
+Now we have the PHP version and we have Xdebug installed. Let's now link PHP Storm with Xdebug which we have in our php. First, let's try using Xdebug n a Simple Script. Just one script like an index.php. We do it using the built-in PHP server and we do debug for it. Because of the basic information that you should know about Xdebug. That it has nothing to do with the code structure. That means, for example, you're working with Symfony, working with Zend, working with Laravel, working with any framework, even working with MVC. You create your configuration yourself. Working with any structure. At that time, you should have Xdebug working as it is. There is no difference at all. But the only difference that you might find is. Your code has become large or your trace or your files have become numerous to some extent. But Xdebug has nothing to do with the Code size or Structure. It's the same Configuration. It's the same settings, it's the same everything. Whether you're using any Framework or even Native PHP or even a Simple Script as we're going to see.
+<code bash>
+mkdir demo && cd demo
+composer init
+</code>
+Looking at the project, I have it completely clean, there's nothing at all. There's nothing but composer.json. Now you can here for example a index.php.
+<code php>
+<?php
+$var1 = "test";
+$var2 = 1;
+
+echo "Welcome to PHP and Xdebug";
+</code>
+
+==== Configuring and using Xdebug in PHP Storm ====
+What's left is connecting Xdebug and PHP storm. In the **PHP Storm preferences**, you can go to PHP. You check your interpreter. There are **...** beside CLI Interpreter, in the upcoming window you'll find Xdebug already configured, within the **General Section** from the php.ini. 
+
+Go inside PHP and go to Debug and check Pre-configuration. PHP Storm supports Two Versions or two types of Debuggers.
+  * The first one is Xdebug.
+  * The second one is Zend Debugger.
+There are also more than two, you're supposed to use them. The most important one is actually Xdebug. Install the [[https://chromewebstore.google.com/detail/xdebug-helper-by-jetbrain/aoelhdemabeimdhedkidlnbkfhnhgnhm?pli=1|Xdebug Helper by JetBrains]] (Chrome) see **[[https://www.jetbrains.com/help/phpstorm/browser-debugging-extensions.html#xdebug-helper-extension|Browser debugging extensions]]** for more Extensions. This is an Extension that you can add inside Chrome and at the same time you'll find the same Extension. Available for any browser. For example, if you use Opera, if you use Safari. Using Firefox. You'll find there an Extension to help you that is Xdebug helper. At this point, you'll be able to do Debug or Disable with in your browser after adding the Extension (green bug). It helps you to deal with the browser actions themselves and with PHP Storm.
+
+Inside the PHPStorm Preferences in the PHP/Debug area you'll see Xdebug works on one of the two ports, either 9000 and 9003. Sometimes Port 9000 conflicts with PHP fpm and that's why you have the 9003 port alternative. So you can use one of the two and this is the default so you don't have to change anything. Don't forget to start the listener inside your PHP Storm.
+
+If the Configuration is okay. You can start running a php server here we're using the Built-in PHP server.
+<code bash>
+PHP -S localhost:8080
+</code>
+
+In the --??-- Menu you'll find the **Break at first line in PHP scripts** You can run it too tell it to break at the first line in the PHP scripts. Alternatively click near the line number to enable a breakpoint.
+
+==== Using Xdebug in PHP Storm ====
+setting xdebug.start_with_request to 'trigger' enable Debugging starts when a trigger is present
+
+=== Conditional Break Points ===
+You want to start adding a breakpoint, or a breakpoint that works only if the variable has a special condition, like a special value or bigger or smaller then a destinated value. Add a break point by clicking near the line number (PHP Storm) and define a condition. If the condition is something else, this breakpoint won't trigger. If we want to test and create a break point you will removed any other breakpoints for this line.
+
+=== PHPUnit Debug Test Case === 
+If you click on the break point icon in your PHPUnit Test eg a assertTrue, you start the test run debug, run with coverage, and also modify the configuration if you want to make a custom configuration for this test case. The first step here is to click on 'Run'. If you run, it will execute this code, and perform the assert. And then, you will find here, one test with one assertion, and the test has been successfully executed.
+
+So, if you want to know why it didn't work, you go here and add breakpoints. And then you tell it to debug. Once you tell it to debug, where will it stop? At the first breakpoint ;-). You're running the code from the PHPUnit. Which is also here, you'll find all your traces here. From PHPUnit to the command, to the runner, the test suite, and certainly to the test case, until you reach the login service test that we're working on. But of course, it brought all your code from when you started running PHPUnit until you reached your test case.
+
+You'll go to the implementation of your code, itself which is inside your code, not in the test. Not in the test itself but in the code. Go to 'Step in', so, you'll enter the code of your project. So, you'll move from the test to the source with the data or the values that I used inside the test case. So you're at the same time in the test and in the code, you can debug and see what the problem is, whether it's in the test or in your code.
+
+==== XDebug Modes ==== 
+
+=== Develop Mode ===
+Develop Mode is like an enhanced level of VAR DUMP and DIE. That means you're already using Var_dump, but it displays it a little better. To change the mode, you can change it through environment variables, or you can go to the php.ini. In the PHP ini, you have the Xdebug mode. The default is “develop”, but here we updated the mode to the debug mode.
+<code bash>
+[xdebug]
+xdebug.mode=debug
+xdebug.client_host=127.0.0.1
+</code>
+For example, here in the PHP ini, you have the Xdebug mode. The default is “develop”, but here we updated the mode to the debug mode. Which is the main one that you consider using all the time Because for example, you want to do step debugging. 
+
+Like we've seen that, like step in and step over, and you move step by step in your code. This is by using the debug mode But now if you want the enhancement level of var dump and die, you can, for example, change here the mode from debug to develop. First thing, let's see the change. For example, here in our code here, let's come when we were doing var_dump, I come here, for example, and tell it to do var_dump for the request.
+
+And I come here on the terminal, and I tell it Symfony serve, and Symfony serve here, I'm supposed to go to my code. 
+If I refresh, you'll find it here, it brought you the var_dump we talked about before. You will find here that it displayed the var dump in the default form without any improvements. You can use dump and die or dd, which is available in Symfony. For example, here if we did instead of var dump, you can use DD to use the var_dump that exists in Symfony and come here if you refresh again. Then we'll move on to profile mode, which helps you see what the performance issues are in PHP.
+
+You will find here that it displayed the var dump in the default form without any improvements. You can use dump and die or dd, which is available in Symfony. For example, here if we did instead of var dump, you can use DD to use the var_dump that exists in Symfony and come here if you refresh again. Yes, as you see this is a little enhancement level for the view. The topic looks like you're doing a var_dump, but using the DD that's inside Symfony. Now, with Xdebug, what's the difference? How can develop mode help you? If we went here in the ini, and we came back here, var_dump. We came here in the ini, we switched debug, and we changed it to develop. When I came here, of course, I have to restart PHP.
+<code bash>
+[xdebug]
+xdebug.mode=develop
+xdebug.client_host=127.0.0.1
+</code>
+Then I come here and tell it Symfony serve, because I edited the ini file, I have to restart, and I did a second load, you'll find that it's similar to var dump, but a little better. So I don't want to use it because it looks like you'll use var_dump, die, echo. Let's, for example, use dd to see what it will display to us. For example, here if I changed var dump to dd, will it display what's inside Symfony or what's inside xdebug? It showed me what's inside Symfony, it overrides the version of the existing var_dump. Now I've mentioned the first mode, which is develop.
+
+Develop is when you do debug and use var dump and die, and sometimes you might have a special case where you need to use var dump and die. Or for some reason, the debugger isn't working for you. So you want to do a dump. And if for some reason you can't use dd from Symfony, or you’re using, for example, any other framework that doesn't have these functions. And that displays the var dump in a simpler way. Then you can use the develop mode that exists inside Xdebug. We've now understood the first mode, which is develop, and as we said, you won't use it in most cases. You can at the same time in the xdebug mode. You can use more than one mode. You can use both **develop,debug** and then, you can use both. **You can use more than one mode.** It doesn't have to be just one mode. 
+<code bash>
+[xdebug]
+xdebug.mode=develop,debug
+xdebug.start_with_request=yes
+xdebug.client_host=127.0.0.1
+</code>
+You can use develop, and at the same time, you can Enable the debug mode also. And at the same time, you can display what the modes or features are inside Xdebug using xdebug info.
+<code php>
+<?php
+//php_info();
+xdebug_info();
+</code>
+Let's go here to the terminal and stop the server, then restart it again. And I come here in the code, and here in the index.php, we go here in the public, index.php, we can remove all of this, just comments, and tell it here, for example, xdebug, Xdebug info. Xdebug info will display your data, if you went here, for example, started the server 
+again, and came here in my code, and refresh, perfect, it will display for you the Xdebug version and the rest of the services you have. You have here a development helper. "This is the develop mode. At the same time, you have here the coverage mode which is currently unavailable because we haven't enabled it yet. Here, we have the Gc Stats feature related to the PHP's garbage collector mechanism. I don't think you will need it, at least not often. 
+This is the step_debugger that we talked about in previous videos and we've seen how you can debug using xdebug and PHPStorm. Here is the tracing. If you want to track all function calls and everything related to the execution or connection in your script, you can perform tracing, but generally, you won't be using it much. We could also make a dedicated video about it, discussing and learning about tracing, and how to use it. Here you can see the XDebug-related information, for example, the XDebug variables. Like here in the mode, we are in develop mode and debug.
+Here we have the master value are develop and debug. And Xdebug starts with request Here the value is the default one. The default is by triggering, meaning as soon as the Xdebug trigger happens, the xdebug session starts. But you can change it to yes or 1. What does this mean? This means that if you, for instance, take this copy, and went here to the ini, told it, "Boss, add these settings but equal 1". What does this mean? Or yes, this means you want the xdebug to start with any request before executing any PHP code. Here you can see the current XDebug configurations using this nice function called xdebug_info, which is like php_info but for xdebug. Let's revert back to our code without using Xdebug info. Alright, we finished this simple video, and we talked about the first mode which is the development helper and as we said, it's an enhancement level of var dump. 
+
+=== Profile Mode ===
+When do you need to use the Profile Mode? You need it when you have performance problems. Like, for example, when your code is slow, and you want to know which part, which function, or which class in the code takes the longest time. For example, now it has integration with third parties, or there's heavy code. Like, you're doing a lot of logic, you're doing for loops inside another for loop, and you don't know why it takes a long time. Then you need to identify the areas in your code that have a performance issue or take longer. You can determine them and at the same time optimize them. 
+<code bash>
+[xdebug]
+xdebug.mode=profile
+xdebug.start_with_request=yes
+xdebug.client_host=127.0.0.1
+</code>
+Here is the current mode profile. What does this mean that the current mode is profile? This means that **a file will be produced by XDebug** itself, and you can visualize this file either on PHP Storm or another program we will talk. The file named **/tmp/cache_grunt.out.37769.gz**, it is located in the temp by default, as long as you didn't specify the path for this file. name of the file itself because, as you see, the name here is not understandable.
+It's the **process ID**, and this is what we will see now. The first one is **Profile append = 1**, meaning we want to **append data to the existing file**. Then there is **xdebug_profiler_output_name** the name will be **cash_grant.out**, here **%t and %r**, what are these? If we go to this in the documentation, here you will find that "%t" what does it mean? It refers to the **timestamp**. I want the file that comes out to have the current timestamp of this process. And then we'll find here also **"%R"**. What does "%R" mean? It **refers to the server request URI**, meaning I can have each file specific to a particular request. Here the file will appear to me, and the name of this file will be the timestamp followed by for example, the route to the Home.  Then there will also be the timestamp for the request, and at the same time, it will be followed by Home, so I will have many files, each file specific to a certain route, to make it easier for you. The one that's currently there or the default, which is **"p%**", is the PID, the **process ID** specific to PHP. Find more about this in the [[https://xdebug.org/docs/all_settings#profiler_output_name|Xdebug - all settings Documentation]] 
+
+Modify the php.ini file in the XDebug settings so that we save the output file in a specific path and, at the same time, change the name of the file itself because, as you see, the name here is not understandable.
+<code bash>
+[xdebug]
+xdebug.mode=profile
+xdebug.profiler_append=1
+xdebug.profiler_output_name=cachgrid.out.%t-%R
+xdebug.output_dir=/tmp
+xdebug.start_with_request=yes
+xdebug.client_host=127.0.0.1
+</code>
+Alright, how to visualize this file? If we go back here to PHPStorm, and here, for example, **in tools**, you'll find a tool named **"Analyze Xdebug Profiler Snapshot"**. The snapshot is the file that appeared to you.
+
+You'll find here execution statistics, from the first step to the last step. You'll find even the steps related to Symfony and your code. Okay, your entire trace is here. And at the same time, here you'll find the callees and callers, which refers to who is calling and who is being called. In all the files from the beginning, the index, you can enter here and delve in and see everything sequentially. And at the same time, you'll find here the time, all the time here. 

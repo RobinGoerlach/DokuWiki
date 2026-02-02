@@ -1,7 +1,7 @@
 ====== Themen Liste ======
 
   * **[[home:sec:|Security]]**
-  * **[[home:php:|PHP]]** -> [[home:html:|HTML]], ([[home:ide:|IDE's]] & [[home:git:|git]])
+  * **[[home:php:|PHP]]** -> [[home:html:|HTML]] & [[home:css:|CSS]], [[home:js:|JavaScript]], ([[home:ide:|IDE's]] & [[home:git:|git]])
   * **[[home:TeX:|LaTeX]]**
 
   * **[[home:meet:|Tagungen]]**

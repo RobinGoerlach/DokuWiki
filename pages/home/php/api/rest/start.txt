@@ -1,12 +1,837 @@
 **[[home:|Start]]** -> **[[home:php:|PHP]]** -> **[[home:php:api:|PHP API]]** -> **PHP Rest API**
 
 ====== PHP Rest API ======
+What is an API? When you visit a website, you enter a web address in the address bar of the browser. This sends a request to the web server, and that responds with some content, which is usually HTML. When the browser displays the content, you see links to click on, forms to fill in and so on. The content is laid out and formatted using HTML and CSS so that a human can easily understand it. This is the web interface for that content. It's meant for humans to understand. If a program wants the same data though, it doesn't need HTML or CSS to understand it. All the program wants is the data. It doesn't care about the text colour, font size and so on. So in order for some software to be able to read this more easily, we have an API or application programming interface. When a program makes a request to the API, it returns just the data, with no formatting. **The web interface is for humans, whereas an API is for machines.** An API is basically a way for two pieces of software to talk to each other.
+
+So REST is not a protocol, it's an idea or a philosophy, a way of building things in a manner that's very consistent and elegant. A REST service tries to make data processing very easy over HTTP. You can do REST without HTTP, but its specially designed as an service to work with data over HTTP. It's ideally suited to situations were we do CRUD.
+
+This site, [[https://randomuser.me/|Random User Generator]], generates random data about people. This data is useful when developing or testing software that needs user data, so you don't have to make it up yourself. Every time the page is refreshed, we get details about a new random user - the name, photo, email address, password and so on.
+
+This is the web interface for this data. However, to use this data, it's not really very convenient to extract this from this page. You could copy and paste each item of data from the web browser and then paste it into your code or insert it into a database. Alternatively, you could **write code to parse this HTML, and extract the data from it**, a process known as **scraping**. However, this is error prone and very fragile. Any changes made to the underlying HTML could break the code that extracts the data. Instead, we want to be able to access this data programmatically.
+
+This is where an API comes in. The API for this particular website is available at this **URL plus /api** at the end. If we open that in the browser, we get some data about a random user, although this time without all the visual formatting. As with the web interface, if I refresh this, we get some random data about another user. It's the same data - name, email address and so on, although this is in a format that is much easier for a piece of software to read. When using the API, what is returned is just data, which is all another program needs. So basically, the web interface is for people to use, whereas the API is for programs to use.
+
+The [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] function in PHP can be used to read the contents of a file into a string. However, we can also use this to retrieve the contents of a website. So let's call this function, passing in the URL we want, [[https://example.com|example.com]], and we'll assign the return value to a variable. Next, let's just print out the contents of this variable. We store this in an index.php file, as follows
+<code php>
+<?php
+$response = file_get_contents("https://example.com");
+echo $response;
+</code>
+Let's run this on the command line.
+<code bash>
+php index.php
+</code>
+What's printed out is the content from the [[https://example.com|example.com]] website. If we compare this with the source we just saw in the browser, it's exactly the same. So all this code does is request the given URL, and returns the response into this variable. Let's change this URL to that of the random user API we saw earlier. 
+<code php>
+<?php
+$response = file_get_contents("https://randomuser.me/api");
+echo $response;
+</code>
+**Note** that with APIs, a web address or URL is commonly known as an **API endpoint**. So when we run this again, we get a response from that URL. This is known as an **API call**. So instead of the browser making this request, retrieving the response and displaying it, the PHP code does it instead. And we get the response back as a string.
+
+When we make an API call to this site and get some data, the data that's returned doesn't contain any HTML, CSS or any other presentation code. This data is in a format that is easy for the code to use. Some APIs return data formatted as XML, or even HTML, but the default is usually [[http://www.json.org/json-en.html|JSON]]. [[http://www.json.org/json-en.html|JSON]], or JavaScript Object Notation, is a simple, easy to read format used for exchanging data and is the de facto standard for web APIs. Although this is JavaScript code, it's not code that's going to be executed either on the server or in the browser, it's just used to format the data.
+
+Basically, it's just a list of key and value pairs - raw data with no formatting. Plus, PHP has functions like this one, [[https://www.php.net/manual/en/function.json-decode.php|json_decode]], for handling JSON data, so you don't need to worry about parsing it manually. Now we have some JSON data, we can decode it and process it further. So instead of printing this out, let's call the json_decode method on it, and assign this return value to another variable. This time, let's use var_dump to print it out.
+<code php>
+<?php
+$response = file_get_contents("https://randomuser.me/api");
+$data = json_decode($response); var_dump($data);
+</code>
+When we run this, we get a generic PHP object with various properties that contain the various attributes of the random user data. To make this simpler, let's get this data as an associative array instead, which we can do by passing in true as the second argument to the json_decode function. 
+<code php>
+<?php
+$response = file_get_contents("https://randomuser.me/api");
+$data = json_decode($response, true); var_dump($data);
+</code>
+Now when we run this, we get the data in an array. Let's print out one of these items of data. As we can see, at the top level, we have an item with an index of "results", which itself contains an array with one element, and that in turn contains several arrays, for name, location and so on. The array with an index of "name" contains three values, for the title, first name and surname.
+
+**Note** that the structure of these results is specific to this API. Most, if not all, APIs will come with documentation that describes how the results are structured.
+<code php>
+<?php
+$response = file_get_contents("https://randomuser.me/api");
+$data = json_decode($response, true); //var_dump($data);
+echo $data["results"][0]["name"]["first"], "\n";
+</code>
+So instead of printing out the whole array, we'll access the "results" element, the first element of that array, then the "name" element, then the first element of that. Let's print out a newline character after this, so it's easy to see what's happening when we run it. All we're doing here is **accessing nested array data**, nothing unusual. When we run this, we get a random user's first name. Every time we run it, we get a new value. So when we run this, the code is making a request to the API, getting the response in JSON format, converting this to a PHP array, and getting the first name from that data.
+
+We've been running this PHP on the command line, but let's look at how we might integrate API data into a page we view in a browser. Just like you might use a database to generate content, using an API allows you to do many more things. For example, integrating weather data into your application, looking up currency exchange rates and so on. 
+For this example, we'll use the [[https://agify.io/|agify API]]. This is a simple API that predicts the age of a person given their name. 
+
+To use [[https://agify.io/|agify API]], we pass in the name in the URL, using the query string like this [[https://api.agify.io?name=robin]], and this returns some [[http://www.json.org/json-en.html|JSON]]. For example, the name Michael is predicted to be sixty nine. Let's call this API from a form we display in the browser.
+First, let's add some HTML after this PHP at the top.
+<code php>
+<?php
+if (!empty($_GET["name"])) {
+  $response = file_get_contents("https://api.agify.io?name={$_GET['name']}");
+  $data = json_decode($response, true); //var_dump($data);
+  //echo $data["results"][0]["name"]["first"], "\n";
+  $age = $data["age"];
+}  
+?>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Random User</title>
+  </head>
+  <body>
+    <?php if(isset($age)): ?>
+      Age: <?= $age ?>
+    <?php endif; ?>  
+    <form>
+      <label for="name">Name</label>
+      <input name="name" id="name">
+      <button>Guess age</button>
+    </form>
+  </body>
+</html>      
+</code>
+We'll add a doctype, a head element containing a title, and a body element. In here, let's at a form, a label, and input for the name, and a button to submit the form. Without any attributes, this form will use the get method, and submit to itself, so we can check for this at the top of the script. 
+
+So before we call the API, let's keep it simple and just check to see if the "name" element of the $_GET array isn't empty, and if it isn't, we'll call the [[https://agify.io/|agify API]], which has this URL as its endpoint. We'll pass the contents of the text input in the query string. Obviously, with a real application, we'd sanitise this first, but for the purposes of this demo, we'll keep it simple. The JSON returned contains an element with an index of "age", which contains the value we want. So instead of echoing out this item of data, we'll assign the age value from the [[https://agify.io/|agify]] data to a variable called $age. Then, in the HTML, we'll check to see if this variable is set, and if so, we'll display its contents.
+
+In the browser, there's the form. Let's submit a name, and the API predicts that the name Robin belongs to someone who is 64. I'm not there yet, but try your name with this API to see if it's more accurate. So just as with the random user data, we're calling this API from our code, passing it some user input,decoding the JSON response and displaying the results.
+
+===== Requests and Responses using cURL =====
+From the user's point of view though in the browser, the fact we're using an API is hidden. This happens on the server, and the server sends the request to the API and processes its response. As we just saw, to open a web page or use an API, the client makes a request to the server and it receives a response. The client could be a web browser, or in the case of an API, another program. To make a request, we need the URL, and the body of the response that we get contains HTML, JSON or whatever. In addition to these, there are additional parts of the request and response that we need to use when working with APIs.
+
+==== Using cURL Library ====
+These are the basics of HTTP, the protocol that the web uses. In this section, we're going to look at these in more detail. First though, we're going to change how we make an API request. In the previous section, we used the [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] function. Although this is part of core PHP, using this function to make API requests requires stream contexts, and you have to make sure you format values using special characters like "\r\n".
+
+So it's much easier to introduce errors. Plus, **if an API call fails, there's no way to get the body of the response, only the status code**. We'll see an example of this later on in this section. In addition, [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] requires the [[https://www.php.net/manual/en/filesystem.configuration.php#ini.allow-url-fopen|allow_url_fopen]] setting to be enabled.
+
+**It's common for [[https://www.php.net/manual/en/filesystem.configuration.php#ini.allow-url-fopen|allow_url_fopen]]  not to be enabled on shared hosting, so it wouldn't work**. For these reasons, we won't be using the [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] function. Instead, a more common way to consume an API is using [[https://curl.se/|cURL]]. This is a tool for transferring data using URLs. You can use [[https://curl.se/|cURL]] on the command line or from code.
+
+PHP supports [[https://www.php.net/manual/en/book.curl.php|libcurl]], and provides many functions for sending requests to URLs, and handling their responses. So instead of using [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]], let's use [[https://curl.se/|cURL]] to make the request to the API. 
+
+To use [[https://curl.se/|cURL]] in PHP, First, we need to initialise a [[https://curl.se/|cURL]] session using the **curl_init** function. This returns the handle to the [[https://curl.se/|cURL]] session. You can pass in the URL you want to request as an argument if you like, or you can set it as an option.
+<code php>
+<?php
+//$ch = curl_init("https://randomuser.me/api");
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https//randomuser.me/api");
+curl_setopt($ch, RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response, "\n";
+</code>
+To set an option for the transfer, we call the **[[http://php.net/manual/en/function.curl-setopt.php|curl_setopt]]** function, passing in the handle, a constant identifying the value we want to set, and the value itself. There are many different options we can set, as detailed in the [[http://php.net/manual/en/function.curl-setopt.php|official documentation]]. 
+
+First, let's set the URL, which we do with the **[[[[https://curl.se/libcurl/c/CURLOPT_URL.html|CURLOPT_URL]]** constant. We'll set this to the URL we were using earlier. As I said, you can pass this in as an argument to the **[[https://www.php.net/manual/en/function.curl-init.php|curl_init]]** function if you like, but as we usually set more than one option, I prefer to do it this way. Then, we want the response to be returned as a string instead of being output directly, which we do by setting **[[https://php.watch/codex/CURLOPT_RETURNTRANSFER|CURLOPT_RETURNTRANSFER]] to true**. For this simple request, these are the only settings we need to set.
+
+To execute the request, we call the **[[https://www.php.net/manual/en/function.curl-exec.php|curl_exec]]** function, passing in the handle. As we've set **[[https://php.watch/codex/CURLOPT_RETURNTRANSFER|CURLOPT_RETURNTRANSFER]] to true**, this will return the response as a string. So that's assign that to a variable. Finally, we call **[[https://www.php.net/manual/en/function.curl-close.php|curl_close]]** to close the handle and free up any system resources it's been using. To see the response, which is a string, let's just echo it out, followed by a newline character. 
+<code php>
+<?php
+//$ch = curl_init("https://randomuser.me/api");
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "https//randomuser.me/api");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response, "\n";
+</code>
+When we run the script, we get the JSON response we saw earlier containing the random user data. When using cURL, if you're setting multiple options, there is an alternative way to set them, which avoids calling [[https://www.php.net/manual/en/function.curl-setopt.php||curl_setopt]] multiple times. By using the  [[https://www.php.net/manual/en/function.curl_setopt_array.php|curl_setopt_array]] function, we can set multiple options at once, by passing the options in as an array. Both of these methods are equivalent, so whichever one you use is up to you. Plus, you can use a mixture of these if you like, setting some values individually, others as part of the array.
+<code php>
+<?php
+$ch = curl_init();
+//curl_setopt($ch, CURLOPT_URL, "https//randomuser.me/api");
+//curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//randomuser.me/api",
+  CURLOPT_RETURNTRANSFER => true
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response, "\n";
+</code>
+And when we run this code, it works just as before, requesting data from the API and printing it out.
+
+==== HTTP status code ====
+Now we can look at additional parts of the request and response. We'll start with an **additional part** of the response, the **status code**. In addition to the body of the response, which is sometimes referred to as the **payload**, the server returns a status code. The status code is a numeric value that tells us how the request went. There are several possible [[https://en.wikipedia.org/wiki/List_of_HTTP_status_codes| HTTP status codes]] that could be returned, all three digits.
+
+Generally, **anything in the 200 range means the request was OK** and the server could successfully return a response. Anything in **the 400 range means there is something wrong with the request**, and anything **in the 500 range means the server had a problem**. If you're not familiar with [[https://en.wikipedia.org/wiki/List_of_HTTP_status_codes|HTTP status codes]], you'll almost certainly have seen a [[https://github.com/404|404]] page, which means the URL you requested couldn't be found on the server. When this happens, the server returns a [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404|404 status code]]. 
+
+Let's use [[https://curl.se/|cURL]] to get the status code for the API request we're making. To do this, we call the [[https://www.php.net/manual/en/function.curl-getinfo.php|curl_getinfo]] function, passing in the handle to the [[https://curl.se/|cURL]] session and the [[https://www.php.net/manual/en/curl.constants.php#constant.curlinfo-http-code|CURLINFO_HTTP_CODE]] constant. This will return the status code as an integer, so let's assign the return value to a variable. Then lower down, let's print this out, followed by a new line character. When we run this, we get a status code of [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200|200]]. This means the request was successful and there were no problems. 
+<code php>
+<?php
+$ch = curl_init();
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//randomuser.me/api",
+  CURLOPT_RETURNTRANSFER => true
+]);
+ 
+$response = curl_exec($ch);
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+echo "Status " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+If I change the URL to one that doesn't exist, and then run it again, we get a [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404|404 status code]], as that URL wasn't found on that server. 
+<code php>
+<?php
+$ch = curl_init();
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//randomuser.me/apixxx",
+  CURLOPT_RETURNTRANSFER => true
+]);
+ 
+$response = curl_exec($ch);
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+**Note** that if the server isn't found, you get a status code of zero as there's no server to send back a status code. Let's try this with a different API. The [[https://openweathermap.org/api|Open Weather API]] gives us weather forecast data for a specified location. 
+
+Let's try this from our code. We'll change the URL to the endpoint of the [[https://openweathermap.org/api|OpenWeather API]], and to specify the location we want the forecast for, we pass it in using the query string. So let's get the data for London for example. 
+<code php>
+<?php
+$ch = curl_init();
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.openweathermap.org/data/2.5/weather?q=London",
+  CURLOPT_RETURNTRANSFER => true
+]);
+ 
+$response = curl_exec($ch);
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+When we run this, we get a **[[https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/401|401 status code]]**, which means this **page requires authentication**, but we didn't provide any. 
+
+**Note** that we also get some data in the body of the response, the code and an error message telling us the API key is invalid. This is one reason why using [[https://curl.se/|cURL]] is better than using the [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] function. For any response that doesn't have a status code of 200, [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] just returns false, and there's no way to get the response's payload.
+
+In order to use this API, we need an API key. This is similar to a username and password, but for an API. We'll cover these in more detail later on. For the moment, to get an API key for this API, you need to sign up for a free account. Once you've done this, your account will show you the API key you need to use the API, which is just a string of characters. So copy the key from the webside, then in the code, we pass in the API key as part of the query string, using the "appid" key. **Note** that there's no standard for the name of the API key variable, this one is specific to this API. 
+<code php>
+<?php
+$ch = curl_init();
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.openweathermap.org/data/2.5/weather?q=London&appid=081532",
+  CURLOPT_RETURNTRANSFER => true
+]);
+ 
+$response = curl_exec($ch);
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+Now when we run this, we get a [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200|200 status code]] and the weather data for the location we specified, which includes the temperature, humidity and so on. So the [[https://en.wikipedia.org/wiki/List_of_HTTP_status_codes|response code]] tells us how the request went - if it was successful or if not, why not, so we can process the response accordingly.
+
+==== Request Headers (Add Request meta data) ====
+In addition to the URL we specify when we make the request, we can add headers to the request. Headers represent metadata about the request, the address of the server making the request, or details about the client, for example. 
+Plus, they can be used to send authorisation details, like an API key, or to request data in a specific format or language. The [[https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields||headers are simple key value pairs]] sent as strings. 
+
+To show an example of how to use request headers, let's use the [[https://unsplash.com/|Unsplash API]] to retrieve data about a random photo. To use this API, as with the one we saw previously, you need an API key, which you can get by creating a free account. As before, we could pass the [[https://unsplash.com/documentation#public-authentication|API key]] in using the query string like this, but we can also do it using the Authorization header. First, let's change the API endpoint we're requesting to the [[https://unsplash.com/|Unsplash API]] endpoint that returns a random photo. 
+<code php>
+<?php
+$ch = curl_init();
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.unsplash.com/photos/random",
+  CURLOPT_RETURNTRANSFER => true
+]);
+ 
+$response = curl_exec($ch);
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+Before we out of the authorisation details, let's run this, and we get a 401 status code, which tells us the request requires authorisation, and in the body of the response, we're told the access token is invalid. So let's add the API key in a request header. To do this, first, we'll **create an array which contains each header we want to pass** as a string. To authenticate with this API, we pass in the "Authorization" header, which is separated by its value by a colon, then the string "Client-ID", and finally, the API key value.
+
+You need to change this value to your individual API key. If you want to pass in more request headers, you can simply add more elements to this array. Then, to pass these headers along with the request, we set the [[https://curl.se/libcurl/c/CURLOPT_HTTPHEADER.html|CURLOPT_HTTPHEADER]] option, setting the value to the array.
+<code php>
+<?php
+$ch = curl_init();
+
+$headers = [
+  "Authorization: Client-ID YOUR_ACCESS_KEY"
+];
+
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.unsplash.com/photos/random",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers
+]);
+ 
+$response = curl_exec($ch);
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+When we run it, we get a 200 response code, and the body of the response contains the details of a random photo its URL, dimensions and so on. So the request headers allow us to add metadata about the request. Some APIs require specific headers to work, for example, in this case, the API key in the authorization header. Others require details about the user agent and so on, but details of these will always be covered in the [[https://unsplash.com/documentation/user-authentication-workflow|API's documentation]]. 
+
+See [[https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines|Unsplash API Guidelines]] from the [[https://unsplash.com/documentation|official Unlash technical guidelines]] for integrating the Unsplash API into your application for mor details
+
+==== Request Headers (Read Request meta data) ====
+In addition to the request headers, the **response also includes headers** which **represent metadata about the response**. [[https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields|Common response headers]] include details about the response body, like its length, the language it uses and the type, for example, HTML, JSON and so on. To view all the response headers, we set the **[[https://curl.se/libcurl/c/CURLOPT_HEADER.html|CURLOPT_HEADER]]** setting to true. Now, when we make a request, the response headers are included as part of the response body, before the payload, with a blank line separating them. 
+<code php>
+<?php
+$ch = curl_init();
+ 
+$headers = [
+  "Authorization: Client-ID YOUR_ACCESS_KEY"
+];
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.unsplash.com/photos/random",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_HEADER => true
+]);
+$response = curl_exec($ch);
+
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+$content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+$content_length = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Type:    " . $content_type;
+echo "Length:  " . $content_length;
+echo "Response\n" . $response, "\n";
+</code>
+**With this response, we can see some standard headers**, like the response type, which in this case is [[https://www.json.org/json-en.html|JSON]], and the content length, which is the size of the response body below in bytes. There are also some **non-standard headers, which typically begin with an X**, for example, with this API, this account is limited to 50 requests per hour, which is shown in the x-ratelimit header, and it also reports how many are left in the remaining header. Adding this option to the cURL request does include all the headers as part of the response body. There are a few response header values that can be retrieved individually using the [[https://www.php.net/manual/en/function.curl-getinfo.php|curl_getinfo]] function, for example, the content type and its length. We're already using this function to get the status code. So let's do the same for the content type, passing in the relevant constant, and also the content length. Then, let's print these out in the same way.
+ 
+Now when we run this, we also get the content type and the content length. As with the request headers, details of what data are included in the response headers will be covered in the [[https://unsplash.com/documentation#public-authentication|API's documentation]]. 
+
+==== Individual Response Headers ====
+Although there are a few response headers we can get using the [[https://www.php.net/manual/en/function.curl-getinfo.php|curl_getinfo]] function, we can't get all of them like this. Setting the **[[https://curl.se/libcurl/c/CURLOPT_HEADER.html|CURLOPT_HEADER]] option to true**, just adds all the headers to the top of the response, as we just saw. If you want to get all of the response headers in a more usable format, then we can use the [[https://curl.se/libcurl/c/CURLOPT_HEADERFUNCTION.html|CUROLOP_HEADERFUNCTION]]. We can set this value to a callback function that will be called once for each response header, allowing us to process each one individually.
+
+**Note** that for this to work, the function needs to return the length of the individual header, in bytes. Before we add this, let's remove the individual header calls we added earlier for the content type and content length, and also the setting that adds the headers to the response body. Next, let's initialise an array to store each individual response header. Then create a closure, which will be our callback function, and this is the function that will be called for each response header. When [[https://curl.se/|cURL]] calls this function, it will be passed two arguments the [[https://curl.se/|cURL]] handle, and the header value itself. So we can use the array variable we just created inside this function, we have to pass it in from the parent scope with use, prefixing it with an ampersand, so it's passed by reference. Inside the body of the function, first we'll use the string length function to get the length of the header. Then for now, let's just append the value of the header to the array. Finally, we'll return the header length value. To call this function for each header, we add the HEADERFUNCTION option, setting its value to the callback function. To see the results, at the end of the script, let's print out the contents of this array, just before we print out the response body.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: ClientID YOUR_ACCESS_KEY"
+];
+$header_callback = function($ch, $header) use (&$response_headers) {
+  $len = strlen($header);
+  $response_headers[] = $header;
+  return $len;
+}
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.unsplash.com/photos/random",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_HEADERFUNCTION => $header_callback
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+print_r($response_headers);
+echo "Response\n" . $response, "\n";
+</code>
+When we run this, we get an array containing each individual response header as a string. Each header is the name of the header, followed by a colon and then its value. 
+
+If you want to separate the header name from its value in the array, first we need to split the header into parts with the colon as a separator, specifying a maximum of two parts. If there are less than two parts, then it's not a valid response header. So we'll ignore it, and just return the length. Otherwise, we'll use the first part as the array key, and the second part as the value. Let's also call trim on this to remove any surrounding whitespace. Now when we run this, the array of response headers has the header names as the array keys, and the values just contain the header value.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: ClientID YOUR_ACCESS_KEY"
+];
+$header_callback = function($ch, $header) use (&$response_headers) {
+  $len = strlen($header);
+  $parts = explode(":", $header, 2);
+  if (count($parts < 2)) {
+    return $len;
+  }
+  $response_headers[$parts[0]] = trim($parts[1]); // = $header;
+  return $len;
+}
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.unsplash.com/photos/random",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_HEADERFUNCTION => $header_callback
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+print_r($response_headers);
+echo "Response\n" . $response, "\n";
+</code>
+So if you **need to handle the response based on one or more of the response headers**, you have various options for processing them.
+
+==== API requires a specific Header ====
+Before we learn about the request method, we need to see how to use the [[https://docs.github.com/en/rest/activity?apiVersion=2022-11-28#starring|GitHub API]] as we'll be using this to demonstrate how request methods work. We'll be using the part of the API that lets you start a repository, which, if you're unfamiliar, is like bookmarking repositories. As with the Unsplash API, the [[https://github.com/settings/tokens|GitHub API requires an access token]], which you can generate in the Personal [[https://github.com/settings/tokens|GitHub Access Token]] section of the developer settings in your GitHub account. Before we start with the [[https://docs.github.com/en/rest/using-the-rest-api/getting-started-with-the-rest-api?apiVersion=2022-11-28#user-agent-required|GitHub API]], to keep it simple, let's just remove the response header code that we added earlier.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: token YOUR_ACCESS_KEY"
+];
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.unsplash.com/photos/random",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+Then let's change the authorization header to the format required by the [[https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#check-if-a-repository-is-starred-by-the-authenticated-user|GitHub API]], followed by your own token value as. We'll start by using the [[https://docs.github.com/en/rest/activity/starring?apiVersion=2022-11-28#check-if-a-repository-is-starred-by-the-authenticated-user|API to check if a repository is starred]] or not, which we do by sending a **Get request** to this endpoint **
+/user/starred/{owner}/{repo}**. Substituting the owner and repo name you want to check. You can check any repository you like. For this example, I'll use the [[https://github.com/httpie/cli|http repo httpie/cli]], which just happens to be a tool we'll be using later on. So let's change the URL to this endpoint, passing in the repo owner and repo name as part of the URL.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: token YOUR_ACCESS_KEY"
+];
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/user/started/httpie/httpie",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+Let's give that a try. And we get an error message with a 403 status code request forbidden us. This is because the GitHub API requires all requests to include a **valid user agent header**, which can be your GitHub username or the name of your application. For example, There are two ways you can add this header. One is to use the array of headers we're already using for the authorization token. So let's add that and I'll set it to my GitHub username a3. Now when we run this we get a 204 status code. This corresponds to the repository being starred by my user, which as we can see it is A3. The other way to add this header is with the user agent option. And when we run this it works in the same way. So in addition to the authorization token, the GitHub API requires a user agent header which you can add using either of these methods, whichever you prefer.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: token YOUR_ACCESS_KEY",
+  // "User-Agent: <code php>
+];
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/user/started/httpie/httpie",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_USERAGENT => "robing"
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+
+==== Different Methods, same URL ====
+When making a request, in addition to the headers and the URL, we can also specify a request method. These are sometimes referred to as **HTTP verbs**. Unlike the request headers, which are just metadata about the request, the method can **affect what the request does**. You will be familiar with request methods if you've used [[https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/form|forms in HTML]]. **By default, a form uses the GET method**, but you can also specify POST in the "method" attribute of the form. In addition to GET and POST, there are [[https://en.wikipedia.org/wiki/HTTP#Request_methods|other methods]] such as PUT and DELETE. Note that you can't specify these additional methods in a form in HTML, but you can when using client side [[home:js:|JavaScript]] to make [[home:js:ajax:|Ajax]] requests, and of course, when using [[https://curl.se/|cURL]] from [[home:php|PHP]], as we'll see in a moment. We just learned how to use the GitHub API to check if a repository has been starred or not. However, we can also use the API to change this status. To remove a star from a repository, or to add it. Note that the endpoint URL is exactly the same for all of these actions - to check if a repository is starred, to remove it, or to add it. What differs is the method used in the request. 
+
+The default request method is GET, which is why we haven't been setting this until now that's all we've needed to use. To change the request method, we specify the [[https://curl.se/libcurl/c/CURLOPT_CUSTOMREQUEST.html|CURLOPT_CUSTOMREQUEST]] option, setting it to the method we want, in this case DELETE. **Note** that unlike in HTML, the method has to be in uppercase, otherwise, it won't work.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: token YOUR_ACCESS_KEY",
+  // "User-Agent: <code php>
+];
+
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/user/started/httpie/httpie",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_USERAGENT => "robing",
+  CURLOPT_CUSTOMREQUEST => "DELETE"
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+Let's try that, and we get a 204 status code, which means it worked and if we refresh the page in the browser, we can see that it's no longer starred. Let's change the code again to add a star back to the repository. Again, we don't need to change the endpoint URL, just the method. This time, we'll change it to PUT, making sure it's in uppercase. Let's run that again, we get the 204 success status code, and in the browser, we can see that the repository has been starred again.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: token YOUR_ACCESS_KEY",
+  // "User-Agent: <code php>
+];
+
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/user/started/httpie/httpie",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_USERAGENT => "robing",
+  CURLOPT_CUSTOMREQUEST => "PUT"
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+So just by changing the request method, we can carry out different actions. The GET method will retrieve if the repository is starred or not, **DELETE will unstar a repository**, and **PUT will star a repository**.
+
+These three different methods do different things with the same endpoint URL. This is a key part of RESTful APIs, which we'll learn about later on.
+
+==== Add a payload to send data with a request ====
+In addition to the response body, we can also send a body or payload with the request. This is in fact what happens when a regular HTML form sends a post request. The data from the form goes in the request body. To demonstrate this, we'll continue to use the [[https://docs.github.com/en/rest/repos?apiVersion=2022-11-28#create-a-repository-for-the-authenticated-user|GitHub API]], this time working with the authenticated user's repositories. To create a new repository, we send a post request to this endpoint. To specify the parameters for the new repository, like the name, description and so on, we need to send them in the body of the request.
+
+So let's change the URL we're sending the request to to this endpoint **/user/repos**. Then we'll change the request method used to POST. To specify the body of the request, first, let's create an array containing two elements the name of the repository, and its description. The API requires this data to be JSON encoded, so we'll call the json_encode function on that array. To attach this data to the request, we use the [[https://curl.se/libcurl/c/CURLOPT_POSTFIELDS.html|CURLOPT_POSTFIELDS]] option, assigning its value to the JSON-encoded data. Before we run this, we'll have a look at the list of my current repositories, which is here.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: token YOUR_ACCESS_KEY",
+];
+
+$payload = json_encode([
+  "name"=> Create from API,
+  "description" => "an example API-create repo"
+]);
+
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/user/repos",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_USERAGENT => "robing",
+  CURLOPT_CUSTOMREQUEST => "POST",
+  CURLOPT_POSTFIELDS => $payload
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+Let's run the script and we get a **201 created success code**, along with the details of the repository that was created. And in the browser, if we refresh the list, there's the new repository, with the name and the description set to the values we sent with the API call. When we make this request, we're explicitly setting the request method to POST. There is another way to do this, and that's to set the POST option to true. This will also set the request method to POST. Having said that, by setting the [[https://curl.se/libcurl/c/CURLOPT_POSTFIELDS.html|CURLOPT_POSTFIELDS]] option as we're doing to attach the payload, this automatically sets the request method to POST, so it's not actually necessary to explicitly set the request method in this instance, although you can if you prefer.
+<code php>
+<?php
+$ch = curl_init();
+$headers = [
+  "Authorization: token YOUR_ACCESS_KEY",
+];
+
+$payload = json_encode([
+  "name"=> Create from API,
+  "description" => "an example API-create repo"
+]);
+
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/user/repos",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_HTTPHEADER => $headers,
+  CURLOPT_USERAGENT => "robing",
+  // CURLOPT_CUSTOMREQUEST => "POST",
+  CURLOPT_POST => true,
+  CURLOPT_POSTFIELDS => $payload
+]);
+$response = curl_exec($ch);
+ 
+$status_code = curl_get($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+ 
+echo "Status:  " . $status_code, "\n";
+echo "Response\n" . $response, "\n";
+</code>
+So as we've just seen in this section, the request isn't just a URL. It also consists of headers, a method and an optional body. Likewise, the response isn't just a body, which could in fact be empty. We also obtain a status code and headers when we receive a response.
+
+===== REST and RESTful API =====
+
+Now we know how each HTTP requests work, we can learn about REST and RESTful APIs. This is what we'll be doing in this section. Most web APIs are RESTful, which means they follow a set of rules known as **representational state transfer**, or [[https://en.wikipedia.org/wiki/REST|REST]]. **[[https://roy.gbiv.com/pubs/dissertation/rest_arch_style.htm|REST is a set of rules for how to structure an application]]**. The basic idea of REST is treating objects on the server as resources that can be created, updated or destroyed. For example, rows in a database table. Unlike a regular web application, these actions are carried out using a combination of specific URLs and HTTP methods. For example, let's say you have a **product database** and you want to create a RESTful API to access it. **Resources are best thought of as nouns such as user, post, article and so on**.
+
+So in this case, **"product" would be a resource**. To get a list of all products, the RESTful way to do it would be to make a **GET request to /products**. Each **resource has a unique identifier**, which can be a name or a number, so to get to an **individual product, you make a request to /products, followed by a slash, and the ID of the product**. So far, the same as a regular web application. Now though, we **start to make the requests different by using different request methods**. To create a new product, you make a POST request to /products, with the **data for the new product in the body of the request**.
+^ **Method** ^ **URL** ^
+| GET | /products |
+| GET | /products/123 |
+| POST | /products |
+| PUT or PATCH | /products/123 |
+| DELETE | /products/123 |
+Note that this is the same URL as above used for retrieving a list of products. Only the request method has changed. Likewise, to **update an existing product**, you send a **request to the URL that contains an ID**, but instead using the **PUT or PATCH method**. And to **delete an existing product**, a request to the **same URL, but using the DELETE method**. 
+
+**Note** that to do all this, we only need two URLs: one for a collection of resources, and one for individual ones. __**These URLs refer to resources, not actions**__. The action is taken care of using the HTTP method. So for example, **/products/add would not be a restful URL because it uses the URL to describe the action**. These are the endpoints a RESTful API would have for manipulating product data on the server. Any other resources would follow the same pattern. So when designing a RESTful API, all you basically need to do is to identify the resources, then the URLs to manipulate these resources follow on naturally. So when someone refers to a REST API, generally what they mean is the API uses RESTful URLs like these for retrieving, updating and deleting data.
+
+==== Access RESTful APIs in PHP with cURL ====
+In the previous section, we used the GitHub API, which is a RESTful API. For example, if we look at the [[https://docs.github.com/en/rest/gists?apiVersion=2022-11-28|documentation for gists]], to get a list of gists, we send a GET request to /gists/{gist_id}. To get an individual gist, we send a GET request to /gists, followed by the ID of the [[https://docs.github.com/en/rest/gists/gists?apiVersion=2022-11-28#get-a-gist|individual gist]]. To update a gist, we send a PATCH request to the same URL /gists/{gist_id}, and so on.
+
+In this case, the gist is the resource. In other parts of the API, there are equivalent endpoints for other resources, such as repositories, users and so on. Let's look at an example using both URLs the one for collections, and the one for individual resources. We'll start with this script, which you'll be familiar with. We initialise a cURL session, then set the various options we need: the [[https://curl.se/libcurl/c/CURLOPT_URL.html|CURLOPT_URL]], [[https://php.watch/codex/CURLOPT_RETURNTRANSFER|CURLOPT_RETURNTRANSFER]], which returns the response as a string, and the required User-Agent string. We send the request, retrieving the response into this variable, and then we close the cURL session. In the [[https://docs.github.com/en/rest/gists/gists?apiVersion=2022-11-28#list-gists-for-the-authenticated-user|list of gists]], the data returned includes a lot of properties, but to keep it simple, let's just print out the ID and the description. So first, let's decode the JSON response into an associative array. Then we'll loop around that array, and print out the ID, a hyphen as a separator, the description, and a new line character.
+<code php>
+<?php
+$ch = curl_init();
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/gists",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_USERAGENT => "robing",
+]);
+$response = curl_exec($ch);
+curl_close($ch);
+$data = json_decode($response, true);
+foreach ($data as $gist) {
+  echo $gist["id"], " - ", $gist["description"], "\n";
+}  
+</code>
+When we run this, we get a list of gist IDs and their descriptions, some of which are empty. **Note** that we only get 30 results, as this is the default number of gists per page, but you can change this by passing in a different value in the query string. Let's pick one of these IDs, and copy it. Now we can use the endpoint to get the data about an individual resource. To do that, we add the ID to the end of the URL. Then, instead of leaping around the results, we just print out the whole array. 
+<code php>
+<?php
+$ch = curl_init();
+ 
+curl_setopt_array($ch, [
+  CURLOPT_URL => "https//api.github.com/gists/0f820ccb870c31aa232668bd4f5f5ccab6",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_USERAGENT => "robing",
+]);
+$response = curl_exec($ch);
+curl_close($ch);
+$data = json_decode($response, true);
+/*
+foreach ($data as $gist) {
+  echo $gist["id"], " - ", $gist["description"], "\n";
+} 
+*/
+print_r($data); 
+</code>
+When we run this, we get all the details about that particular gist. These endpoints require the HTTP GET method, which is the default, so we don't have to specify it. For other endpoints that require other methods, we can set it using the [[https://curl.se/libcurl/c/CURLOPT_CUSTOMREQUEST.html|CURLOPT_CUSTOMREQUEST]] option as we saw earlier. 
+
+
+So accessing a RESTful API using cURL is no different to any other API. Basically, it's just a matter of specifying the URL and the request method.
+
+==== Guzzle HTTP client for OOP API ====
+So far, we've looked at two ways to access an API using PHP: the [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] function and [[https://www.php.net/manual/en/book.curl.php|cURL]].  **cURL is fairly straightforward to use, and is usually installed by default**.
+
+However, **it doesn't produce very readable code, and it certainly isn't object oriented**. A popular alternative is [[https://docs.guzzlephp.org/en/stable/|Guzzle]]. **Guzzle is a PHP HTTP client that makes working with APIs very simple**, with easy to read object-oriented code. **Note** that by default,** Guzzle does use cURL, so you still need to have that installed**. But as I just said, it's likely that you already have it installed. To use Guzzle, first we need to install the package and its dependencies. The recommended way to do this is using Composer on the command line.
+<code bash>
+composer require guzzlehttp/guzzle
+</code>
+Once installed, first we need to require the various package classes. The simplest way to do this is just to include Composer's autoloader. Then we create a Guzzle Client object, which is in the GuzzleHttp namespace. As an example, let's make a request to the GitHub API, as we did in the previous section. To make a request, we call the request method on the Client object, **first passing in the method we want to use**, in this case GET, and **then the URL of the endpoint**. In the optional third argument, we can **pass in headers in an array**. Remember that for this request, the GitHub API requires two headers
+  * first, the authorization header, set to the access token we used earlier, 
+  * then the User-Agent header. 
+Calling this method returns a Response object, so we'll assign that to a variable. To get the details of the response, we can call various methods on this object. For example, to get the status code, we call the getStatusCode method. Let's print that out, followed by a newline character. Headers can be accessed in a similar way. For example, let's get the Content-Type header, which will be an array just in case there are multiple headers with the same value. So we'll just get the first element of that array. Again, we'll print that out, followed by a newline character. To get the response body we call the getBody method. This will be quite a long string of JSON, so let's use the substr function to just print out the first 200 characters of this, followed by an ellipsis just so that we can see that it worked. When we run this, we see the 200 response code, the Content-Type header, which is application/json, and the first 200 characters of the JSON in the response body.
+<code php>
+<?php
+require __DIR__ . "/vendor/autoload.php";
+$client = new GuzzleHTTP\Client;
+$response = $client->request("GET", "https//api.github.com/user/repos", [
+  "headers" => [
+    "Authorization" => "token YOUR_TOKEN",
+    "User-Agent" => "robing"
+  ]
+]);
+
+echo $response->getStatusCode(), "\n";
+echo $response->getHeader("content-type")[0], "\n";
+echo substr($response->getBody(), 0, 200), "...\n";
+</code>
+As you can see, having request and response objects along with clearly named methods like this makes the code much more readable than the cURL equivalent. To change the HTTP method used, you simply change the first argument to the request method. Alternatively, there are some [[https://docs.guzzlephp.org/en/stable/quickstart.html#sending-requests|magic methods like get, delete, patch]] and so on, which will do the same thing. There are many options available when making a request. For example, to [[https://docs.guzzlephp.org/en/stable/request-options.html#body|add a request body]], we simply include it in the third argument when we call request. As for working with headers, there are convenience methods like [[https://docs.guzzlephp.org/en/stable/psr7.html#accessing-headers|hasHeader]] to see if a request or response contains a certain header. And you can get individual headers as we just did, or an array containing all of them with the getHeaders method. As you can see, the official documentation is comprehensive and very clear.
+
+So **Guzzle is another alternative to accessing APIs using PHP, which makes the code simpler and easier to read**.
+
+=== SDK Usage ===
+Using the [[https://www.php.net/manual/en/function.file-get-contents.php|file_get_contents]] function, [[https://www.php.net/manual/en/book.curl.php|cURL]] and [[https://docs.guzzlephp.org/en/|Guzzle]] all use HTTP requests to access the API directly. There is however another alternative to accessing some APIs, and that's to use a [[https://aws.amazon.com/sdk-for-php/||software development kit or SDK]]. **An SDK is a set of pre-written components in a single installable package or library**. In the context of APIs, an SDK is basically a tool that calls an API for you.  **It's a way to integrate an API into your application without having to call the API directly**. Also, an SDK could include functionality for accessing more than one API or just a limited part of an API. Not all APIs will have an SDK. It depends on the provider, and there's **no standard structure for how an SDK works**. You'll have to look at the documentation for each individual SDK. [[https://www.google.com/search?q=php+sdk|Many popular APIs have an SDK]]. Consult the API vendor to see if there is an SDK available. 
+
+For this example, we're going to use [[https://stripe.com/en-de|Stripe]], which is a service for managing online payments. They have a RESTful API along [[https://docs.stripe.com/sdks|with SDK]], so we can see how the two compare. We'll use the API and SDK to create a new [[http://stripe.com/docs/api/customers?lang?php|customer]]. Let's start with the API, using cURL. In this script, we already have the basic cURL code to make an API request to the endpoint to create a new customer, and we're printing out the response. As with other APIs that we've already seen, we need to authenticate. So let's add a variable containing an API key.
+<code php>
+<?php
+$api_key = 'YOUR_API_KEY';
+$data = [
+  "name" => "Alice",
+  "email" => "alice@example.com"
+];
+
+$ch=curl=init();
+curl_setopt_array($ch, [
+   CURLOPT_URL => 'https://api.stripe.com/v1/customers',
+   CURLOPT_RETURNTRANSFER => true,
+   CURL_USERPWD=> $api_key,
+   CURLOPT_POSTFIELDS => http_build_query($data)
+];
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+echo $response;
+</code>
+These can be generated in the Stripe account dashboard. Instead of a header, this particular API requires the key to be passed using HTTP basic authentication, which we do using the CURLOPT_USERPWD option. Next, let's add an array containing the data for the new customer. This will be an associative array with the customer's name and email address. There are other fields available which we could specify, but these are enough for this example. To pass this data to the API, we set the **CURLOPT_POSTFIELDS option** passing in the array of data. **This will automatically set the request method to POST**. Instead of formatting the data using JSON though, this API requires the data to be formatted as a URL-encoded query string, which we can do using the [[https://www.php.net/manual/en/function.http-build-query.php|http_build_query]] function. So finally, let's call that on the array of data we're passing in the request. In the [[https://dashboard.stripe.com/test/customers|Stripe dashboard]], the list of customers for this account is currently empty. Let's run the script, and the response is some JSON that represents the new customer record. And in the list of customers, there's the new customer record, created using the API.
+
+Now, let's do the same thing using the SDK. First, let's install the SDK using Composer.
+<code bash>
+customer require stripe/stripe-php 
+</code>
+Then in the code, let's comment out to the cURL code. We still need the API key and the customer data, but we'll change the customer data to differentiate it in the dashboard. Then, so the classes in the SDK are loaded automatically, we'll require Composer's autoloader. Then we'll create a StripeClient object, passing in the API key as an argument. To create a new customer, we simply access the customers property of this object. Then call the create method on that, passing in the array of data. This returns an object that represents the new customer, and we can just print that out using echo. Let's run that, and we get the new customer details printed out.
+<code php>
+<?php
+$api_key = 'YOUR_API_KEY';
+$data = [
+  "name" => "Bob",
+  "email" => "bob@example.com"
+];
+require __DIR__ . "/vedor/autoload.php";
+
+$stripe = new \Stripe\StripeClient($api_key);
+$customer = $stripe->customers->create($data);
+echo $customer;
+
+/*
+$ch=curl=init();
+curl_setopt_array($ch, [
+   CURLOPT_URL => 'https://api.stripe.com/v1/customers',
+   CURLOPT_RETURNTRANSFER => true,
+   CURL_USERPWD=> $api_key,
+   CURLOPT_POSTFIELDS => http_build_query($data)$data
+];
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+echo $response;
+*/
+
+</code>
+In the [[https://dashboard.stripe.com/test/customers|list of customers]], there's the new customer record, this time created using the SDK. As you can see, the SDK code is much simpler than the API call. So **if an API has an SDK available, it will almost certainly be much easier** to use than making direct calls to the API.
 
 
 
+===== Build a RESTful API framework =====
+Now we understand how APIs work and how to use them, we can write our own RESTful API using PHP. We'll create an API to process tasks on a todo list. This is what we'll be doing in this and the next two sections. I'm going to use the Apache web server, installed locally, but you can use another server if you prefer. Details of how to install a web server are covered at the start of the course. I'm going to be developing the code in a sub folder of the web root, called "api". So let's start by creating that folder. Then we'll create a new file in here, called index.php. In here, we'll add the PHP opening tag, and for now, let's just print out a message so we can check it's working. 
+<code bash>
+mkdir api
+echo '<?php' > api/index.php
+echo 'echo "Hello User";
+</code>
+If we [[http://localhost/api/|open this script in a browser]], we see the message, meaning all is working properly. The URL though, contains the folder and name of the script index.php. However, in our RESTful API, we want URLs like /tasks, /tasks followed by  the ID and so on. By default, there's a direct mapping between the request URL and the file and folder on the web server. So these RESTful URLs, which don't follow this pattern won't work, as the web server doesn't know what to do with them.
 
-REST is not a protocol, it's an idea or a philosophy, a way of building things in a manner that's very consistent and elegant. A REST service tries to make data processing very easy over HTTP. You can do REST without HTTP, but its specially designed as an service to work with data over HTTP. It's ideally suited to situations were we do CRUD.
+==== Enable URL rewriting ====
+We can change this by using the URL rewriting capability of the web server. By adding some rewrite rules to the web server configuration, we can associate each URL with whatever script we want. In Apache, we can do this with an .htaccess file. So let's create a new file in the api folder called **.htaccess**. **Note the name has to be exactly that, starting with the dot and lowercase**. In here, we'll **turn the rewrite engine on**, then add a rewrite rule that says for **any URL, run the index.php script**. At the end we'll **add the "L" flag**, which just tells the rewrite engine to stop processing. **Note this is not PHP, these are Apache configuration directives.**
+<code config>
+RewriteEngine On
+RewriteRule . index.php [L]
+</code>
+Before we test this, we need to add **some rules to ignore existing files**, such as images or other assets on the same web server. This will effectively **deactivate the URL rewriting for any existing file**, **directory** or **symbolic link**. 
+<code config>
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule . index.php [L]
+</code>
+In the browser, **now we can specify whatever URL we like, and it always runs the index.php script**.
 
+==== Front Controller ====
+We saw earlier that a resource in a RESTful API has two URLs - one for a collection, and one for
+
+an individual resource.
+
+And we also decide what action to take based on the request method.
+
+Now we're rewriting all the URLs to go through this one script, index.php,
+
+we can do this in here.
+
+This is known as a front controller.
+
+This simply means that all requests are sent through one single script and the script decides what to
+
+do.
+
+First, let's process the URL.
+
+So instead of printing out this message, let's print out the URL.
+
+We can get this from the REQUEST_URI
+
+element of the $_SERVER
+
+superglobal.
+
+In the browser, we get the path part of the URL printed out - basically everything after the hostname.
+
+However, this also includes the query string, which we could be using for things like pagination,
+
+for example.
+
+To remove this, we can use the parse_url function, passing in the PHP_URL_PATH as the second argument.
+
+This will parse the URL and remove the query string.
+
+In the browser, even though the query string is still part of the URL in the address bar, now we're
+
+just getting the path.
+
+Note that this does include the sub folder though. As far as the URL goes,
+
+all we're interested in is the segment that identifies the resource - in this case, "tasks". And if there
+
+is an ID or not.
+
+So let's process this path to get these parts.
+
+First we'll assign this path to a variable instead of printing it out.
+
+Then we'll use the explode function to split this into segments using the forward slash character as
+
+a separator.
+
+Let's print that out to see what we get.
+
+In the browser, for a URL containing an ID, we get an array with four elements.
+
+If we remove the ID,
+
+then we get just three elements.
+
+So we're just interested in the third element, which identifies the resource, and the optional fourth
+
+element, which is the ID.
+
+So instead of printing this out, we'll create a variable called $resource, which will be the third
+
+element of this array, and one called $id, which will be the fourth element, or if this isn't set,
+
+we'll set it to null.
+
+Then let's just print these out to see what we get.
+
+In the browser, we get the two values printed out, including the ID value if present,
+
+and not otherwise.
+
+In addition to the URL, we also need to take action based on the request method. Again, we can get
+
+this from the $_SERVER superglobal.
+
+So let's print that out to see what it contains.
+
+In the browser, the method used was GET.
+
+So using this code, we're identifying the three elements we need: the resource, in this case "tasks"; the
+
+optional ID; and the request method.
+
+===== REST stands for representational State transfer =====
 REST stands for representational State transfer and everything is a recourse (a single object or entity). The aim of REST is not having pretty and hackable URLs, its about meaning of URLs having a unique ways to refer to the resources.
 
 On the web, we use HTTP's features to implement REST. When we use REST with HTTP, we use the building blocks of HTTP to implement our restful service, we use **Verbs** to say which operation should take place when we request a collection or a resource. We use the **Status Codes** to give accurate information with every response about what actually happened and we use header to send metadata about the transaction that has taken place. **Headers** are not part of the data we transfer, they are the envelope format, sender address and the data is in the body. This avoids mixing data that relates to the resource and the transaction.

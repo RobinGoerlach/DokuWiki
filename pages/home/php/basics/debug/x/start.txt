@@ -18,7 +18,7 @@ Afterward, the web server and the IDE start to communicate via DBGP Protocol. An
 After the debugging session finishes, the web server sends all the rest data to the browser to execute the code and view the login page. let's recap what we just said Firstly, the process of listening on port number 9000 or 9003 happens Secondly, you start to call xdebug from the browser by sending a request, such as sending a request on the login page. Thirdly, xdebug starts to call your IDE to initialize the debugging session. Fourthly, the IDE calls xdebug and sends it the breakpoints, for example, to inform it to make a breakpoint in this part or to debug this script and so on. Fifthly, the IDE and Xdebug initialize the protocol to start communicating with each other. And the final step is that the web server starts to execute the rest of the script after the end of the debugging session. And then sends the response to the browser to display the login page or the home page or any other page or any execution of the PHP response. Now we know how Xdebug works and deals with PHP installation. So, we're now ready to use xdebug.
 
 Check [[https://www.youtube.com/@ramyhakam/playlists|Ramy Hakam @ YouTube]]
-
+by [[https://www.udemy.com/course/master-advanced-php-debugging-with-xdebug-ultimate-guide|Master Advanced PHP Debugging with XDebug: Ultimate Guide]] Ramy Hakam @Udemy
 ===== Installation of Xdebug =====
 Installation of [[https://xdebug.org/docs/|Xdebug]] depends on your operating system and development environment. The official documentation contains detailed instructions. Choose those that are the most relevant for your setup. If you do need help, please don't hesitate to ask. Once installed, you can check if it's available on the command line by running PHP with the version flag. Choose those that are the most relevant for your setup or run 
 <code bash>
@@ -149,6 +149,41 @@ Then I can go to `LoginServiceTest`. And then I will go to the debug part, Choos
 We saw how you can debug your test case. It's the same method, with the same capabilities, but with a difference. Whether you will add some configurations in Visual Studio Code, Or modify some existing configurations. Alright, we finished the quick video about PHP unit, How you can test and how you can debug in Visual Studio Code. Let's see how you can debug, If Xdebug is inside Docker, Just as we did in PHP Storm.
 
 === Using Xdebug Inside Docker with Visual Studio Code ===
+
+<code bash>
+docker compose build
+docker compose up
+</code>
+
+VS Code -> Run and Debug -> Create a launch file
+<code json>
+{
+  "name": "Listen for Xdebug",
+  "type": "php",
+  "request": "launch",
+  "port": 9003
+}, 
+{
+  "name": "Listen for Xdebug From Docker",
+  "type": "php",
+  "request": "launch",
+  "port": 9003,
+  "pathMappings": {
+    "/var/www/html": "${workspaceFolder}/src/public"
+  }
+}
+</code>
+and **xdebug.ini**
+<code bash>
+zend_extension=xdebug
+xdebug.mode=develop,debug
+xdebug.start_with_request=yes
+xdebug.remote_port=9003
+xdebug.client_port=9003
+xdebug.discover_client_host=0
+xdebug.remote_host=host.docker.internal
+xdebug.client_host=host.docker.internal
+</code>
 ===== XDebug Modes =====
 
 ==== Develop Mode ====

@@ -1,6 +1,7 @@
 **[[home:|Start]]** -> **[[home:php:|PHP]]** -> **HTML & CSS**
 
 ====== HTML & CSS ======
+[[home:css:|CSS]] & [[home:js:|JavaScript]]
 
 <code html>
 <!DOCTYPE html>

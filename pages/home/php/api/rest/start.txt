@@ -720,7 +720,7 @@ Now we understand how APIs work and how to use them, we can write our own RESTfu
 <code bash>
 mkdir api
 echo '<?php' > api/index.php
-echo 'echo "Hello User";
+echo 'echo "Hello User";' >> api/index.php
 </code>
 If we [[http://localhost/api/|open this script in a browser]], we see the message, meaning all is working properly. The URL though, contains the folder and name of the script index.php. However, in our RESTful API, we want URLs like /tasks, /tasks followed by  the ID and so on. By default, there's a direct mapping between the request URL and the file and folder on the web server. So these RESTful URLs, which don't follow this pattern won't work, as the web server doesn't know what to do with them.
 
@@ -738,100 +738,1131 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-l
 RewriteRule . index.php [L]
 </code>
+**.htaccess**
+
 In the browser, **now we can specify whatever URL we like, and it always runs the index.php script**.
 
 ==== Front Controller ====
-We saw earlier that a resource in a RESTful API has two URLs - one for a collection, and one for
+We saw earlier that a resource in a RESTful API has two URLs - one for a collection, and one for an individual resource. And we also decide what action to take based on the request method. **Now we're rewriting all the URLs to go through this one script, index.php**, we can do this in here. __**This is known as a front controller. This simply means that all requests are sent through one single script and the script decides what to do**__. First, let's process the URL. So instead of printing out this message, let's print out the URL. We can get this from the **REQUEST_URI element of the $_SERVER** superglobal.
+<code php>
+<?php
+echo $_SERVER["REQUEST_URI"];
+</code>
+In the browser, we get the [[http://localhost/api/task?page=1|path part]] of the URL printed out - **basically everything after the hostname** like /api/task?page=1. However, this also includes the query string, which we could be using for things like pagination, for example. To remove this, we can use the **[[https://www.php.net/manual/en/function.parse-url.php|parse_url]] function**, passing in the **PHP_URL_PATH** as the second argument. **This will parse the URL and remove the query string** like ?page=1, so this will return /api/task. 
+<code php>
+<?php
+echo parse_url($_SERVER["REQUEST_URI"];, PHP_URL_PATH);
+</code>
+In the browser, even though the query string is still part of the URL in the address bar, now we're just getting the path. **Note that this does include the sub folder though**. As far as the URL goes, all we're interested in is the segment that identifies the resource - in this case, "tasks" and if there is an ID or not like /api/tasks/123?page=1. So let's process this path to get these parts. First we'll assign this path to a variable instead of printing it out. Then we'll **use the explode function to split this into segments** using the **forward slash character as a separator**.
+<code php>
+<?php
+$path = parse_url($_SERVER["REQUEST_URI"];, PHP_URL_PATH);
+$parts = explode("/", $path);
+print_r($parts);
+</code>
+Let's print that out to see what we get. In the browser, for a URL containing an ID, we get an array with four elements 
+  - [0] =>
+  - [1] => api
+  - [2] => tasks
+  - [3] => 123
+If we remove the ID in the URL, then we get just three elements
+  - [0] =>
+  - [1] => api
+  - [2] => tasks
+So we're just interested in **the third element, which identifies the resource**, and **the optional fourth element, which is the ID**. So instead of printing this out, we'll create a variable called $resource, which will be the third element of this array, and one called $id, which will be the **fourth element, or if this isn't set, we'll set it to null**.
+<code php>
+<?php
+$path = parse_url($_SERVER["REQUEST_URI"];, PHP_URL_PATH);
+$parts = explode("/", $path);
+//print_r($parts);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+echo $resource, ", ", $id;
+</code>
+Then let's just print these out to see what we get. In the browser, we get the two values printed out, including the ID value if present, and not otherwise. In addition to the URL, we also need to take action based on the request method. Again, we can get this from the $_SERVER superglobal. 
+<code php>
+<?php
+$path = parse_url($_SERVER["REQUEST_URI"];, PHP_URL_PATH);
+$parts = explode("/", $path);
+//print_r($parts);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+echo $resource, ", ", $id;
+echo $_SERVER["REQUEST_METHOD"];
+</code>
+So let's print that out to see what it contains. In the browser, the method used was GET. __**So using this code, we're identifying the three elements we need: the resource, in this case "tasks"; the optional ID; and the request method**__.
 
-an individual resource.
+==== Testing the Front Controller ====
+We're getting the URL and request method, and to test this up to now, we've used the browser. However, using the browser like this, we can only make GET requests. To use other request methods, we could create an HTML form to test the POST method, and write some JavaScript code that uses Ajax requests to test other methods. This would  effectively be writing a client for working with an API though, and there are already several of these available.
 
-And we also decide what action to take based on the request method.
+We've already been using [[https://www.php.net/manual/en/function.curl-exec.php|cURL]] from [[https://www.php.net/manual/en/book.curl.php|PHP]] to access various APIs. [[https://curl.se|cURL]] is also available on the command line.
+It is installed by default on most desktop operating systems, but you can download it for free from [[https://curl.se/download.html|here]] if you don't already have it. **To make a GET request in cURL, you just call the curl command followed by the URL**. 
+<code bash>
+curl https://localhost/api/tasks
+</code>
+This will request the URL and print out the body of the response, just like we saw in the browser.** To use a different request method, we specify the --request option**, for example, using the PATCH method. 
+<code bash>
+curl https://localhost/api/tasks --request PATCH
+</code>
+You can abbreviate this option to -X if you prefer. 
+<code bash>
+curl https://localhost/api/tasks -X PATCH
+</code>
+If you prefer a graphical user interface, **an alternative to [[https://curl.se|cURL]] is [[https://www.postman.com/downloads/|Postman]]**. This is available for all operating systems. You can download this and run it locally, or use the browser-based version. Instead of working on the command line, you specify the URL, request method, headers and so on using a GUI. Another alternative is **[[https://httpie-io|HTTPie]]**, which, like [[https://curl.se|cURL]], is a command-line tool. **[[https://httpie-io|HTTPie]] is more user friendly** than [[https://curl.se|cURL]] though, and is specifically designed with API development in mind. To install [[https://httpie-io|HTTPie]], just follow the instructions for your particular operating system. Once installed, to use [[https://httpie-io|HTTPie]] on the command line, we simply enter the "http" command, followed by the URL. 
+<code bash>
+http https://localhost/api/tasks
+</code>
+**GET is the default method**, so we don't need to specify it. To **specify another request method, we simply include it before the URL**. 
+<code bash>
+http patch https://localhost/api/tasks
+</code>
+As you can see, in addition to the response body, the headers are also shown, highlighted in different colours. **All these API clients are cross-platform and free**. On this course, I'm going to use [[https://httpie-io|HTTPie]], as it's simpler than [[https://curl.se|cURL]] and more lightweight than [[https://www.postman.com/|Postman]]. As far as the course content is concerned though, it doesn't matter. So feel free to use whichever you prefer.
 
-Now we're rewriting all the URLs to go through this one script, index.php,
+==== Set the HTTP status code ====
+When we make a request to our API, the status code of the response, is 200, which means the request was successful. 
+<code bash>
+http http://localhost/api/taskd
+</code>
+This request was for /tasks. At the moment, we're not checking the path of the URL, so any request will be successful. We're going to develop an API for managing tasks on a to-do list, so only two URLs are needed: /tasks and /tasks followed by an ID. **Any other URL should return a 404 status code**. So once we've extracted the resource segment out of the URL, if this doesn't equal "tasks", we can set the status code to 404.
+<code php>
+<?php
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  exit;
+}
+</code>
+There are two ways we can do this. The first is to set the **response header containing the status code using the [[https://www.php.net/manual/en/function.header.php|header function]]**. Note that the status code header contains the **HTTP version, in this case 1.1, the status code itself, and some status text**, which is also known as a reason phrase, which we'll get to in a moment. So let's call the header function, passing in a string with the HTTP version, the status code and the **reason phrase**. My server is using HTTP 1.1, so this is the version of HTTP that I'll pass in. If you don't want to hardcode this, you can get it from the **SERVER_PROTOCOL element of the $_SERVER superglobal**. Then we'll exit from the script, as there's no need to continue processing if the [[http://localhost/api/failtasks|URL is incorrect]]. Let's try that with a URL that doesn't match our task API. And we get the 404 not found status code.
+<code bash>
+http http://localhost/api/failtasks
+</code>
+For a [[http://localhost/api/tasks|valid URL]], we continue to get the 200 status code. 
+<code bash>
+http http://localhost/api/tasks
+</code>
+The second option is to use the **[[https://www.php.net/manual/en/function.http-response-code.php|http_response_code function]]**. This sets the reason phrase automatically from a hardcoded list in the PHP source code. So instead of writing the header directly, we **just call the http_response_code function**, passing in 404 as the code we want.
+<code php>
+<?php
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+</code>
+[[https://localhost/api/failtasks/|Let's try]] that, and we get the 404 status code along with the Not Found recent phrase. 
+<code bash>
+http https://localhost/api/failtasks
+</code>
+If you really want to change the reason phrase, then you'll have to set the status code using the header function. However, these reason phrases aren't really meant for the client anyway, and **in HTTP 2, they're not actually supported**. If you want to **return details about the response, the best place to do it is in the response body**, as we'll see later on. So the **recommended way to set the status code is to use the http_response_code function**. **We don't need to call this to set the 200 status code, as this is the default**. Note that we're only developing an API for task resources. **If you have other resources you want to deal with in here, you'll need additional processing in here, or alternatively, you could use a third-party router to process the URL**. For the purposes of the course, we'll keep it simple, and just have an API for tasks.
 
-we can do this in here.
+==== Add a controller class ====
+Now we've isolated the parts of the URL we need, and the request method, we can process the request. **Rather than do this in here in the front controller, let's add a separate class to do this**. First, we'll create a folder to store classes, called "src". Then we'll create a new file in here. This will be controlling the interaction with task resources, so we'll call it **TaskController.php**. In this new file, we'll add the opening PHP tag, and the class definition, **matching the class name to the file name**. This is **important later on for autoloading**. I won't use a namespace in order to keep it simple, but feel free to add one if you like. Then let's add a new public method called processRequest. Remember, we're going to do different things based on the request method and the URL - 
+whether the URL includes an ID or not. So let's pass two arguments to this method - the first being the request method, then the ID. 
+<code php>
+<?php
 
-This is known as a front controller.
+class TaskController
+{
+  public function processRequest($method, $id) 
+  {
+  
+  }
+}
+</code>
+**File: ./src/TaskController.php**
 
-This simply means that all requests are sent through one single script and the script decides what to
+Back in the front controller, let's call this method. First, let's load the file the class is in, which for now, we'll do using require. We'll use the **dirname function and __DIR__ constant to get the parent folder** of the current folder so that this will be an absolute path. This is the safest way to require a file, as **relative paths might not always work in all PHP configurations**. Then we'll create a new object of the class, and **call the processRequest method**. The first argument is the request method, which we can get directly from the $_SERVER global. The next argument is the ID, which we're creating up here. If the ID isn't set, we're assigning the variable a value of null. 
+<code php>
+<?php
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+
+require dirname(__DIR__) . "/src/TaskController.php";
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./index.php**
+
+So in this method in the controller, we can check for this. If the ID is null, the URL is the one for collections, i.e. the one that doesn't contain an ID. So we need to act based on the request method. If it's GET, we want to retrieve a list of tasks. For now, we'll just print out a message. If the method is POST, we want to create a new task, and again, we'll just print out a message. If the idea isn't null, we're dealing with an existing task. This time, let's add a switch statement to decide what to do, based on the method. If it's GET, we want to show the task with that ID. For editing resources, we'll specify the PATCH request method. So if it's PATCH, we'll update that task. Finally, if it's DELETE, we'll delete that task.
+<code php>
+<?php
+
+class TaskController
+{
+  public function processRequest($method, $id) 
+  {
+     if ($id === null) {
+       if ($method == "GET") {
+         echo "index";
+       } elseif ($method == "POST") {
+         echo "create";
+       }    
+     } else {
+        switch ($method)
+        case "GET":
+          echo "show $id";
+          break;
+        case "Patch":
+          echo "update $id";
+          break;
+        case "DELETE":
+          echo "delete $id";
+          break;             
+     }
+  }
+}
+</code>
+**File: ./src/TaskController.php**
+
+Before we test this, let's remove these lines where we're printing out the resource and method at the top of the front controller, as we no longer need them.
+<code php>
+<?php
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+
+require dirname(__DIR__) . "/src/TaskController.php";
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./index.php**
+
+[[http://localhost/api/tasks|Let's give that a try]]. If we make a GET request to /tasks, we get the index method printed out in the response body. 
+<code bash>
+http http://localhost/api/tasks
+</code>
+If we send a POST request to the same URL, it says create. 
+<code bash>
+http post http://localhost/api/tasks
+</code>
+Let's add an ID to the URL. and change it to a GET request, and we get the message to show the resource with that ID. 
+<code bash>
+http http://localhost/api/tasks/123
+</code>
+With the PATCH method it will be updated,
+<code bash>
+http patch http://localhost/api/tasks/123
+</code>
+and with the DELETE method, it will be deleted.
+<code bash>
+http delete http://localhost/api/tasks/123
+</code>
+__**So the controller is deciding what to do based on the request method and if there is an ID in the URL or not.**__
+==== Use Composers autoloader ====
+In the front controller, we're explicitly loading the file where the TaskController class is defined, using the  require statement. As we'll be adding more classes and therefore more files to the project, it will be simpler to load these automatically. We could do this by registering an **auto loader using the [[https://www.php.net/manual/en/function.spl-autoload-register.php|spl_autoload_register function]]**, but it's simpler to use, **[[https://getcomposer.org/doc/01-basic-usage.md#autoloading|Composer's autoloader]]**. To do this, first let's create a new **file called composer.json**. Note we're **creating this file in the root, not in the API folder**. In here, let's add an "autoload" field, then inside there, a "psr-4" field, and in there, a key of an empty string, and the value of the "src" folder. **This means that the autoloader will try and load classes from the src folder**. PSR-4 autoloading simply means that classes are loaded automatically when the **file name matches the class name**, which is why **we created the TaskController class in a file called TaskController.php**, making sure that the case matches. 
+<code json>
+{
+  "autolad": {
+    "psr-4": {
+       "": "src/"
+    }
+  }
+}
+</code>
+**File: ./composer.json**
+
+To generate the autoload script, on the command line in the same folder as the **composer.json file**, we run the **composer dump-autoload** command. This generates an autoload.php script in the vendor folder.
+<code bash>
+composer dump-autoload
+</code>
+**Note that you never need to edit this file and the files it includes directly** - they're generated automatically by Composer whenever you run the dump-autoload command. To use this, at the top of the front controller, we'll require the file using the dirname function and __DIR__ constant as we did below. Now we can remove the line where we're requiring the controller class. 
+<code php>
+<?php
+require dirname(__DIR__) . "/vendor/autoload.php";
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+
+//require dirname(__DIR__) . "/src/TaskController.php";
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./index.php**
+
+[[http://localhost/api/tasks|Let's try making a request again]], and it still works as before. 
+<code bash>
+http http://localhost/api/tasks
+</code>
+Now though, this class is being loaded automatically, which will also work for any other class we add to the src folder in the same way.
+==== Make debugging easier ====
+In the TaskController class, we have the processRequest method, which has two arguments: the request method, and the resource ID. In the interests of good coding practices, and to help us debug the code more easily, let's add [[https://www.php.net/manual/en/language.types.declarations.php|type declarations]] to the method arguments and its return value. The method argument will be a string, as will the id. Even if this id is numeric, it's still coming from the URL, so it will be a string. For now, we're not returning anything from this method, so we'll declare its return value as void.
+<code php>
+<?php
+ 
+class TaskController
+{
+  public function processRequest(string $method, string $id): void
+  {
+</code>
+**File: ./src/TaskController.php (partial)** 
+
+In the front controller, let's enable strict type checking with the declare statement, **setting the strict_types declaration to 1**. Note that this has to be the first statement in the script. This is optional, but I find if you're going to use type declarations, you might as well make them strict. __**As all requests are going through this script, this setting will be applied globally.**__
+<code php>
+<?php
+declare/strict_types=1);
+require dirname(__DIR__) . "/vendor/autoload.php";
+$path = parse_url($_SERVER["...
+</code>
+**File: ./index.php (partial)** 
+
+Let's request the endpoint to get the details of an individual resource. And this continues to work as before with no problems.
+<code bash>
+http http://localhost/api/tasks/123
+</code>
+However, if I try to get the index of tasks, in the body of the response, we get an error.
+<code bash>
+http http://localhost/api/tasks/
+</code>
+If you're following along and you don't see this error, it could be that PHP isn't configured to display errors. This is controlled by the [[https://www.php.net/manual/en/errorfunc.configuration.php#ini.display-errors|display_errors option]] in the **PHP configuration file**. You need to set this to the string "on". If you don't have access to the configuration file to change this setting, **you can do it in code with ini_set function, setting display_errors to "on"**.
+<code php>
+<?php
+declare/strict_types=1);
+ini_set("display_errors", "on");
+require dirname(__DIR__) . "/vendor/autoload.php";
+$path = parse_url($_SERVER["...
+</code>
+If we look at the error message, we can see the error is occurring because the second argument to the processRequest method is expected to be a string, but null was given. If there's no ID in the URL, the ID variable is set to null. We can mark the type declaration on the ID argument as a nullable by prefixing it with a question mark. 
+<code php>
+<?php
+ 
+class TaskController
+{
+  public function processRequest(string $method, ?string $id): void
+  {
+</code>
+Now when we make the request, the error has gone and it works as expected. 
+<code bash>
+http http://localhost/api/tasks/
+</code>
+If we try it with an ID, this also still works. 
+<code bash>
+http http://localhost/api/tasks/123
+</code>
+With type declarations and strict type checking enabled, finding bugs will be easier and the code will be more readable.
+==== Always return JSON ====
+In the previous video, we saw an error message when the type declaration for this argument wasn't nullable. Let's remove this question mark temporarily so we can reproduce this. And when we make the request again, there's the error. **By default, the details of the error are formatted with HTML tags**, as it's assumed that this will be being viewed in a browser. However, as this is an API, this isn't the case. **We'll be accessing the API using code, or a tool like [[https://httpie.io/|HTTPie]] while we're developing it**. __**We're going to return all successful responses formatted as JSON, as this is the de facto standard**__. So we should do the same with errors and exceptions. We can define a **generic exception handler using the [[https://www.php.net/manual/en/function.set-exception-handler.php|set_exception_handler function]]**. This will catch all unhandled exceptions like the one we just saw, and allow us to control the output. 
+
+We'll leave this bug we just added here in the controller for now and fix it at the end. Instead of writing the **error handling code here in the front controller**, let's put it in a separate class. So let's create a new file in the src folder, called **ErrorHandler.php**. In here, we'll add the PHP opening tag and the class definition to match the file name, so that the PSR-4 autoloading we configured earlier works. In here, we'll add a **public static method called handleException**. This has one argument which is an object of the [[https://www.php.net/manual/en/class.throwable.php|Throwable class]], which we'll call $exception. This doesn't return anything, so we'll type hint it has void. The [[https://www.php.net/manual/en/class.throwable.php|Throwable class]] is the base for all errors and exceptions thrown in PHP, so we have access to various methods to get details about the error. So in the body of the exception handler, we'll output some JSON, passing the json_encode function an array containing a "code" element, which is the code of the exception, and likewise, a "message" element, a "file" element, which is the path of the file where it occurred, and a "line" element for the line number.
+<code php>
+<?php
+
+class ErrorHandler
+{
+  public static function handleException(Throwable $exception): void
+  {
+    echo json_encode([
+      "code" => $exception->getCode(),
+      "message" => $exception->getMessage(),
+      "file" => $exception->getFile(),
+      "line" => $execption->getLine()
+  }
+}
+</code>
+**File: ./src/ErrorHandler.php**
+
+You can add more details to this if you like, but I'll keep it simple and just provide these details. To enable this in the front controller, we call this [[https://www.php.net/manual/en/function.set-exception-handler.php|set_exception_handler function]], passing in the class and method name of the handler we just added.
+<code php>
+<?php
+declare(strict_types=1);
+//init_set("display_errors", "on");
+require dirname(__DIR__) . "/vendor/autoload.php";
+set_exception_handler("ErroroHandler::handlerException");
+
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+ 
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./index.php**
+
+[[http://localhost/api/tasks|Let's give that a try]], repeating the same request, and now the body of the request contains the details about the error in JSON format. **Note that we didn't need to explicitly require the file containing the ErrorHandler class** - this was loaded automatically by the autoloader we configured earlier. If we look at the response headers, we can see the status code is 200, which is incorrect as this response isn't OK, and the Content-Type is still shown as text/html. To fix the Content-Type, let's add the Content-Type header to the front controller. All response bodies in our API will be formatted using JSON so we can safely put it in here and it will apply to all requests. We do this using the header function, setting the Content-Type to application/json. We'll also include the character set, which is UTF-8. Note the hyphen, and also that I've put it in uppercase. **This is case insensitive, but the de facto standard is to put it in capitals**. As for the status code, in the error handler, let's set it to 500, which means a generic server error, using the [[https://www.php.net/manual/en/function.http-response-code.php|http_response_code function]].
+<code php>
+// ...
+  header_response_code (404);
+  exit;
+}
+header("Content-type: application/json; charset=UTF-8");
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./index.php**
+
+Now if we make the request again, we get a 500 internal server error status code, and the JSON content type. **Note that you probably don't want to output all these details like this in a production environment**. Instead, you'd probably log these details and output a generic error message here. This is beyond the scope of the course though, so we'll keep it simple and just output these basic error details.
+<code php>
+<?php
+
+class ErrorHandler
+{
+  public static function handleException(Throwable $exception): void
+  {
+    http_response_code(500);
+    echo json_encode([
+      "code" => $exception->getCode(),
+      "message" => $exception->getMessage(),
+      "file" => $exception->getFile(),
+      "line" => $execption->getLine()
+  }
+}
+</code>
+**File: ./src/ErrorHandler.php**
+
+Now we've configured the error handler, we can remove the error from the task controller that we introduced at the start of the section, and make this type declaration nullable again.
+
+==== Allow header for invalid request methods ====
+In the task controller, we're outputting the response based on the request method, and if the URL contains an ID or not. Some actions will be different for the same URL, but with a different method. For example, a GET request to /tasks will return the list of tasks, whereas a POST request to the same URL will create a new task resource. However, what happens if we use a different request method with this URL, for example DELETE. We get a 200 status code, but no response body. There's no body because we're only outputting something if it's a GET or a POST request. These are the only two valid request methods for this URL.
+
+In fact, if any other request method is used, it's an invalid request and we should send an appropriate status code. The one to send is [[https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/405|405: method not allowed]]. When we send this status code, we must also send an "Allow" header field that lists the methods that are allowed on this resource. This header is simply called "[[https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Allow|Allow]]", followed by a comma-separated list of the HTTP methods that are allowed, in uppercase. So let's add an else statement to this if, then we'll call the http_response_code function with an argument of 405. To send the header, we call the header function, and we'll allow the GET and POST methods. 
+<code php>
+<?php
+ 
+class TaskController
+{
+  public function processRequest($method, $id) 
+  {
+     if ($id === null) {
+       if ($method == "GET") {
+         echo "index";
+       } elseif ($method == "POST") {
+         echo "create";
+       } else {
+         http_response_code(405);
+         header("Allow: GET, POST");
+       }   
+     } else {
+        switch ($method)
+        case "GET":
+          echo "show $id";
+          break;
+        case "Patch":
+          echo "update $id";
+          break;
+        case "DELETE":
+          echo "delete $id";
+          break;             
+     }
+  }
+}
+</code>
+**File: ./src/TaskController.php**
+
+Now if we use an invalid method, we get the 405 status code, and the Allow header is shown with the methods that are allowed.
+<code bash>
+http delete http://localhost/api/tasks
+</code>
+Let's do the same for an individual resource. For example, let's make a POST request to the URL that contains an ID. 
+<code bash>
+http post http://localhost/api/tasks/123
+</code>
+Again, we get to 200 status code and an empty response body. To fix this, we'll send a similar response for requests like this. So we don't repeat ourselves though, first, we'll extract this code out into a separate method. So let's create a new private method called respondMethodNotAllowed, passing in a string argument of the list of allowed methods. This won't return anything, so we'll add the void return type declaration. In here, we'll copy the code we just added, and paste it in the body of the new method. In the Allow header, we'll replace these hardcoded methods with the contents of the $allowed_methods argument.
+<code php>
+private function responseMethodNotAllowed(string $allowed_methods): void
+{
+  http_response_code(405);
+  header(Allow: $allowed_methods");
+}
+</code>
+Then we can replace the older else two lines with a call to this new method, passing in GET and POST as the allowed methods. To fix the problem with an invalid request to the URL containing an ID, let's add a default block to the switch statement. In here, we'll call the new method we just added, passing in GET, PATCH and DELETE as allowed methods. 
+<code php>
+<?php
+ 
+class TaskController
+{
+  public function processRequest($method, $id) 
+  {
+     if ($id === null) {
+       if ($method == "GET") {
+         echo "index";
+       } elseif ($method == "POST") {
+         echo "create";
+       } else {
+         $this->respondMethodNotAllowed("GET, POST");
+       } 
+     } else {
+        switch ($method)
+        case "GET":
+          echo "show $id";
+          break;
+        case "Patch":
+          echo "update $id";
+          break;
+        case "DELETE":
+          echo "delete $id";
+          break; 
+        default:
+          $this->respondMethodNotAllowed("GET, PATCH, DELETE");              
+     }
+  }
+}
+
+private function responseMethodNotAllowed(string $allowed_methods): void
+{
+  http_response_code(405);
+  header(Allow: $allowed_methods");
+}
+</code>
+If we repeat the POST request, now we get the 405 status code with the relevant Allow header. 
+<code bash>
+http post http://localhost/api/tasks/123
+</code>
+If we make a valid request such as GET, then it still works as before, with the status code of 200, and the response body. 
+<code bash>
+http get http://localhost/api/tasks/123
+</code>
+If we make an invalid request to the tasks URL, this gives us the 405 status as before, with the appropriate Allow header.
+<code bash>
+http patch http://localhost/api/tasks/
+</code>
+With a valid method, we get a successful response.
+<code bash>
+http http://localhost/api/tasks/123
+</code>
+====== Create a RESTful Database API ======
+Now we have the basic framework of our API application set up, instead of outputting these placeholder messages from the task controller, we can manipulate some data in a database using the API. In this section, we'll learn how to read and output data from the database.
+
+First, we'll create a database. I'll be doing this in the [[https://mariadb.com/downloads/|MariaDB]] database server that I have installed locally, which for all intents and purposes is the same as [[https://www.mysql.com/downloads/|MySQL]]. All commands shown valid for either DBMS. You'll have a similar setup if you installed the suggested software at the start of the course, although feel free to use any relational database you like. I'll be doing this on the command line, but if you prefer, you can use your GUI of choice, such as [[https://www.phpmyadmin.net/downloads/|phpMyAdmin]] or [[https://dev.mysql.com/downloads/workbench/|MySQL Workbench]].
+
+===== Create a new database and a database user to access it =====
+Let's start by connecting to the database server on the command line using the root account. 
+<code bash>
+mysql -uroot -p
+</code>
+Then we'll create a new database, which I'll just call "api_db". 
+<code sql>
+CREATE DATABASE api_db;
+</code>
+Then we'll create a user just for accessing this database, so we don't have to do it using the root account. This user will have full privileges on all the tables in the new database. I'll call the user "api_db_user", it's on the localhost server and we'll assign a random password. You need to make a note of this password for when we connect to the database later on from PHP. 
+<code sql>
+GRANT ALL PRIVILEGES ON api_db.* TO api_db_user@localhost IDENTIFIED BY 'k5cWTeqs6GXK2hzF';
+</code>
+To check this works, we can exit from the console, and reconnect using the user and password we just created. 
+<code bash>
+mysql -uapi_db_user -p
+</code>
+Then we can select the database with use, and that selects it with no problems.
+<code sql>
+use api_db;
+</code>
+===== Create a table to store resource data =====
+Now we can add a table to the database to store task data. Let's create a table called "task" with the following fields: an ID field that's an integer, it can't be null, and will set this to auto increment to assign values automatically. Then a name field, which is a 128 character varchar, that can't be null. 
+Next, a field called priority, which is an integer, and this can be null, with null as the default value. Finally, a field called is_completed, which is a boolean, can't be null and is false by default. We'll make the ID column the primary key, and add a non-unique index to the name column. 
+<code sql>
+CREATE TABLE task (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(128) NOT NULL,
+  PRIORITY INT DEFAULT NULL,
+  is_completed BOOLEAN NOT NULL DEFAULT FALSE,
+  PRIMARY KEY (id),
+  INDEX (name)
+);  
+</code>
+I've included columns of various different types so that we can see how these are encoded into JSON format later on. Let's have a look at the table we just created, and there it is. Let's view the indexes, and there they are.
+<code sql>
+DESCRIBE task;
+SHOW INDEXES FROM task;
+</code>
+As mentioned before, you can do this using a GUI like phpMyAdmin if you prefer.
+===== Connect to the database from PHP =====
+Now we have the database set up, we can connect to it from PHP. Let's create a new class to do this, so we'll create a file in the src folder called **Database.php**. We'll add the PHP opening tag, and the class definition. When we connect to the database, we need various data like the hostname, database name and so on. We'll pass these data in when we create a new database object, so as arguments to the constructor. So let's add the constructor method and string arguments for the database host, name, username and password. You can add an argument for the database port if you're using a non-standard one as well if you need to. Next, we'll assign these values to private properties. We could declare individual properties like this for the host value, for example, and assign values to them in the body of the constructor. However, if that's all we're doing in the constructor, we can use [[https://www.php.net/manual/en/language.oop5.decon.php#language.oop5.decon.constructor.promotion|constructor promotion]] instead. This is shorthand for doing just that. If we had a visibility modifier to each property, PHP will automatically create the property and assign the value to it. So instead of declaring this property and the assigning a value to it in the body of the constructor, we just add the visibility modifier to the function arguments, which will do the same thing. We'll do this for each of the constructor's arguments.
+<code php>
+<?php
+
+class Database
+{
+   public function __construct(
+     private string $host,
+     private string $name,
+     private string $user,
+     private string $password
+   ) {
+   }
+}
+</code>
+**File: ./src/Database.php**
+
+Next, let's add a method that will connect to the database called getConnection. I'll connect using PDO, but you can use MySQLi for example, if you prefer. First, we'll create a string variable that contains the data source name. We'll use the MySQL database driver, the host is the value of the host property, the db name the value of the name property, and will specify utf8 as the character set. Then we'll create a PDO object, passing in this variable, followed by the username and password properties. We want PDO to throw an exception when a database error occurs, so we'll set the error mode to do just that. Finally, we'll return this object from this method, so we can add a return type declaration, specifying 
+a PDO object. 
+<code php>
+  public function getConnection(): PDO
+  {
+    $dsn = "mysql:host={$this->host};dbname={$this->name};charset=utf8";
+    
+    return new PDO($dsn, $this-user, $this->password, [
+      PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+  }
+}
+</code>
+**File: ./src/Database.php**
+
+Then in the front controller, let's create a new object of the Database class, which again will be loaded automatically. Then we'll pass in values for the host, which in my case is localhost, the database name, user and password, which we created earlier in this section when we created the database.
+<code php>
+<?php
+declare(strict_types=1);
+//init_set("display_errors", "on");
+require dirname(__DIR__) . "/vendor/autoload.php";
+set_exception_handler("ErroroHandler::handlerException");
+ 
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+
+header("Content-type: application/json; charset=UTF-8");
+$database = new Database("localhost", "api_db", "api_db_user", "geheim");
+$database->getConnection();
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./src/Database.php**
+
+To check we can connect to the database, ok, let's call the getConnection method on the database object. Let's check that by making a valid request using HTTPie. And we get an error, displayed as JSON, by our error handling code. This is the error you'll get if the connection details are incorrect.
+<code bash>
+http http://localhost/api/tasks
+</code>
+I actually deliberately entered the wrong password, so this would happen. If we correct this, when we make the request again, the error has gone and we get the expected response. This means the credentials are correct and we're connecting to the database successfully.
+
+===== Connection data in .env file =====
+In the front controller, we're creating a new database object and passing in the connection credentials. Having these hardcoded in here isn't a good idea, as if we check this file into source code control, the database connection details will be included. Plus, to change them, for example, when you deploy the code to a different server, you have to edit this file. Instead, we'll put these data in a separate file. There are several ways you can do this, but the simplest and most commonly used is to use a .env environment file.
+
+Rather than write this functionality ourselves, we'll use a [[https://packagist.org/?query=dotenv|third-party package]] to do it. The most popular at the moment is [[https://packagist.org/packages/vlucas/phpdotenv|vlucas/phpdotenv]]. We can install this using Composer. 
+On the command line, from the root folder of the project, not the api folder, we'll run the Composer command.
+<code bash>
+composer require vlucas/phpdotenv
+</code>
+Next, we need to create a separate file to store the database connection values - the host, name, username and password for the database. So let's create a new file, again in the root folder, not in the api folder called .env, making sure the **file name starts with a dot**. In here, we'll create a setting for the database host, the database name, the username and password. These are the values we currently have hardcoded in the front controller. **Note this isn't PHP, they're just simple key-value pairs.**
+<code bash>
+DB_HOST="localhost"
+DB_NAME="api_db"
+DB_USER="api_db_user"
+DB_PASS="k5cWTeqs6GXK2hzF"
+</code>
+**File: ./.env**
+
+Then, back in the index, before we connect to the database, we can load that file. We'll do this near the top, after we've enabled the exception handler. We create a Dotenv object by calling the createImmutable method of the Dotenv class in the Dotenv namespace. We're already using Composer's autoloader, so the package's classes will be loaded automatically. To this method, we pass the path of where the .env file is. It's in the parent folder of the script, which we can get by calling the dirname function, passing in the __DIR__ constant. Then we called the load method on that object. This will load the values from the .env file into the PHP $_ENV super global. So instead of passing in these hardcoded values when we create the Database object, we can pass in the values from the $_ENV superglobal. 
+<code php>
+<?php
+declare(strict_types=1);
+//init_set("display_errors", "on");
+require dirname(__DIR__) . "/vendor/autoload.php";
+set_exception_handler("ErroroHandler::handlerException");
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+ 
+header("Content-type: application/json; charset=UTF-8");
+$database = new Database($_ENV["DB_HOST"], $_ENV["DB_NAME"], $_ENV["DB_USER"], $_ENV["DB_PASS"]);
+//$database->getConnection();
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./src/Database.php**
+
+To check this is working, let's change one of the connection settings, so it's incorrect. Let's make a request, and we get the database connection error. 
+<code bash>
+http http://localhost/api/tasks
+</code>
+If we correct this, and make the request again, now it works. Now we've checked the connection still works, we can remove this getConnection call. **Note how we're just using this third-party package for the configuration settings**. The rest of the API we'll write using plain PHP.
+===== Create a Table Data Gateway class =====
+Now we can connect to the database, we can use this to retrieve some data. In the task controller class, we're outputting placeholder messages for each of the API actions. Instead of working with the database directly in this class, let's create a separate class to access the task table following the table data gateway pattern - basically an object that will act as a gateway to the task table. So let's create a new file in the src folder, called TaskGateway.php.
+
+In here, we'll add the PHP opening tag and the class definition. This class needs access to the database, so will require an object of the Database class we just added. Instead of creating one in here, we'll inject this dependency passing in an object in the constructor. So let's add the constructor method, with a single argument that's an object of the Database class. All the public methods in this class will need to connect to the database, so let's do that in the constructor. First we'll declare a private property to store the database connection, which will be a PDO object as we're using PDO, so we'll include a type declaration for that. Then in the constructor, we'll call the getConnection method on the database object and store this in the property. 
+<code php>
+<?php
+
+class TaskGateway
+{
+  private PD= $conn;
+  
+  public function __construct(Database $database)
+  {
+    $this->conn = $database-getConnection();
+  }
+}
+</code>
+**File: ./src/TaskGateway.php**
+
+Back in the task controller, instead of creating an object of this new class in here, we'll pass one in via the constructor and store it in a private property. So let's add the constructor method, with an argument that contains an object of the TaskGateway class. As before we'll use constructor promotion to assign this to a private property of this class, which we can do by simply prefixing this with the private visibility modifier.
+<code php>
+<?php
+ 
+class TaskController
+{
+  public function __construct(private TaskGateway $gateway)
+  {
+  }
+  
+  public function processRequest($method, $id) 
+  {
+     if ($id === null) {
+       if ($method == "GET") {
+         echo "index";
+       } elseif ($method == "POST") {
+         echo "create";
+       } else {
+         $this->respondMethodNotAllowed("GET, POST");
+       } 
+     } else {
+        switch ($method)
+        case "GET":
+          echo "show $id";
+          break;
+        case "Patch":
+          echo "update $id";
+          break;
+        case "DELETE":
+          echo "delete $id";
+          break; 
+        default:
+          $this->respondMethodNotAllowed("GET, PATCH, DELETE");              
+     }
+  }
+}
+
+private function responseMethodNotAllowed(string $allowed_methods): void
+{
+  http_response_code(405);
+  header(Allow: $allowed_methods");
+}
+</code>
+**File: ./src/TaskController.php**
+
+So when we create an object of the controller class, we need to pass in an object of the TaskGateway class. We're creating the controller object in the front controller. So before we do this, let's create an object of the TaskGateway class. Remember, this class requires a Database object in its constructor, and we're already creating an 
+object of that class, so we can just pass that in. Now we can pass in the gateway object to the task controller's constructor.
+<code php>
+<?php
+declare(strict_types=1);
+//init_set("display_errors", "on");
+require dirname(__DIR__) . "/vendor/autoload.php";
+set_exception_handler("ErroroHandler::handlerException");
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->load();
+$path = parse_url($_SERVER["REQUEST_URL"], PHP_URL_PATH);
+$parts = explode("/", $path);
+$resource = $parts[2];
+$id = $parts[3] ?? null;
+//echo $resource, ", ", $id;
+//echo $_SERVER["REQUEST_METHOD"], "\n";
+if ($resource != "tasks") {
+  // header ("{$_SERVER['SERVER_PROTOCOL']} 404 Not Found");
+  header_response_code (404);
+  exit;
+}
+ 
+header("Content-type: application/json; charset=UTF-8");
+$database = new Database($_ENV["DB_HOST"], $_ENV["DB_NAME"], $_ENV["DB_USER"], $_ENV["DB_PASS"]);
+//$database->getConnection();
+$task_gateway = new TaskGateway($database);
+$controller = new TaskController;
+$controller->processRequest($_SERVER['REQUEST_METHOD']], $id);
+</code>
+**File: ./index.php**
+
+We haven't selected any data yet, we're just setting up the structure of how this will work. Passing in dependencies like this makes each class simpler and therefore easier to maintain, and also easier to test using automated testing frameworks. Just to make sure we've wired all this up correctly, let's make a request,
+<code bash>
+http http://localhost/api/tasks
+</code>
+and this still works as before with no errors.
+===== Show a list of all records =====
+Now we can use the classes we just added to select some data from the database. In the task gateway class, let's add a method to get all the task records called getAll. This will return an array. Let's create a variable containing the SQL to select all the records from the task table, ordered by name, which we can do as we have an index on the name column. Then, as this is a simple SQL string that we don't have to substitute any values into, we can use the PDO query method. We previously connected to the database in the constructor, so we can simply call the query method on that object property, passing in the SQL. This will return a PDOStatement object, so to get an array of all the records we can call the fetchAll method on that, passing in the constant to fetch the data as an associative array. Finally, we'll return this method call's return value.
+<code php>
+<?php
+ 
+class TaskGateway
+{
+  private PD= $conn;
+ 
+  public function __construct(Database $database)
+  {
+    $this->conn = $database-getConnection();
+  }
+  
+  public function getAll(): array
+  {
+    $sql = "SELECT * FROM task ORDER BY name";
+    $stmt = $this->conn->query($sql);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+}
+</code>
+**File: ./src/TaskGateway.php**
+
+In the task controller, we'll call this new method when the request is for the list of tasks. So instead of printing out the index message, we'll call the getAll method on the gateway property of the class. Remember, we're assigning a gateway object to this property using the constructor. This will return an array of data, so to output this as part of the API, we'll simply encode it as JSON using the json_encode function and print it out.
+<code php>
+<?php
+ 
+class TaskController
+{
+  public function __construct(private TaskGateway $gateway)
+  {
+  }
+ 
+  public function processRequest($method, $id) 
+  {
+     if ($id === null) {
+       if ($method == "GET") {
+         //echo "index";
+         echo json_encode($this->gateway->getAll());
+       } elseif ($method == "POST") {
+         echo "create";
+       } else {
+         $this->respondMethodNotAllowed("GET, POST");
+       } 
+     } else {
+        switch ($method)
+        case "GET":
+          echo "show $id";
+          break;
+        case "Patch":
+          echo "update $id";
+          break;
+        case "DELETE":
+          echo "delete $id";
+          break; 
+        default:
+          $this->respondMethodNotAllowed("GET, PATCH, DELETE");              
+     }
+  }
+}
+ 
+private function responseMethodNotAllowed(string $allowed_methods): void
+{
+  http_response_code(405);
+  header(Allow: $allowed_methods");
+}
+</code>
+**File: ./src/TaskController.php**
+
+Let's give that a try. If we make a get request to the tasks endpoint, we get an empty array printed out. This is to be expected, as the table is still empty, we haven't inserted any data yet.
+<code bash>
+http http://localhost/api/tasks
+</code>
+Let's insert some records directly into the database as test data. I'll do this on the command line, but as always, you can use a GUI like phpMyAdmin if you prefer. 
+<code bash>
+mysql -uapi_db_user -p
+</code>We'll insert into the task table, specifying the name, priority and is_completed columns. We'll leave the value for the ID column to be assigned automatically. We'll insert the values for three records, with various different values according to the column type, and if it accepts null values or not.
+<code sql>
+INSERT INTO task (name, priority, is_completed) VALUES
+('Buy new shoes', 1, true),
+('Renew Passport', 2, false),
+('Paint wall', NULL, true);
+</code>
+That says the records were inserted OK, let's have a look at them in the task table. And we can see that values for the ID column have been assigned automatically. 
+<code sql>
+SELECT * FROM task;
+</code>
+Now we can exit from here and make the API request again.
+<code bash>
+http http://localhost/api/tasks
+</code>
+Now it shows the data from the database encoded in JSON format.
+===== Configure PDO to prevent numeric values from being converted to strings =====
+We just added some data to the database and displayed it encoded as JSON. However, you might have noticed that each value is displayed as a string, regardless of its data type in the database. For example, the ID and priority columns are integers, but in the JSON they're shown as strings, surrounded by quotes. According to the [[https://www.json.org/json-en.html|JSON specification]], in addition to strings, J**SON values can be numbers, boolean values and null**. So somewhere the values from the database are being converted to strings. 
+
+The problem is not in the task controller class where we're using the [[https://www.php.net/manual/en/function.json-encode.php|json_encode function]], as this function supports these data types. Rather, this is happening when we get the data from the database. As we're using PDO, there are a couple of [[https://www.php.net/manual/en/pdo.setattribute.php|PDO attributes]] that we need to change to fix this problem. The [[https://www.php.net/manual/en/pdo.constants.php#pdo.constants.attr-emulate-prepares|EMULATE_PREPARES]] attribute controls if prepared statements are emulated or not. This is used to enable [[https://www.php.net/manual/en/pdo.prepared-statements.php|prepared statements]] for databases that don't natively support them. If this value is set to true, then it can affect how the data is returned from the database. As we're using MySQL or MariaDB, which do natively support prepared statements, we can safely set this to [[https://www.php.net/manual/en/pdo.setattribute.php#PDO::ATTR_EMULATE_PREPARES|false]].
+
+The other setting is **[[https://www.php.net/manual/en/pdo.setattribute.php#PDO::ATTR_STRINGIFY_FETCHES|STRINGIFY_FETCHES]]**, which does exactly what we're seeing. It **converts all values to strings**. This is usually set to false, but we'll make sure of that just to be certain. We're creating the new PDO object here in the database class. Let's add these two options to the array of options we passed to the PDO constructor. First, to turn prepared statement emulation off by setting it to false, then the setting to stringify fetches to false also.
+<code php>
+<?php
+ 
+class Database
+{
+  public function __construct(
+    private string $host,
+    private string $name,
+    private string $user,
+    private string $password
+  ) {
+  }
+
+  public function getConnection(): PDO
+  {
+    $dsn = "mysql:host={$this->host};dbname={$this->name};charset=utf8";
+ 
+    return new PDO($dsn, $this-user, $this->password, [
+      PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+      PDO::ATTR_EMULATE_PREPARES => false,
+      PDO::ATTRIB_STRINGIFY_FETCHES => false
+    ]);
+  }
+}
+</code>
+**File: ./src/Database.php**
+
+Let's give that a try. 
+<code bash>
+http http://localhost/api/tasks
+</code> 
+Now when I make the same request, the integer values for the ID and priority columns are no longer surrounded by quotes, and are shown as numbers in the JSON.
+===== Convert database booleans to boolean literals in the JSON =====
+We just made sure any numeric values in the database aren't converted to strings when we return them as JSON. This also includes the is_completed column, which is shown as 1 or 0. When we created the task table though, we defined this as boolean. The boolean data type in MySQL and MariaDB however, is just a synonym for a very small integer, where 1 represents true and 0 represents false. If you're happy with this representation in the JSON, and more importantly, **you document it as such so that anyone using your API knows that 1 is true and 0 is false, then you don't need to change it**. However, JSON values can also be the [[https://www.json.org/josn-en.html|boolean literals true or false]].
+
+So we can encode these integers as booleans if we want to. __**There isn't a reliable way to do this automatically in the database code, as the data is stored in the database as a number**__. So we have to change any columns we want as boolean manually. Here in the getAll method of the task gateway class, we're fetching all the rows at once using the [[https://www.php.net/manual/en/pdostatement.fetchall.php|fetchAll method]]. Instead of this, first we'll **initialise a variable with an empty array**. Then we'll call the fetch method, passing in the option to **get the row as an associative array**. This will return an individual row, so we'll assign that to a variable and enclose this in a while loop. When there are no more rows, this will return false, and the loop will end. Inside the loop, we'll change the value of the is_completed element by simply casting its value to boolean. Then we'll append the row to the array, and after the loop return that array.
+<code php>
+<?php
+ 
+class TaskGateway
+{
+  private PD= $conn;
+ 
+  public function __construct(Database $database)
+  {
+    $this->conn = $database-getConnection();
+  }
+ 
+  public function getAll(): array
+  {
+    $data = [];
+    
+    $sql = "SELECT * FROM task ORDER BY name";
+    $stmt = $this->conn->query($sql);
+    // return $stmt->fetchAll(PDO::FETCH_ASSOC);
+   
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC) {
+      $row['is_completed'] = (bool) $row['is_completed'];
+      $data[] = $row;
+    }
+    
+    return $data;
+  }
+}
+</code>
+**File: ./src/TaskGateway.php**
+
+Let's give that a try.
+<code bash>
+http http://localhost/api/tasks
+</code>
+
+Now the values for the is_completed column are shown as boolean literals in the JSON.
+===== Show an individual record =====
+Next, we can show an individual task record. Let's add a method to the task gateway class called get. We'll pass in the ID of the record we want as an argument, which will be a string. Let's add a variable containing the SQL to select the record, which has a where clause that includes a placeholder for the ID. To avoid SQL injection, instead of the query method we used above, we'll use a prepared statement, so we'll call the prepare method on the database connection property, passing in the SQL. This will return a PDOStatement object, which we can then call the bindValue method on to replace the ID placeholder with the value of the ID argument. This particular table has integer IDs, so we'll specify that it should be inserted into the SQL string as an integer. Then we can execute the statement, then call the fetch method on it, passing in the constant to get the data as an associative array, and assigning its return value to a variable. The [[https://www.php.net/manual/en/pdostatement.fetch.php|PDO fetch method]] will return an array, as we specified, or false on failure. So if it hasn't returned false, we can convert the is_completed element to its boolean equivalent, as we did above in the getAll method. Then we can return the data variable. This variable will contain an array or boolean false, so we can declare the return type of this method to be an array or false. 
+<code php>
+<?php
+ 
+class TaskGateway
+{
+  private PD= $conn;
+ 
+  public function __construct(Database $database)
+  {
+    $this->conn = $database-getConnection();
+  }
+ 
+  public function getAll(): array
+  {
+    $data = [];
+ 
+    $sql = "SELECT * FROM task ORDER BY name";
+    $stmt = $this->conn->query($sql);
+    // return $stmt->fetchAll(PDO::FETCH_ASSOC);
+ 
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC) {
+      $row['is_completed'] = (bool) $row['is_completed'];
+      $data[] = $row;
+    }
+ 
+    return $data;
+  }
+  
+  public function get(string $id): array | false
+  {
+    $sql = "SELECT * FROM task WHERE id = :id";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(":id", $id, PDO::PARAM_INT);
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($data !== false) {
+      $data['is_completed'] = (bool) $data['is_completed'];
+    }
+    return $data;
+  }
+}
+</code>
+**File: ./src/TaskGateway.php**
+
+In the task controller, where we're responding to the request to get an individual task resource, we can call this new method. Let's remove the placeholder message ''echo "show $id";'' and instead call the get method we just added on the gateway property, passing in the ID. As above, we want to output this as JSON, so we'll call the json_encode method on this, and we'll just print this out.
+<code php>
+<?php
+ 
+class TaskController
+{
+  public function __construct(private TaskGateway $gateway)
+  {
+  }
+ 
+  public function processRequest($method, $id) 
+  {
+     if ($id === null) {
+       if ($method == "GET") {
+         //echo "index";
+         echo json_encode($this->gateway->getAll());
+       } elseif ($method == "POST") {
+         echo "create";
+       } else {
+         $this->respondMethodNotAllowed("GET, POST");
+       } 
+     } else {
+        switch ($method)
+        case "GET":
+          // echo "show $id";
+          echo json_encode($this->gateway->get($id));
+          break;
+        case "Patch":
+          echo "update $id";
+          break;
+        case "DELETE":
+          echo "delete $id";
+          break; 
+        default:
+          $this->respondMethodNotAllowed("GET, PATCH, DELETE");              
+     }
+  }
+}
+ 
+private function responseMethodNotAllowed(string $allowed_methods): void
+{
+  http_response_code(405);
+  header(Allow: $allowed_methods");
+}
+</code>
+**File: ./src/TaskController.php**
+
+Let's give that a try.
+<code bash>
+http http://localhost/api/tasks
+</code>
+If we make a get request to the endpoint for an individual task using an ID that we know exists in the database, we see the JSON encoded data for that particular record.
+===== Respond with 404 if the resource with the specified ID is not found =====
+If we request an individual record with an ID that exists, we see the response containing the data with a status code of 200. If we make the same request with an ID that doesn't exist, however, the body of the response just contains false and the status code is still 200. 
+<code bash>
+http http://localhost/api/tasks/6
+</code>
+If the resource doesn't exist at this URL, we should get a 404 status code, along with something useful in the body of the response. In the task controller, we're using the get method of the task gateway class to retrieve the record based on the ID. This returns false if there's no record with that ID. Back in the controller, we can check for that return value. However, we don't need an individual task record only at this point, each action inside the switch block does. So instead of checking for the task existing here, we'll do it beforehand.
+
+So let's call the get method on the gateway property, passing in the ID. We'll assign this to a variable
+
+called task, then we can check to see if this is equal to false.
+
+We need to make sure we use the identity comparison operator, as an empty array is the boolean equivalent
+
+of false.
+
+Using this operator, we make sure we're checking that the value is strictly Boolean false. If it is
+
+false,
+
+the task with that ID wasn't found, so we can return the 404.
+
+However, instead of doing that in here, to keep this method cleaner, we'll add a separate method to
+
+return a 404 response.
+
+This will also be consistent with the method we added earlier to return the method not allowed response.
+
+So let's add a new private method called respondNotFound.
+
+In here, we'll set the status code to 404.
+
+In the body of the response, we don't necessarily have to return anything, but it's helpful if we
 
 do.
 
-First, let's process the URL.
+So let's just echo out some JSON that contains a message saying the task with that ID wasn't found.
 
-So instead of printing out this message, let's print out the URL.
+We'll pass the ID in as an argument to the method, which will be a string.
 
-We can get this from the REQUEST_URI
+While we're here, we'll set the return type declaration to void.
 
-element of the $_SERVER
+Back in the processRequest method, in the if block for when the task isn't found, we'll call this
 
-superglobal.
+new method passing in the ID.
 
-In the browser, we get the path part of the URL printed out - basically everything after the hostname.
+If this does happen, we don't want to continue in this method,
 
-However, this also includes the query string, which we could be using for things like pagination,
+so we'll simply return at this point.
 
-for example.
+Then where we are outputting the task details, if it is found we can replace this call to the get method
 
-To remove this, we can use the parse_url function, passing in the PHP_URL_PATH as the second argument.
+with the task variable.
 
-This will parse the URL and remove the query string.
+Let's give that a try.
 
-In the browser, even though the query string is still part of the URL in the address bar, now we're
+Now if we request a task that doesn't exist, we get a 404 status code,
 
-just getting the path.
+and in the body of the response, we get the error message still formatted as JSON.
 
-Note that this does include the sub folder though. As far as the URL goes,
+If we request a task that does exist, this still works. We get the task details in the response body
 
-all we're interested in is the segment that identifies the resource - in this case, "tasks". And if there
+and the status code of 200.
 
-is an ID or not.
+So now we can request a list of all tasks, or individual ones responding with a 404 status code
 
-So let's process this path to get these parts.
+if a task with the supplied ID wasn't found.
+====== Summary - Building a RESTful API Service in PHP ======
+===== RESTfull - (REpresentational State Transfer) =====
 
-First we'll assign this path to a variable instead of printing it out.
-
-Then we'll use the explode function to split this into segments using the forward slash character as
-
-a separator.
-
-Let's print that out to see what we get.
-
-In the browser, for a URL containing an ID, we get an array with four elements.
-
-If we remove the ID,
-
-then we get just three elements.
-
-So we're just interested in the third element, which identifies the resource, and the optional fourth
-
-element, which is the ID.
-
-So instead of printing this out, we'll create a variable called $resource, which will be the third
-
-element of this array, and one called $id, which will be the fourth element, or if this isn't set,
-
-we'll set it to null.
-
-Then let's just print these out to see what we get.
-
-In the browser, we get the two values printed out, including the ID value if present,
-
-and not otherwise.
-
-In addition to the URL, we also need to take action based on the request method. Again, we can get
-
-this from the $_SERVER superglobal.
-
-So let's print that out to see what it contains.
-
-In the browser, the method used was GET.
-
-So using this code, we're identifying the three elements we need: the resource, in this case "tasks"; the
-
-optional ID; and the request method.
-
-===== REST stands for representational State transfer =====
 REST stands for representational State transfer and everything is a recourse (a single object or entity). The aim of REST is not having pretty and hackable URLs, its about meaning of URLs having a unique ways to refer to the resources.
 
 On the web, we use HTTP's features to implement REST. When we use REST with HTTP, we use the building blocks of HTTP to implement our restful service, we use **Verbs** to say which operation should take place when we request a collection or a resource. We use the **Status Codes** to give accurate information with every response about what actually happened and we use header to send metadata about the transaction that has taken place. **Headers** are not part of the data we transfer, they are the envelope format, sender address and the data is in the body. This avoids mixing data that relates to the resource and the transaction.
@@ -856,7 +1887,7 @@ Collections are containers that have resources inside them, like files in a dire
 **HTTP Headers for Metadata** sending extra data, unrelated to the resource but important for the request, e.g. user agent or accept header.
   * Accept and Content header to negotiate the kind of content, what kinds of content understood as a client, so server responds with content type is json or plain text.
 
-====== Building a RESTful Service in PHP ======
+===== Building a RESTful Service in PHP =====
 
 <code php>
 <?php
@@ -947,7 +1978,7 @@ curl http://localhost:8888/events
 </code>
 
 
-====== Consuming a RESTful Service in PHP ======
+===== Consuming a RESTful Service in PHP =====
 
 <code php>
 <?php
@@ -979,6 +2010,9 @@ php -f use-rest.php
 
 ====== PHP REST Tooling ======
 
-  * Postman
-  * curl
+  * [[https://curl.se/|curl]] is used in command lines or scripts to transfer data. [[https://curl.se/|curl]] is also [[|https://curl.se/libcurl/libcurl]] [[https://www.php.net/manual/en/book.curl.php|in PHP]]
+  * [[https://httpie.io/|httpie]] is making APIs simple and intuitive for those building the tools of our time.
+  * [[https://www.postman.com/|Postman]] ia a Unify API design, testing, documentation, monitoring, and discovery on one platform that integrates with the rest of your stack, including every major gateway and Git solution.
+  * And [[https://www.google.com/search?q=postman+alternative&oq=postman+alternative|many Postman Alternatives]]
+
 
